@@ -1,0 +1,28 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.26403.7
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Canopy.Api.Client", "Canopy.Api.Client\Canopy.Api.Client.csproj", "{DAC44429-4DB6-4D17-AC37-0424591E989C}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Canopy.Cli.Executable", "Canopy.Cli.Executable\Canopy.Cli.Executable.csproj", "{45106155-B13E-4E6A-99F1-43A5A037C1F4}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{DAC44429-4DB6-4D17-AC37-0424591E989C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DAC44429-4DB6-4D17-AC37-0424591E989C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DAC44429-4DB6-4D17-AC37-0424591E989C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DAC44429-4DB6-4D17-AC37-0424591E989C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{45106155-B13E-4E6A-99F1-43A5A037C1F4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{45106155-B13E-4E6A-99F1-43A5A037C1F4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{45106155-B13E-4E6A-99F1-43A5A037C1F4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{45106155-B13E-4E6A-99F1-43A5A037C1F4}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
