@@ -1,4 +1,4 @@
-﻿namespace Canopy.Cli.Executable
+﻿﻿namespace Canopy.Api.Client
 {
     using System;
     using System.IO;
@@ -10,28 +10,23 @@
     using Newtonsoft.Json.Linq;
     using Canopy.Api.Client;
 
-    public class CanopyAuthentication
+    public class AuthenticationManager
     {
-        public const string CanopyApiBaseUrl = "https://api.canopysimulations.com";
-        public const string ClientId = "";
-        public const string ClientSecret = "";
-
-        public static readonly CanopyApiConfiguration Configuration = new CanopyApiConfiguration(CanopyApiBaseUrl);
-        public static readonly CanopyAuthentication Instance = new CanopyAuthentication();
+        public static readonly AuthenticationManager Instance = new AuthenticationManager();
 
         private readonly string saveFolder;
-        private readonly string saveFile;
+		private readonly string saveAuthenticatedUserFile;
 
         private string username;
         private string tenantName;
         private string password;
 
-        private AuthenticatedUser authenticatedUser;
+		private AuthenticatedUser authenticatedUser;
 
-        public CanopyAuthentication()
+        public AuthenticationManager()
         {
             this.saveFolder = PlatformUtilities.AppDataFolder();
-            this.saveFile = Path.Combine(this.saveFolder, "authenticated-user.json");
+			this.saveAuthenticatedUserFile = Path.Combine(this.saveFolder, "authenticated-user.json");
         }
 
         public void SetAuthenticationInformation(string username, string tenantName, string password)
@@ -41,11 +36,20 @@
             this.password = password;
         }
 
+        public void ClearAuthenticatedUser()
+        {
+			this.username = null;
+			this.tenantName = null;
+			this.password = null;
+            this.authenticatedUser = null;
+            this.DeleteAuthenticatedUser();
+        }
+
         public bool LoadAuthenticatedUser()
         {
-            if (File.Exists(this.saveFile))
+            if (File.Exists(this.saveAuthenticatedUserFile))
             {
-                var json = File.ReadAllText(this.saveFile);
+                var json = File.ReadAllText(this.saveAuthenticatedUserFile);
                 this.authenticatedUser = JsonConvert.DeserializeObject<AuthenticatedUser>(json);
 
                 // Uncomment this to force getting a new access token on startup.
@@ -58,37 +62,23 @@
                     this.authenticatedUser.TenantId);
                 */
 
-                Console.WriteLine("Loaded user from: " + this.saveFile);
-
                 return true;
             }
 
             return false;
         }
 
-        private void SaveAuthenticatedUser()
-        {
-            if (!Directory.Exists(this.saveFolder))
-            {
-                Directory.CreateDirectory(this.saveFolder);
-            }
-
-            var json = JsonConvert.SerializeObject(this.authenticatedUser);
-            File.WriteAllText(this.saveFile, json);
-        }
-
-        private void DeleteAuthenticatedUser()
-        {
-            if (File.Exists(this.saveFile))
-            {
-                File.Delete(this.saveFile);
-            }
-        }
-
         public async Task<AuthenticatedUser> GetAuthenticatedUser()
         {
             if (this.authenticatedUser == null)
             {
+                if(string.IsNullOrWhiteSpace(this.username) 
+                   || string.IsNullOrWhiteSpace(this.tenantName)
+                   || string.IsNullOrWhiteSpace(this.password))
+                {
+                    return null;
+                }
+
                 await this.Authenticate();
             }
             else if (DateTime.UtcNow > this.authenticatedUser.AccessTokenExpiry)
@@ -99,17 +89,32 @@
             return this.authenticatedUser;
         }
 
+        private void SaveAuthenticatedUser()
+        {
+            var json = JsonConvert.SerializeObject(this.authenticatedUser);
+            File.WriteAllText(this.saveAuthenticatedUserFile, json);
+        }
+
+        private void DeleteAuthenticatedUser()
+        {
+            if (File.Exists(this.saveAuthenticatedUserFile))
+            {
+                File.Delete(this.saveAuthenticatedUserFile);
+            }
+        }
+
         private async Task Authenticate()
         {
             Console.WriteLine("Authenticating...");
             var now = DateTime.UtcNow;
             var client = new HttpClient();
             var request = new HttpRequestMessage();
+            var connection = ConnectionManager.Instance.Connection;
             request.Method = new HttpMethod("POST");
-            request.RequestUri = new Uri(CanopyApiBaseUrl + "/token");
+            request.RequestUri = new Uri(connection.Endpoint + "/token");
             request.Content = new StringContent(
                 $"grant_type=password&username={this.username}&tenant={this.tenantName}&password={this.password}" +
-                $"&client_id={ClientId}&client_secret={ClientSecret}",
+                $"&client_id={connection.ClientId}&client_secret={connection.ClientSecret}",
                 Encoding.UTF8,
                 "application/x-www-form-urlencoded");
 
@@ -125,11 +130,12 @@
                 var now = DateTime.UtcNow;
                 var client = new HttpClient();
                 var request = new HttpRequestMessage();
-                request.Method = new HttpMethod("POST");
-                request.RequestUri = new Uri(CanopyApiBaseUrl + "/token");
+				var connection = ConnectionManager.Instance.Connection;
+				request.Method = new HttpMethod("POST");
+                request.RequestUri = new Uri(connection.Endpoint + "/token");
                 request.Content = new StringContent(
                     $"grant_type=refresh_token&refresh_token={this.authenticatedUser.RefreshToken}&tenant={this.authenticatedUser.TenantId}" +
-                    $"&client_id={ClientId}&client_secret={ClientSecret}",
+                    $"&client_id={connection.ClientId}&client_secret={connection.ClientSecret}",
                     Encoding.UTF8,
                     "application/x-www-form-urlencoded");
 
@@ -166,24 +172,5 @@
             this.authenticatedUser = new AuthenticatedUser(accessToken, now.AddSeconds(expiresIn), refreshToken, userId, tenantId);
             this.SaveAuthenticatedUser();
         }
-    }
-
-    public class AuthenticatedUser
-    {
-        public AuthenticatedUser(string accessToken, DateTime accessTokenExpiry, string refreshToken, string userId, string tenantId)
-        {
-            AccessToken = accessToken;
-            AccessTokenExpiry = accessTokenExpiry;
-            RefreshToken = refreshToken;
-            UserId = userId;
-            TenantId = tenantId;
-        }
-
-        public string AccessToken { get; private set; }
-        public DateTime AccessTokenExpiry { get; private set; }
-        public string RefreshToken { get; private set; }
-
-        public string UserId { get; private set; }
-        public string TenantId { get; private set; }
     }
 }

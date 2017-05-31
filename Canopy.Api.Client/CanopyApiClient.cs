@@ -10,6 +10,7 @@
     public class CanopyApiClient
     {
         private readonly CanopyApiConfiguration configuration;
+
         public CanopyApiClient(CanopyApiConfiguration configuration)
         {
             this.configuration = configuration;
@@ -24,8 +25,12 @@
         {
             var result = new HttpRequestMessage();
 
-            var authenticatedUser = await CanopyAuthentication.Instance.GetAuthenticatedUser();
-            result.Headers.Add("Authorization", "Bearer " + authenticatedUser.AccessToken);
+            var authenticatedUser = await AuthenticationManager.Instance.GetAuthenticatedUser();
+
+            if(authenticatedUser != null)
+            {
+				result.Headers.Add("Authorization", "Bearer " + authenticatedUser.AccessToken);
+			}
 
             return result;
         }
@@ -33,12 +38,13 @@
         protected virtual void PrepareRequest(System.Net.Http.HttpClient client, System.Net.Http.HttpRequestMessage request, System.Text.StringBuilder urlBuilder)
         {
             // ASP.NET Web API doesn't like having trailing ampersands in URLs.
-            if (urlBuilder[urlBuilder.Length] == '&')
+			if (urlBuilder[urlBuilder.Length - 1] == '&')
             {
                 urlBuilder.Remove(urlBuilder.Length - 1, 1);
             }
 
-            urlBuilder.Insert(0, '/').Insert(0, this.configuration.BaseUrl);
+			var connection = ConnectionManager.Instance.Connection;
+			urlBuilder.Insert(0, '/').Insert(0, connection.Endpoint);
         }
     }
 }
