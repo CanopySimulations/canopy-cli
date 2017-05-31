@@ -14,10 +14,10 @@ build_script:
   - dotnet publish -c Release -r osx.10.12-x64
 
 artifacts:
-  - path: win10-x64
-    name: Canopy.Cli.Executable\bin\Release\netcoreapp1.1\win10-x64
-  - path: osx.10.12-x64
-    name: Canopy.Cli.Executable\bin\Release\netcoreapp1.1\osx.10.12-x64
+  - path: Canopy.Cli.Executable\bin\Release\netcoreapp1.1\win10-x64
+    name: win10-x64
+  - path: Canopy.Cli.Executable\bin\Release\netcoreapp1.1\osx.10.12-x64
+    name: osx.10.12-x64
 
 notifications:
   - provider: Slack
