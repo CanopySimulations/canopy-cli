@@ -23,8 +23,8 @@ namespace Canopy.Cli.Executable
             {
                 maxValues[i] = lines.Max(x => (x.Count > i + 1 && x[i] != null ? x[i].Length : 0)) + padding;
             }
+
             var sb = new StringBuilder();
-            // Build the output
             foreach (var line in lines)
             {
                 sb.AppendLine();
@@ -41,7 +41,6 @@ namespace Canopy.Cli.Executable
             }
 
             Console.WriteLine(sb.ToString());
-        }
-
+        }        
     }
 }

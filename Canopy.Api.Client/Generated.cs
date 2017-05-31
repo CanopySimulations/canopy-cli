@@ -391,66 +391,66 @@ namespace Canopy.Api.Client
     {
         /// <returns>OK</returns>
         /// <exception cref="CanopyApiException">A server side error occurred.</exception>
-        System.Threading.Tasks.Task<UpgradeConfigQueryResult> UpgradeConfigAsyncAsync(string targetSimVersion, UpgradeConfigData data, string subTreePath);
+        System.Threading.Tasks.Task<UpgradeConfigQueryResult> UpgradeConfigAsync(string targetSimVersion, UpgradeConfigData data, string subTreePath);
 
         /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
         /// <returns>OK</returns>
         /// <exception cref="CanopyApiException">A server side error occurred.</exception>
-        System.Threading.Tasks.Task<UpgradeConfigQueryResult> UpgradeConfigAsyncAsync(string targetSimVersion, UpgradeConfigData data, string subTreePath, System.Threading.CancellationToken cancellationToken);
+        System.Threading.Tasks.Task<UpgradeConfigQueryResult> UpgradeConfigAsync(string targetSimVersion, UpgradeConfigData data, string subTreePath, System.Threading.CancellationToken cancellationToken);
 
         /// <returns>OK</returns>
         /// <exception cref="CanopyApiException">A server side error occurred.</exception>
-        System.Threading.Tasks.Task<GetConfigsQueryResult> GetConfigsAsyncAsync(string tenantId, string configType, string filter, string subTreePath);
-
-        /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
-        /// <returns>OK</returns>
-        /// <exception cref="CanopyApiException">A server side error occurred.</exception>
-        System.Threading.Tasks.Task<GetConfigsQueryResult> GetConfigsAsyncAsync(string tenantId, string configType, string filter, string subTreePath, System.Threading.CancellationToken cancellationToken);
-
-        /// <returns>OK</returns>
-        /// <exception cref="CanopyApiException">A server side error occurred.</exception>
-        System.Threading.Tasks.Task<GetConfigNamesQueryResult> GetConfigNamesAsyncAsync(string tenantId, string configType, string resultType, string subTreePath, string simVersion);
+        System.Threading.Tasks.Task<GetConfigsQueryResult> GetConfigsAsync(string tenantId, string configType, string filter, string subTreePath);
 
         /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
         /// <returns>OK</returns>
         /// <exception cref="CanopyApiException">A server side error occurred.</exception>
-        System.Threading.Tasks.Task<GetConfigNamesQueryResult> GetConfigNamesAsyncAsync(string tenantId, string configType, string resultType, string subTreePath, string simVersion, System.Threading.CancellationToken cancellationToken);
+        System.Threading.Tasks.Task<GetConfigsQueryResult> GetConfigsAsync(string tenantId, string configType, string filter, string subTreePath, System.Threading.CancellationToken cancellationToken);
 
         /// <returns>OK</returns>
         /// <exception cref="CanopyApiException">A server side error occurred.</exception>
-        System.Threading.Tasks.Task<string> PostConfigAsyncAsync(string tenantId, string userId, NewConfigData data, string subTreePath);
-
-        /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
-        /// <returns>OK</returns>
-        /// <exception cref="CanopyApiException">A server side error occurred.</exception>
-        System.Threading.Tasks.Task<string> PostConfigAsyncAsync(string tenantId, string userId, NewConfigData data, string subTreePath, System.Threading.CancellationToken cancellationToken);
-
-        /// <returns>OK</returns>
-        /// <exception cref="CanopyApiException">A server side error occurred.</exception>
-        System.Threading.Tasks.Task<GetConfigQueryResult> GetConfigAsyncAsync(string tenantId, string userId, string configId, string subTreePath, string simVersion);
+        System.Threading.Tasks.Task<GetConfigNamesQueryResult> GetConfigNamesAsync(string tenantId, string configType, string resultType, string subTreePath, string simVersion);
 
         /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
         /// <returns>OK</returns>
         /// <exception cref="CanopyApiException">A server side error occurred.</exception>
-        System.Threading.Tasks.Task<GetConfigQueryResult> GetConfigAsyncAsync(string tenantId, string userId, string configId, string subTreePath, string simVersion, System.Threading.CancellationToken cancellationToken);
+        System.Threading.Tasks.Task<GetConfigNamesQueryResult> GetConfigNamesAsync(string tenantId, string configType, string resultType, string subTreePath, string simVersion, System.Threading.CancellationToken cancellationToken);
+
+        /// <returns>OK</returns>
+        /// <exception cref="CanopyApiException">A server side error occurred.</exception>
+        System.Threading.Tasks.Task<string> PostConfigAsync(string tenantId, string userId, NewConfigData data, string subTreePath);
+
+        /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
+        /// <returns>OK</returns>
+        /// <exception cref="CanopyApiException">A server side error occurred.</exception>
+        System.Threading.Tasks.Task<string> PostConfigAsync(string tenantId, string userId, NewConfigData data, string subTreePath, System.Threading.CancellationToken cancellationToken);
+
+        /// <returns>OK</returns>
+        /// <exception cref="CanopyApiException">A server side error occurred.</exception>
+        System.Threading.Tasks.Task<GetConfigQueryResult> GetConfigAsync(string tenantId, string userId, string configId, string subTreePath, string simVersion);
+
+        /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
+        /// <returns>OK</returns>
+        /// <exception cref="CanopyApiException">A server side error occurred.</exception>
+        System.Threading.Tasks.Task<GetConfigQueryResult> GetConfigAsync(string tenantId, string userId, string configId, string subTreePath, string simVersion, System.Threading.CancellationToken cancellationToken);
 
         /// <returns>No Content</returns>
         /// <exception cref="CanopyApiException">A server side error occurred.</exception>
-        System.Threading.Tasks.Task PutConfigAsyncAsync(string tenantId, string userId, string configId, UpdatedConfigData data, string subTreePath);
-
-        /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
-        /// <returns>No Content</returns>
-        /// <exception cref="CanopyApiException">A server side error occurred.</exception>
-        System.Threading.Tasks.Task PutConfigAsyncAsync(string tenantId, string userId, string configId, UpdatedConfigData data, string subTreePath, System.Threading.CancellationToken cancellationToken);
-
-        /// <returns>No Content</returns>
-        /// <exception cref="CanopyApiException">A server side error occurred.</exception>
-        System.Threading.Tasks.Task DeleteConfigAsyncAsync(string tenantId, string userId, string configId, string subTreePath);
+        System.Threading.Tasks.Task PutConfigAsync(string tenantId, string userId, string configId, UpdatedConfigData data, string subTreePath);
 
         /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
         /// <returns>No Content</returns>
         /// <exception cref="CanopyApiException">A server side error occurred.</exception>
-        System.Threading.Tasks.Task DeleteConfigAsyncAsync(string tenantId, string userId, string configId, string subTreePath, System.Threading.CancellationToken cancellationToken);
+        System.Threading.Tasks.Task PutConfigAsync(string tenantId, string userId, string configId, UpdatedConfigData data, string subTreePath, System.Threading.CancellationToken cancellationToken);
+
+        /// <returns>No Content</returns>
+        /// <exception cref="CanopyApiException">A server side error occurred.</exception>
+        System.Threading.Tasks.Task DeleteConfigAsync(string tenantId, string userId, string configId, string subTreePath);
+
+        /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
+        /// <returns>No Content</returns>
+        /// <exception cref="CanopyApiException">A server side error occurred.</exception>
+        System.Threading.Tasks.Task DeleteConfigAsync(string tenantId, string userId, string configId, string subTreePath, System.Threading.CancellationToken cancellationToken);
 
     }
 
@@ -467,15 +467,15 @@ namespace Canopy.Api.Client
 
         /// <returns>OK</returns>
         /// <exception cref="CanopyApiException">A server side error occurred.</exception>
-        public System.Threading.Tasks.Task<UpgradeConfigQueryResult> UpgradeConfigAsyncAsync(string targetSimVersion, UpgradeConfigData data, string subTreePath)
+        public System.Threading.Tasks.Task<UpgradeConfigQueryResult> UpgradeConfigAsync(string targetSimVersion, UpgradeConfigData data, string subTreePath)
         {
-            return UpgradeConfigAsyncAsync(targetSimVersion, data, subTreePath, System.Threading.CancellationToken.None);
+            return UpgradeConfigAsync(targetSimVersion, data, subTreePath, System.Threading.CancellationToken.None);
         }
 
         /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
         /// <returns>OK</returns>
         /// <exception cref="CanopyApiException">A server side error occurred.</exception>
-        public async System.Threading.Tasks.Task<UpgradeConfigQueryResult> UpgradeConfigAsyncAsync(string targetSimVersion, UpgradeConfigData data, string subTreePath, System.Threading.CancellationToken cancellationToken)
+        public async System.Threading.Tasks.Task<UpgradeConfigQueryResult> UpgradeConfigAsync(string targetSimVersion, UpgradeConfigData data, string subTreePath, System.Threading.CancellationToken cancellationToken)
         {
             if (targetSimVersion == null)
                 throw new System.ArgumentNullException("targetSimVersion");
@@ -551,15 +551,15 @@ namespace Canopy.Api.Client
 
         /// <returns>OK</returns>
         /// <exception cref="CanopyApiException">A server side error occurred.</exception>
-        public System.Threading.Tasks.Task<GetConfigsQueryResult> GetConfigsAsyncAsync(string tenantId, string configType, string filter, string subTreePath)
+        public System.Threading.Tasks.Task<GetConfigsQueryResult> GetConfigsAsync(string tenantId, string configType, string filter, string subTreePath)
         {
-            return GetConfigsAsyncAsync(tenantId, configType, filter, subTreePath, System.Threading.CancellationToken.None);
+            return GetConfigsAsync(tenantId, configType, filter, subTreePath, System.Threading.CancellationToken.None);
         }
 
         /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
         /// <returns>OK</returns>
         /// <exception cref="CanopyApiException">A server side error occurred.</exception>
-        public async System.Threading.Tasks.Task<GetConfigsQueryResult> GetConfigsAsyncAsync(string tenantId, string configType, string filter, string subTreePath, System.Threading.CancellationToken cancellationToken)
+        public async System.Threading.Tasks.Task<GetConfigsQueryResult> GetConfigsAsync(string tenantId, string configType, string filter, string subTreePath, System.Threading.CancellationToken cancellationToken)
         {
             if (tenantId == null)
                 throw new System.ArgumentNullException("tenantId");
@@ -637,15 +637,15 @@ namespace Canopy.Api.Client
 
         /// <returns>OK</returns>
         /// <exception cref="CanopyApiException">A server side error occurred.</exception>
-        public System.Threading.Tasks.Task<GetConfigNamesQueryResult> GetConfigNamesAsyncAsync(string tenantId, string configType, string resultType, string subTreePath, string simVersion)
+        public System.Threading.Tasks.Task<GetConfigNamesQueryResult> GetConfigNamesAsync(string tenantId, string configType, string resultType, string subTreePath, string simVersion)
         {
-            return GetConfigNamesAsyncAsync(tenantId, configType, resultType, subTreePath, simVersion, System.Threading.CancellationToken.None);
+            return GetConfigNamesAsync(tenantId, configType, resultType, subTreePath, simVersion, System.Threading.CancellationToken.None);
         }
 
         /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
         /// <returns>OK</returns>
         /// <exception cref="CanopyApiException">A server side error occurred.</exception>
-        public async System.Threading.Tasks.Task<GetConfigNamesQueryResult> GetConfigNamesAsyncAsync(string tenantId, string configType, string resultType, string subTreePath, string simVersion, System.Threading.CancellationToken cancellationToken)
+        public async System.Threading.Tasks.Task<GetConfigNamesQueryResult> GetConfigNamesAsync(string tenantId, string configType, string resultType, string subTreePath, string simVersion, System.Threading.CancellationToken cancellationToken)
         {
             if (tenantId == null)
                 throw new System.ArgumentNullException("tenantId");
@@ -727,15 +727,15 @@ namespace Canopy.Api.Client
 
         /// <returns>OK</returns>
         /// <exception cref="CanopyApiException">A server side error occurred.</exception>
-        public System.Threading.Tasks.Task<string> PostConfigAsyncAsync(string tenantId, string userId, NewConfigData data, string subTreePath)
+        public System.Threading.Tasks.Task<string> PostConfigAsync(string tenantId, string userId, NewConfigData data, string subTreePath)
         {
-            return PostConfigAsyncAsync(tenantId, userId, data, subTreePath, System.Threading.CancellationToken.None);
+            return PostConfigAsync(tenantId, userId, data, subTreePath, System.Threading.CancellationToken.None);
         }
 
         /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
         /// <returns>OK</returns>
         /// <exception cref="CanopyApiException">A server side error occurred.</exception>
-        public async System.Threading.Tasks.Task<string> PostConfigAsyncAsync(string tenantId, string userId, NewConfigData data, string subTreePath, System.Threading.CancellationToken cancellationToken)
+        public async System.Threading.Tasks.Task<string> PostConfigAsync(string tenantId, string userId, NewConfigData data, string subTreePath, System.Threading.CancellationToken cancellationToken)
         {
             if (tenantId == null)
                 throw new System.ArgumentNullException("tenantId");
@@ -815,15 +815,15 @@ namespace Canopy.Api.Client
 
         /// <returns>OK</returns>
         /// <exception cref="CanopyApiException">A server side error occurred.</exception>
-        public System.Threading.Tasks.Task<GetConfigQueryResult> GetConfigAsyncAsync(string tenantId, string userId, string configId, string subTreePath, string simVersion)
+        public System.Threading.Tasks.Task<GetConfigQueryResult> GetConfigAsync(string tenantId, string userId, string configId, string subTreePath, string simVersion)
         {
-            return GetConfigAsyncAsync(tenantId, userId, configId, subTreePath, simVersion, System.Threading.CancellationToken.None);
+            return GetConfigAsync(tenantId, userId, configId, subTreePath, simVersion, System.Threading.CancellationToken.None);
         }
 
         /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
         /// <returns>OK</returns>
         /// <exception cref="CanopyApiException">A server side error occurred.</exception>
-        public async System.Threading.Tasks.Task<GetConfigQueryResult> GetConfigAsyncAsync(string tenantId, string userId, string configId, string subTreePath, string simVersion, System.Threading.CancellationToken cancellationToken)
+        public async System.Threading.Tasks.Task<GetConfigQueryResult> GetConfigAsync(string tenantId, string userId, string configId, string subTreePath, string simVersion, System.Threading.CancellationToken cancellationToken)
         {
             if (tenantId == null)
                 throw new System.ArgumentNullException("tenantId");
@@ -905,15 +905,15 @@ namespace Canopy.Api.Client
 
         /// <returns>No Content</returns>
         /// <exception cref="CanopyApiException">A server side error occurred.</exception>
-        public System.Threading.Tasks.Task PutConfigAsyncAsync(string tenantId, string userId, string configId, UpdatedConfigData data, string subTreePath)
+        public System.Threading.Tasks.Task PutConfigAsync(string tenantId, string userId, string configId, UpdatedConfigData data, string subTreePath)
         {
-            return PutConfigAsyncAsync(tenantId, userId, configId, data, subTreePath, System.Threading.CancellationToken.None);
+            return PutConfigAsync(tenantId, userId, configId, data, subTreePath, System.Threading.CancellationToken.None);
         }
 
         /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
         /// <returns>No Content</returns>
         /// <exception cref="CanopyApiException">A server side error occurred.</exception>
-        public async System.Threading.Tasks.Task PutConfigAsyncAsync(string tenantId, string userId, string configId, UpdatedConfigData data, string subTreePath, System.Threading.CancellationToken cancellationToken)
+        public async System.Threading.Tasks.Task PutConfigAsync(string tenantId, string userId, string configId, UpdatedConfigData data, string subTreePath, System.Threading.CancellationToken cancellationToken)
         {
             if (tenantId == null)
                 throw new System.ArgumentNullException("tenantId");
@@ -984,15 +984,15 @@ namespace Canopy.Api.Client
 
         /// <returns>No Content</returns>
         /// <exception cref="CanopyApiException">A server side error occurred.</exception>
-        public System.Threading.Tasks.Task DeleteConfigAsyncAsync(string tenantId, string userId, string configId, string subTreePath)
+        public System.Threading.Tasks.Task DeleteConfigAsync(string tenantId, string userId, string configId, string subTreePath)
         {
-            return DeleteConfigAsyncAsync(tenantId, userId, configId, subTreePath, System.Threading.CancellationToken.None);
+            return DeleteConfigAsync(tenantId, userId, configId, subTreePath, System.Threading.CancellationToken.None);
         }
 
         /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
         /// <returns>No Content</returns>
         /// <exception cref="CanopyApiException">A server side error occurred.</exception>
-        public async System.Threading.Tasks.Task DeleteConfigAsyncAsync(string tenantId, string userId, string configId, string subTreePath, System.Threading.CancellationToken cancellationToken)
+        public async System.Threading.Tasks.Task DeleteConfigAsync(string tenantId, string userId, string configId, string subTreePath, System.Threading.CancellationToken cancellationToken)
         {
             if (tenantId == null)
                 throw new System.ArgumentNullException("tenantId");
@@ -1065,12 +1065,12 @@ namespace Canopy.Api.Client
     {
         /// <returns>OK</returns>
         /// <exception cref="CanopyApiException">A server side error occurred.</exception>
-        System.Threading.Tasks.Task<object> GetLatestMessageAndClearMailboxAsyncAsync(string mailboxName);
+        System.Threading.Tasks.Task<object> GetLatestMessageAndClearMailboxAsync(string mailboxName);
 
         /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
         /// <returns>OK</returns>
         /// <exception cref="CanopyApiException">A server side error occurred.</exception>
-        System.Threading.Tasks.Task<object> GetLatestMessageAndClearMailboxAsyncAsync(string mailboxName, System.Threading.CancellationToken cancellationToken);
+        System.Threading.Tasks.Task<object> GetLatestMessageAndClearMailboxAsync(string mailboxName, System.Threading.CancellationToken cancellationToken);
 
     }
 
@@ -1087,15 +1087,15 @@ namespace Canopy.Api.Client
 
         /// <returns>OK</returns>
         /// <exception cref="CanopyApiException">A server side error occurred.</exception>
-        public System.Threading.Tasks.Task<object> GetLatestMessageAndClearMailboxAsyncAsync(string mailboxName)
+        public System.Threading.Tasks.Task<object> GetLatestMessageAndClearMailboxAsync(string mailboxName)
         {
-            return GetLatestMessageAndClearMailboxAsyncAsync(mailboxName, System.Threading.CancellationToken.None);
+            return GetLatestMessageAndClearMailboxAsync(mailboxName, System.Threading.CancellationToken.None);
         }
 
         /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
         /// <returns>OK</returns>
         /// <exception cref="CanopyApiException">A server side error occurred.</exception>
-        public async System.Threading.Tasks.Task<object> GetLatestMessageAndClearMailboxAsyncAsync(string mailboxName, System.Threading.CancellationToken cancellationToken)
+        public async System.Threading.Tasks.Task<object> GetLatestMessageAndClearMailboxAsync(string mailboxName, System.Threading.CancellationToken cancellationToken)
         {
             if (mailboxName == null)
                 throw new System.ArgumentNullException("mailboxName");
@@ -1171,66 +1171,66 @@ namespace Canopy.Api.Client
     {
         /// <returns>No Content</returns>
         /// <exception cref="CanopyApiException">A server side error occurred.</exception>
-        System.Threading.Tasks.Task PostInitializeAsyncAsync();
+        System.Threading.Tasks.Task PostInitializeAsync();
 
         /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
         /// <returns>No Content</returns>
         /// <exception cref="CanopyApiException">A server side error occurred.</exception>
-        System.Threading.Tasks.Task PostInitializeAsyncAsync(System.Threading.CancellationToken cancellationToken);
+        System.Threading.Tasks.Task PostInitializeAsync(System.Threading.CancellationToken cancellationToken);
 
         /// <returns>OK</returns>
         /// <exception cref="CanopyApiException">A server side error occurred.</exception>
-        System.Threading.Tasks.Task<object> PostRegistrationAsyncAsync(RegistrationData registrationData);
-
-        /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
-        /// <returns>OK</returns>
-        /// <exception cref="CanopyApiException">A server side error occurred.</exception>
-        System.Threading.Tasks.Task<object> PostRegistrationAsyncAsync(RegistrationData registrationData, System.Threading.CancellationToken cancellationToken);
-
-        /// <returns>OK</returns>
-        /// <exception cref="CanopyApiException">A server side error occurred.</exception>
-        System.Threading.Tasks.Task<object> PostPasswordResetRequestAsyncAsync(PasswordResetRequestData passwordResetRequestData);
+        System.Threading.Tasks.Task<object> PostRegistrationAsync(RegistrationData registrationData);
 
         /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
         /// <returns>OK</returns>
         /// <exception cref="CanopyApiException">A server side error occurred.</exception>
-        System.Threading.Tasks.Task<object> PostPasswordResetRequestAsyncAsync(PasswordResetRequestData passwordResetRequestData, System.Threading.CancellationToken cancellationToken);
+        System.Threading.Tasks.Task<object> PostRegistrationAsync(RegistrationData registrationData, System.Threading.CancellationToken cancellationToken);
 
         /// <returns>OK</returns>
         /// <exception cref="CanopyApiException">A server side error occurred.</exception>
-        System.Threading.Tasks.Task<object> PostPasswordResetConfirmationAsyncAsync(PasswordResetConfirmationData passwordResetConfirmationData);
-
-        /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
-        /// <returns>OK</returns>
-        /// <exception cref="CanopyApiException">A server side error occurred.</exception>
-        System.Threading.Tasks.Task<object> PostPasswordResetConfirmationAsyncAsync(PasswordResetConfirmationData passwordResetConfirmationData, System.Threading.CancellationToken cancellationToken);
-
-        /// <returns>OK</returns>
-        /// <exception cref="CanopyApiException">A server side error occurred.</exception>
-        System.Threading.Tasks.Task<object> GetPasswordResetTokenValidityAsyncAsync(string userId, string token);
+        System.Threading.Tasks.Task<object> PostPasswordResetRequestAsync(PasswordResetRequestData passwordResetRequestData);
 
         /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
         /// <returns>OK</returns>
         /// <exception cref="CanopyApiException">A server side error occurred.</exception>
-        System.Threading.Tasks.Task<object> GetPasswordResetTokenValidityAsyncAsync(string userId, string token, System.Threading.CancellationToken cancellationToken);
+        System.Threading.Tasks.Task<object> PostPasswordResetRequestAsync(PasswordResetRequestData passwordResetRequestData, System.Threading.CancellationToken cancellationToken);
 
         /// <returns>OK</returns>
         /// <exception cref="CanopyApiException">A server side error occurred.</exception>
-        System.Threading.Tasks.Task<object> PostIdentifiedUserAsyncAsync(IdentifiedUserData identifiedUserData);
+        System.Threading.Tasks.Task<object> PostPasswordResetConfirmationAsync(PasswordResetConfirmationData passwordResetConfirmationData);
 
         /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
         /// <returns>OK</returns>
         /// <exception cref="CanopyApiException">A server side error occurred.</exception>
-        System.Threading.Tasks.Task<object> PostIdentifiedUserAsyncAsync(IdentifiedUserData identifiedUserData, System.Threading.CancellationToken cancellationToken);
+        System.Threading.Tasks.Task<object> PostPasswordResetConfirmationAsync(PasswordResetConfirmationData passwordResetConfirmationData, System.Threading.CancellationToken cancellationToken);
+
+        /// <returns>OK</returns>
+        /// <exception cref="CanopyApiException">A server side error occurred.</exception>
+        System.Threading.Tasks.Task<object> GetPasswordResetTokenValidityAsync(string userId, string token);
+
+        /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
+        /// <returns>OK</returns>
+        /// <exception cref="CanopyApiException">A server side error occurred.</exception>
+        System.Threading.Tasks.Task<object> GetPasswordResetTokenValidityAsync(string userId, string token, System.Threading.CancellationToken cancellationToken);
+
+        /// <returns>OK</returns>
+        /// <exception cref="CanopyApiException">A server side error occurred.</exception>
+        System.Threading.Tasks.Task<object> PostIdentifiedUserAsync(IdentifiedUserData identifiedUserData);
+
+        /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
+        /// <returns>OK</returns>
+        /// <exception cref="CanopyApiException">A server side error occurred.</exception>
+        System.Threading.Tasks.Task<object> PostIdentifiedUserAsync(IdentifiedUserData identifiedUserData, System.Threading.CancellationToken cancellationToken);
 
         /// <returns>No Content</returns>
         /// <exception cref="CanopyApiException">A server side error occurred.</exception>
-        System.Threading.Tasks.Task DeleteRefreshTokensAsyncAsync(string tenantId, string userId);
+        System.Threading.Tasks.Task DeleteRefreshTokensAsync(string tenantId, string userId);
 
         /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
         /// <returns>No Content</returns>
         /// <exception cref="CanopyApiException">A server side error occurred.</exception>
-        System.Threading.Tasks.Task DeleteRefreshTokensAsyncAsync(string tenantId, string userId, System.Threading.CancellationToken cancellationToken);
+        System.Threading.Tasks.Task DeleteRefreshTokensAsync(string tenantId, string userId, System.Threading.CancellationToken cancellationToken);
 
     }
 
@@ -1247,15 +1247,15 @@ namespace Canopy.Api.Client
 
         /// <returns>No Content</returns>
         /// <exception cref="CanopyApiException">A server side error occurred.</exception>
-        public System.Threading.Tasks.Task PostInitializeAsyncAsync()
+        public System.Threading.Tasks.Task PostInitializeAsync()
         {
-            return PostInitializeAsyncAsync(System.Threading.CancellationToken.None);
+            return PostInitializeAsync(System.Threading.CancellationToken.None);
         }
 
         /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
         /// <returns>No Content</returns>
         /// <exception cref="CanopyApiException">A server side error occurred.</exception>
-        public async System.Threading.Tasks.Task PostInitializeAsyncAsync(System.Threading.CancellationToken cancellationToken)
+        public async System.Threading.Tasks.Task PostInitializeAsync(System.Threading.CancellationToken cancellationToken)
         {
             var urlBuilder_ = new System.Text.StringBuilder();
             urlBuilder_.Append("membership/initialize");
@@ -1311,15 +1311,15 @@ namespace Canopy.Api.Client
 
         /// <returns>OK</returns>
         /// <exception cref="CanopyApiException">A server side error occurred.</exception>
-        public System.Threading.Tasks.Task<object> PostRegistrationAsyncAsync(RegistrationData registrationData)
+        public System.Threading.Tasks.Task<object> PostRegistrationAsync(RegistrationData registrationData)
         {
-            return PostRegistrationAsyncAsync(registrationData, System.Threading.CancellationToken.None);
+            return PostRegistrationAsync(registrationData, System.Threading.CancellationToken.None);
         }
 
         /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
         /// <returns>OK</returns>
         /// <exception cref="CanopyApiException">A server side error occurred.</exception>
-        public async System.Threading.Tasks.Task<object> PostRegistrationAsyncAsync(RegistrationData registrationData, System.Threading.CancellationToken cancellationToken)
+        public async System.Threading.Tasks.Task<object> PostRegistrationAsync(RegistrationData registrationData, System.Threading.CancellationToken cancellationToken)
         {
             var urlBuilder_ = new System.Text.StringBuilder();
             urlBuilder_.Append("membership/registrations");
@@ -1389,15 +1389,15 @@ namespace Canopy.Api.Client
 
         /// <returns>OK</returns>
         /// <exception cref="CanopyApiException">A server side error occurred.</exception>
-        public System.Threading.Tasks.Task<object> PostPasswordResetRequestAsyncAsync(PasswordResetRequestData passwordResetRequestData)
+        public System.Threading.Tasks.Task<object> PostPasswordResetRequestAsync(PasswordResetRequestData passwordResetRequestData)
         {
-            return PostPasswordResetRequestAsyncAsync(passwordResetRequestData, System.Threading.CancellationToken.None);
+            return PostPasswordResetRequestAsync(passwordResetRequestData, System.Threading.CancellationToken.None);
         }
 
         /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
         /// <returns>OK</returns>
         /// <exception cref="CanopyApiException">A server side error occurred.</exception>
-        public async System.Threading.Tasks.Task<object> PostPasswordResetRequestAsyncAsync(PasswordResetRequestData passwordResetRequestData, System.Threading.CancellationToken cancellationToken)
+        public async System.Threading.Tasks.Task<object> PostPasswordResetRequestAsync(PasswordResetRequestData passwordResetRequestData, System.Threading.CancellationToken cancellationToken)
         {
             var urlBuilder_ = new System.Text.StringBuilder();
             urlBuilder_.Append("membership/password-reset-requests");
@@ -1467,15 +1467,15 @@ namespace Canopy.Api.Client
 
         /// <returns>OK</returns>
         /// <exception cref="CanopyApiException">A server side error occurred.</exception>
-        public System.Threading.Tasks.Task<object> PostPasswordResetConfirmationAsyncAsync(PasswordResetConfirmationData passwordResetConfirmationData)
+        public System.Threading.Tasks.Task<object> PostPasswordResetConfirmationAsync(PasswordResetConfirmationData passwordResetConfirmationData)
         {
-            return PostPasswordResetConfirmationAsyncAsync(passwordResetConfirmationData, System.Threading.CancellationToken.None);
+            return PostPasswordResetConfirmationAsync(passwordResetConfirmationData, System.Threading.CancellationToken.None);
         }
 
         /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
         /// <returns>OK</returns>
         /// <exception cref="CanopyApiException">A server side error occurred.</exception>
-        public async System.Threading.Tasks.Task<object> PostPasswordResetConfirmationAsyncAsync(PasswordResetConfirmationData passwordResetConfirmationData, System.Threading.CancellationToken cancellationToken)
+        public async System.Threading.Tasks.Task<object> PostPasswordResetConfirmationAsync(PasswordResetConfirmationData passwordResetConfirmationData, System.Threading.CancellationToken cancellationToken)
         {
             var urlBuilder_ = new System.Text.StringBuilder();
             urlBuilder_.Append("membership/password-reset-confirmations");
@@ -1545,15 +1545,15 @@ namespace Canopy.Api.Client
 
         /// <returns>OK</returns>
         /// <exception cref="CanopyApiException">A server side error occurred.</exception>
-        public System.Threading.Tasks.Task<object> GetPasswordResetTokenValidityAsyncAsync(string userId, string token)
+        public System.Threading.Tasks.Task<object> GetPasswordResetTokenValidityAsync(string userId, string token)
         {
-            return GetPasswordResetTokenValidityAsyncAsync(userId, token, System.Threading.CancellationToken.None);
+            return GetPasswordResetTokenValidityAsync(userId, token, System.Threading.CancellationToken.None);
         }
 
         /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
         /// <returns>OK</returns>
         /// <exception cref="CanopyApiException">A server side error occurred.</exception>
-        public async System.Threading.Tasks.Task<object> GetPasswordResetTokenValidityAsyncAsync(string userId, string token, System.Threading.CancellationToken cancellationToken)
+        public async System.Threading.Tasks.Task<object> GetPasswordResetTokenValidityAsync(string userId, string token, System.Threading.CancellationToken cancellationToken)
         {
             if (userId == null)
                 throw new System.ArgumentNullException("userId");
@@ -1629,15 +1629,15 @@ namespace Canopy.Api.Client
 
         /// <returns>OK</returns>
         /// <exception cref="CanopyApiException">A server side error occurred.</exception>
-        public System.Threading.Tasks.Task<object> PostIdentifiedUserAsyncAsync(IdentifiedUserData identifiedUserData)
+        public System.Threading.Tasks.Task<object> PostIdentifiedUserAsync(IdentifiedUserData identifiedUserData)
         {
-            return PostIdentifiedUserAsyncAsync(identifiedUserData, System.Threading.CancellationToken.None);
+            return PostIdentifiedUserAsync(identifiedUserData, System.Threading.CancellationToken.None);
         }
 
         /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
         /// <returns>OK</returns>
         /// <exception cref="CanopyApiException">A server side error occurred.</exception>
-        public async System.Threading.Tasks.Task<object> PostIdentifiedUserAsyncAsync(IdentifiedUserData identifiedUserData, System.Threading.CancellationToken cancellationToken)
+        public async System.Threading.Tasks.Task<object> PostIdentifiedUserAsync(IdentifiedUserData identifiedUserData, System.Threading.CancellationToken cancellationToken)
         {
             var urlBuilder_ = new System.Text.StringBuilder();
             urlBuilder_.Append("membership/identified-users");
@@ -1707,15 +1707,15 @@ namespace Canopy.Api.Client
 
         /// <returns>No Content</returns>
         /// <exception cref="CanopyApiException">A server side error occurred.</exception>
-        public System.Threading.Tasks.Task DeleteRefreshTokensAsyncAsync(string tenantId, string userId)
+        public System.Threading.Tasks.Task DeleteRefreshTokensAsync(string tenantId, string userId)
         {
-            return DeleteRefreshTokensAsyncAsync(tenantId, userId, System.Threading.CancellationToken.None);
+            return DeleteRefreshTokensAsync(tenantId, userId, System.Threading.CancellationToken.None);
         }
 
         /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
         /// <returns>No Content</returns>
         /// <exception cref="CanopyApiException">A server side error occurred.</exception>
-        public async System.Threading.Tasks.Task DeleteRefreshTokensAsyncAsync(string tenantId, string userId, System.Threading.CancellationToken cancellationToken)
+        public async System.Threading.Tasks.Task DeleteRefreshTokensAsync(string tenantId, string userId, System.Threading.CancellationToken cancellationToken)
         {
             if (tenantId == null)
                 throw new System.ArgumentNullException("tenantId");
@@ -1782,30 +1782,30 @@ namespace Canopy.Api.Client
     {
         /// <returns>OK</returns>
         /// <exception cref="CanopyApiException">A server side error occurred.</exception>
-        System.Threading.Tasks.Task<TestAutoScaleFormulaQueryResult> GetTestAutoScaleFormulaAsyncAsync(string poolId, string formula);
+        System.Threading.Tasks.Task<TestAutoScaleFormulaQueryResult> GetTestAutoScaleFormulaAsync(string poolId, string formula);
 
         /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
         /// <returns>OK</returns>
         /// <exception cref="CanopyApiException">A server side error occurred.</exception>
-        System.Threading.Tasks.Task<TestAutoScaleFormulaQueryResult> GetTestAutoScaleFormulaAsyncAsync(string poolId, string formula, System.Threading.CancellationToken cancellationToken);
+        System.Threading.Tasks.Task<TestAutoScaleFormulaQueryResult> GetTestAutoScaleFormulaAsync(string poolId, string formula, System.Threading.CancellationToken cancellationToken);
 
         /// <returns>OK</returns>
         /// <exception cref="CanopyApiException">A server side error occurred.</exception>
-        System.Threading.Tasks.Task<GetPoolStatusQueryResult> GetPoolStatusAsyncAsync(string tenantId, string poolType);
-
-        /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
-        /// <returns>OK</returns>
-        /// <exception cref="CanopyApiException">A server side error occurred.</exception>
-        System.Threading.Tasks.Task<GetPoolStatusQueryResult> GetPoolStatusAsyncAsync(string tenantId, string poolType, System.Threading.CancellationToken cancellationToken);
-
-        /// <returns>OK</returns>
-        /// <exception cref="CanopyApiException">A server side error occurred.</exception>
-        System.Threading.Tasks.Task<GetPoolsQueryResult> GetPoolsAsyncAsync();
+        System.Threading.Tasks.Task<GetPoolStatusQueryResult> GetPoolStatusAsync(string tenantId, string poolType);
 
         /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
         /// <returns>OK</returns>
         /// <exception cref="CanopyApiException">A server side error occurred.</exception>
-        System.Threading.Tasks.Task<GetPoolsQueryResult> GetPoolsAsyncAsync(System.Threading.CancellationToken cancellationToken);
+        System.Threading.Tasks.Task<GetPoolStatusQueryResult> GetPoolStatusAsync(string tenantId, string poolType, System.Threading.CancellationToken cancellationToken);
+
+        /// <returns>OK</returns>
+        /// <exception cref="CanopyApiException">A server side error occurred.</exception>
+        System.Threading.Tasks.Task<GetPoolsQueryResult> GetPoolsAsync();
+
+        /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
+        /// <returns>OK</returns>
+        /// <exception cref="CanopyApiException">A server side error occurred.</exception>
+        System.Threading.Tasks.Task<GetPoolsQueryResult> GetPoolsAsync(System.Threading.CancellationToken cancellationToken);
 
     }
 
@@ -1822,15 +1822,15 @@ namespace Canopy.Api.Client
 
         /// <returns>OK</returns>
         /// <exception cref="CanopyApiException">A server side error occurred.</exception>
-        public System.Threading.Tasks.Task<TestAutoScaleFormulaQueryResult> GetTestAutoScaleFormulaAsyncAsync(string poolId, string formula)
+        public System.Threading.Tasks.Task<TestAutoScaleFormulaQueryResult> GetTestAutoScaleFormulaAsync(string poolId, string formula)
         {
-            return GetTestAutoScaleFormulaAsyncAsync(poolId, formula, System.Threading.CancellationToken.None);
+            return GetTestAutoScaleFormulaAsync(poolId, formula, System.Threading.CancellationToken.None);
         }
 
         /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
         /// <returns>OK</returns>
         /// <exception cref="CanopyApiException">A server side error occurred.</exception>
-        public async System.Threading.Tasks.Task<TestAutoScaleFormulaQueryResult> GetTestAutoScaleFormulaAsyncAsync(string poolId, string formula, System.Threading.CancellationToken cancellationToken)
+        public async System.Threading.Tasks.Task<TestAutoScaleFormulaQueryResult> GetTestAutoScaleFormulaAsync(string poolId, string formula, System.Threading.CancellationToken cancellationToken)
         {
             if (poolId == null)
                 throw new System.ArgumentNullException("poolId");
@@ -1903,15 +1903,15 @@ namespace Canopy.Api.Client
 
         /// <returns>OK</returns>
         /// <exception cref="CanopyApiException">A server side error occurred.</exception>
-        public System.Threading.Tasks.Task<GetPoolStatusQueryResult> GetPoolStatusAsyncAsync(string tenantId, string poolType)
+        public System.Threading.Tasks.Task<GetPoolStatusQueryResult> GetPoolStatusAsync(string tenantId, string poolType)
         {
-            return GetPoolStatusAsyncAsync(tenantId, poolType, System.Threading.CancellationToken.None);
+            return GetPoolStatusAsync(tenantId, poolType, System.Threading.CancellationToken.None);
         }
 
         /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
         /// <returns>OK</returns>
         /// <exception cref="CanopyApiException">A server side error occurred.</exception>
-        public async System.Threading.Tasks.Task<GetPoolStatusQueryResult> GetPoolStatusAsyncAsync(string tenantId, string poolType, System.Threading.CancellationToken cancellationToken)
+        public async System.Threading.Tasks.Task<GetPoolStatusQueryResult> GetPoolStatusAsync(string tenantId, string poolType, System.Threading.CancellationToken cancellationToken)
         {
             if (tenantId == null)
                 throw new System.ArgumentNullException("tenantId");
@@ -1984,15 +1984,15 @@ namespace Canopy.Api.Client
 
         /// <returns>OK</returns>
         /// <exception cref="CanopyApiException">A server side error occurred.</exception>
-        public System.Threading.Tasks.Task<GetPoolsQueryResult> GetPoolsAsyncAsync()
+        public System.Threading.Tasks.Task<GetPoolsQueryResult> GetPoolsAsync()
         {
-            return GetPoolsAsyncAsync(System.Threading.CancellationToken.None);
+            return GetPoolsAsync(System.Threading.CancellationToken.None);
         }
 
         /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
         /// <returns>OK</returns>
         /// <exception cref="CanopyApiException">A server side error occurred.</exception>
-        public async System.Threading.Tasks.Task<GetPoolsQueryResult> GetPoolsAsyncAsync(System.Threading.CancellationToken cancellationToken)
+        public async System.Threading.Tasks.Task<GetPoolsQueryResult> GetPoolsAsync(System.Threading.CancellationToken cancellationToken)
         {
             var urlBuilder_ = new System.Text.StringBuilder();
             urlBuilder_.Append("pools");
@@ -2064,48 +2064,48 @@ namespace Canopy.Api.Client
     {
         /// <returns>OK</returns>
         /// <exception cref="CanopyApiException">A server side error occurred.</exception>
-        System.Threading.Tasks.Task<GetSimVersionDocumentsQueryResult> GetDocumentsAsyncAsync(string simVersion, string tenantId);
+        System.Threading.Tasks.Task<GetSimVersionDocumentsQueryResult> GetDocumentsAsync(string simVersion, string tenantId);
 
         /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
         /// <returns>OK</returns>
         /// <exception cref="CanopyApiException">A server side error occurred.</exception>
-        System.Threading.Tasks.Task<GetSimVersionDocumentsQueryResult> GetDocumentsAsyncAsync(string simVersion, string tenantId, System.Threading.CancellationToken cancellationToken);
+        System.Threading.Tasks.Task<GetSimVersionDocumentsQueryResult> GetDocumentsAsync(string simVersion, string tenantId, System.Threading.CancellationToken cancellationToken);
 
         /// <returns>OK</returns>
         /// <exception cref="CanopyApiException">A server side error occurred.</exception>
-        System.Threading.Tasks.Task<GetSimVersionDocumentQueryResult> GetDocumentAsyncAsync(string simVersion, string documentPath, string tenantId);
-
-        /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
-        /// <returns>OK</returns>
-        /// <exception cref="CanopyApiException">A server side error occurred.</exception>
-        System.Threading.Tasks.Task<GetSimVersionDocumentQueryResult> GetDocumentAsyncAsync(string simVersion, string documentPath, string tenantId, System.Threading.CancellationToken cancellationToken);
-
-        /// <returns>OK</returns>
-        /// <exception cref="CanopyApiException">A server side error occurred.</exception>
-        System.Threading.Tasks.Task<GetWikiDocumentQueryResult> GetWikiDocumentAsyncAsync(string simVersion, string documentPath, string tenantId);
+        System.Threading.Tasks.Task<GetSimVersionDocumentQueryResult> GetDocumentAsync(string simVersion, string documentPath, string tenantId);
 
         /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
         /// <returns>OK</returns>
         /// <exception cref="CanopyApiException">A server side error occurred.</exception>
-        System.Threading.Tasks.Task<GetWikiDocumentQueryResult> GetWikiDocumentAsyncAsync(string simVersion, string documentPath, string tenantId, System.Threading.CancellationToken cancellationToken);
+        System.Threading.Tasks.Task<GetSimVersionDocumentQueryResult> GetDocumentAsync(string simVersion, string documentPath, string tenantId, System.Threading.CancellationToken cancellationToken);
 
         /// <returns>OK</returns>
         /// <exception cref="CanopyApiException">A server side error occurred.</exception>
-        System.Threading.Tasks.Task<string> GetSimVersionAsyncAsync();
+        System.Threading.Tasks.Task<GetWikiDocumentQueryResult> GetWikiDocumentAsync(string simVersion, string documentPath, string tenantId);
 
         /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
         /// <returns>OK</returns>
         /// <exception cref="CanopyApiException">A server side error occurred.</exception>
-        System.Threading.Tasks.Task<string> GetSimVersionAsyncAsync(System.Threading.CancellationToken cancellationToken);
+        System.Threading.Tasks.Task<GetWikiDocumentQueryResult> GetWikiDocumentAsync(string simVersion, string documentPath, string tenantId, System.Threading.CancellationToken cancellationToken);
+
+        /// <returns>OK</returns>
+        /// <exception cref="CanopyApiException">A server side error occurred.</exception>
+        System.Threading.Tasks.Task<string> GetSimVersionAsync();
+
+        /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
+        /// <returns>OK</returns>
+        /// <exception cref="CanopyApiException">A server side error occurred.</exception>
+        System.Threading.Tasks.Task<string> GetSimVersionAsync(System.Threading.CancellationToken cancellationToken);
 
         /// <returns>No Content</returns>
         /// <exception cref="CanopyApiException">A server side error occurred.</exception>
-        System.Threading.Tasks.Task PostSimVersionAsyncAsync(NewSimVersionData simVersionData);
+        System.Threading.Tasks.Task PostSimVersionAsync(NewSimVersionData simVersionData);
 
         /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
         /// <returns>No Content</returns>
         /// <exception cref="CanopyApiException">A server side error occurred.</exception>
-        System.Threading.Tasks.Task PostSimVersionAsyncAsync(NewSimVersionData simVersionData, System.Threading.CancellationToken cancellationToken);
+        System.Threading.Tasks.Task PostSimVersionAsync(NewSimVersionData simVersionData, System.Threading.CancellationToken cancellationToken);
 
     }
 
@@ -2122,15 +2122,15 @@ namespace Canopy.Api.Client
 
         /// <returns>OK</returns>
         /// <exception cref="CanopyApiException">A server side error occurred.</exception>
-        public System.Threading.Tasks.Task<GetSimVersionDocumentsQueryResult> GetDocumentsAsyncAsync(string simVersion, string tenantId)
+        public System.Threading.Tasks.Task<GetSimVersionDocumentsQueryResult> GetDocumentsAsync(string simVersion, string tenantId)
         {
-            return GetDocumentsAsyncAsync(simVersion, tenantId, System.Threading.CancellationToken.None);
+            return GetDocumentsAsync(simVersion, tenantId, System.Threading.CancellationToken.None);
         }
 
         /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
         /// <returns>OK</returns>
         /// <exception cref="CanopyApiException">A server side error occurred.</exception>
-        public async System.Threading.Tasks.Task<GetSimVersionDocumentsQueryResult> GetDocumentsAsyncAsync(string simVersion, string tenantId, System.Threading.CancellationToken cancellationToken)
+        public async System.Threading.Tasks.Task<GetSimVersionDocumentsQueryResult> GetDocumentsAsync(string simVersion, string tenantId, System.Threading.CancellationToken cancellationToken)
         {
             if (simVersion == null)
                 throw new System.ArgumentNullException("simVersion");
@@ -2203,15 +2203,15 @@ namespace Canopy.Api.Client
 
         /// <returns>OK</returns>
         /// <exception cref="CanopyApiException">A server side error occurred.</exception>
-        public System.Threading.Tasks.Task<GetSimVersionDocumentQueryResult> GetDocumentAsyncAsync(string simVersion, string documentPath, string tenantId)
+        public System.Threading.Tasks.Task<GetSimVersionDocumentQueryResult> GetDocumentAsync(string simVersion, string documentPath, string tenantId)
         {
-            return GetDocumentAsyncAsync(simVersion, documentPath, tenantId, System.Threading.CancellationToken.None);
+            return GetDocumentAsync(simVersion, documentPath, tenantId, System.Threading.CancellationToken.None);
         }
 
         /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
         /// <returns>OK</returns>
         /// <exception cref="CanopyApiException">A server side error occurred.</exception>
-        public async System.Threading.Tasks.Task<GetSimVersionDocumentQueryResult> GetDocumentAsyncAsync(string simVersion, string documentPath, string tenantId, System.Threading.CancellationToken cancellationToken)
+        public async System.Threading.Tasks.Task<GetSimVersionDocumentQueryResult> GetDocumentAsync(string simVersion, string documentPath, string tenantId, System.Threading.CancellationToken cancellationToken)
         {
             if (simVersion == null)
                 throw new System.ArgumentNullException("simVersion");
@@ -2288,15 +2288,15 @@ namespace Canopy.Api.Client
 
         /// <returns>OK</returns>
         /// <exception cref="CanopyApiException">A server side error occurred.</exception>
-        public System.Threading.Tasks.Task<GetWikiDocumentQueryResult> GetWikiDocumentAsyncAsync(string simVersion, string documentPath, string tenantId)
+        public System.Threading.Tasks.Task<GetWikiDocumentQueryResult> GetWikiDocumentAsync(string simVersion, string documentPath, string tenantId)
         {
-            return GetWikiDocumentAsyncAsync(simVersion, documentPath, tenantId, System.Threading.CancellationToken.None);
+            return GetWikiDocumentAsync(simVersion, documentPath, tenantId, System.Threading.CancellationToken.None);
         }
 
         /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
         /// <returns>OK</returns>
         /// <exception cref="CanopyApiException">A server side error occurred.</exception>
-        public async System.Threading.Tasks.Task<GetWikiDocumentQueryResult> GetWikiDocumentAsyncAsync(string simVersion, string documentPath, string tenantId, System.Threading.CancellationToken cancellationToken)
+        public async System.Threading.Tasks.Task<GetWikiDocumentQueryResult> GetWikiDocumentAsync(string simVersion, string documentPath, string tenantId, System.Threading.CancellationToken cancellationToken)
         {
             if (simVersion == null)
                 throw new System.ArgumentNullException("simVersion");
@@ -2373,15 +2373,15 @@ namespace Canopy.Api.Client
 
         /// <returns>OK</returns>
         /// <exception cref="CanopyApiException">A server side error occurred.</exception>
-        public System.Threading.Tasks.Task<string> GetSimVersionAsyncAsync()
+        public System.Threading.Tasks.Task<string> GetSimVersionAsync()
         {
-            return GetSimVersionAsyncAsync(System.Threading.CancellationToken.None);
+            return GetSimVersionAsync(System.Threading.CancellationToken.None);
         }
 
         /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
         /// <returns>OK</returns>
         /// <exception cref="CanopyApiException">A server side error occurred.</exception>
-        public async System.Threading.Tasks.Task<string> GetSimVersionAsyncAsync(System.Threading.CancellationToken cancellationToken)
+        public async System.Threading.Tasks.Task<string> GetSimVersionAsync(System.Threading.CancellationToken cancellationToken)
         {
             var urlBuilder_ = new System.Text.StringBuilder();
             urlBuilder_.Append("sim-versions/current");
@@ -2448,15 +2448,15 @@ namespace Canopy.Api.Client
 
         /// <returns>No Content</returns>
         /// <exception cref="CanopyApiException">A server side error occurred.</exception>
-        public System.Threading.Tasks.Task PostSimVersionAsyncAsync(NewSimVersionData simVersionData)
+        public System.Threading.Tasks.Task PostSimVersionAsync(NewSimVersionData simVersionData)
         {
-            return PostSimVersionAsyncAsync(simVersionData, System.Threading.CancellationToken.None);
+            return PostSimVersionAsync(simVersionData, System.Threading.CancellationToken.None);
         }
 
         /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
         /// <returns>No Content</returns>
         /// <exception cref="CanopyApiException">A server side error occurred.</exception>
-        public async System.Threading.Tasks.Task PostSimVersionAsyncAsync(NewSimVersionData simVersionData, System.Threading.CancellationToken cancellationToken)
+        public async System.Threading.Tasks.Task PostSimVersionAsync(NewSimVersionData simVersionData, System.Threading.CancellationToken cancellationToken)
         {
             var urlBuilder_ = new System.Text.StringBuilder();
             urlBuilder_.Append("sim-versions/current");
@@ -2518,165 +2518,165 @@ namespace Canopy.Api.Client
     {
         /// <returns>OK</returns>
         /// <exception cref="CanopyApiException">A server side error occurred.</exception>
-        System.Threading.Tasks.Task<GetAllTenantsStudyStatisticsQueryResult> GetAllTenantsStudyStatisticsAsyncAsync(string startDate, string endDate);
+        System.Threading.Tasks.Task<GetAllTenantsStudyStatisticsQueryResult> GetAllTenantsStudyStatisticsAsync(string startDate, string endDate);
 
         /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
         /// <returns>OK</returns>
         /// <exception cref="CanopyApiException">A server side error occurred.</exception>
-        System.Threading.Tasks.Task<GetAllTenantsStudyStatisticsQueryResult> GetAllTenantsStudyStatisticsAsyncAsync(string startDate, string endDate, System.Threading.CancellationToken cancellationToken);
+        System.Threading.Tasks.Task<GetAllTenantsStudyStatisticsQueryResult> GetAllTenantsStudyStatisticsAsync(string startDate, string endDate, System.Threading.CancellationToken cancellationToken);
 
         /// <returns>OK</returns>
         /// <exception cref="CanopyApiException">A server side error occurred.</exception>
-        System.Threading.Tasks.Task<GetTenantStudyStatisticsQueryResult> GetTenantStudyStatisticsAsyncAsync(string tenantId, string startDate, string endDate);
-
-        /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
-        /// <returns>OK</returns>
-        /// <exception cref="CanopyApiException">A server side error occurred.</exception>
-        System.Threading.Tasks.Task<GetTenantStudyStatisticsQueryResult> GetTenantStudyStatisticsAsyncAsync(string tenantId, string startDate, string endDate, System.Threading.CancellationToken cancellationToken);
-
-        /// <returns>OK</returns>
-        /// <exception cref="CanopyApiException">A server side error occurred.</exception>
-        System.Threading.Tasks.Task<GetStudyTypesQueryResult> GetStudyTypesAsyncAsync(string tenantId);
+        System.Threading.Tasks.Task<GetTenantStudyStatisticsQueryResult> GetTenantStudyStatisticsAsync(string tenantId, string startDate, string endDate);
 
         /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
         /// <returns>OK</returns>
         /// <exception cref="CanopyApiException">A server side error occurred.</exception>
-        System.Threading.Tasks.Task<GetStudyTypesQueryResult> GetStudyTypesAsyncAsync(string tenantId, System.Threading.CancellationToken cancellationToken);
+        System.Threading.Tasks.Task<GetTenantStudyStatisticsQueryResult> GetTenantStudyStatisticsAsync(string tenantId, string startDate, string endDate, System.Threading.CancellationToken cancellationToken);
 
         /// <returns>OK</returns>
         /// <exception cref="CanopyApiException">A server side error occurred.</exception>
-        System.Threading.Tasks.Task<SimTypeDefinition> GetSimTypeAsyncAsync(string simType, string tenantId);
-
-        /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
-        /// <returns>OK</returns>
-        /// <exception cref="CanopyApiException">A server side error occurred.</exception>
-        System.Threading.Tasks.Task<SimTypeDefinition> GetSimTypeAsyncAsync(string simType, string tenantId, System.Threading.CancellationToken cancellationToken);
-
-        /// <returns>OK</returns>
-        /// <exception cref="CanopyApiException">A server side error occurred.</exception>
-        System.Threading.Tasks.Task<StudyTypeDefinition> GetStudyTypeAsyncAsync(string studyType, string tenantId);
+        System.Threading.Tasks.Task<GetStudyTypesQueryResult> GetStudyTypesAsync(string tenantId);
 
         /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
         /// <returns>OK</returns>
         /// <exception cref="CanopyApiException">A server side error occurred.</exception>
-        System.Threading.Tasks.Task<StudyTypeDefinition> GetStudyTypeAsyncAsync(string studyType, string tenantId, System.Threading.CancellationToken cancellationToken);
+        System.Threading.Tasks.Task<GetStudyTypesQueryResult> GetStudyTypesAsync(string tenantId, System.Threading.CancellationToken cancellationToken);
 
         /// <returns>OK</returns>
         /// <exception cref="CanopyApiException">A server side error occurred.</exception>
-        System.Threading.Tasks.Task<GetStudiesQueryResult> GetStudiesAsyncAsync(string tenantId, string filter, bool? includeTransient);
-
-        /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
-        /// <returns>OK</returns>
-        /// <exception cref="CanopyApiException">A server side error occurred.</exception>
-        System.Threading.Tasks.Task<GetStudiesQueryResult> GetStudiesAsyncAsync(string tenantId, string filter, bool? includeTransient, System.Threading.CancellationToken cancellationToken);
-
-        /// <returns>OK</returns>
-        /// <exception cref="CanopyApiException">A server side error occurred.</exception>
-        System.Threading.Tasks.Task<GetTenantAccessInformationQueryResult> GetTenantAccessInformationAsyncAsync(string tenantId);
+        System.Threading.Tasks.Task<SimTypeDefinition> GetSimTypeAsync(string simType, string tenantId);
 
         /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
         /// <returns>OK</returns>
         /// <exception cref="CanopyApiException">A server side error occurred.</exception>
-        System.Threading.Tasks.Task<GetTenantAccessInformationQueryResult> GetTenantAccessInformationAsyncAsync(string tenantId, System.Threading.CancellationToken cancellationToken);
+        System.Threading.Tasks.Task<SimTypeDefinition> GetSimTypeAsync(string simType, string tenantId, System.Threading.CancellationToken cancellationToken);
 
         /// <returns>OK</returns>
         /// <exception cref="CanopyApiException">A server side error occurred.</exception>
-        System.Threading.Tasks.Task<PostStudyResult> PostStudyAsyncAsync(string tenantId, string userId, NewStudyData data);
-
-        /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
-        /// <returns>OK</returns>
-        /// <exception cref="CanopyApiException">A server side error occurred.</exception>
-        System.Threading.Tasks.Task<PostStudyResult> PostStudyAsyncAsync(string tenantId, string userId, NewStudyData data, System.Threading.CancellationToken cancellationToken);
-
-        /// <returns>OK</returns>
-        /// <exception cref="CanopyApiException">A server side error occurred.</exception>
-        System.Threading.Tasks.Task<GetStudyQueryResult> GetStudyAsyncAsync(string tenantId, string userId, string studyId);
+        System.Threading.Tasks.Task<StudyTypeDefinition> GetStudyTypeAsync(string studyType, string tenantId);
 
         /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
         /// <returns>OK</returns>
         /// <exception cref="CanopyApiException">A server side error occurred.</exception>
-        System.Threading.Tasks.Task<GetStudyQueryResult> GetStudyAsyncAsync(string tenantId, string userId, string studyId, System.Threading.CancellationToken cancellationToken);
+        System.Threading.Tasks.Task<StudyTypeDefinition> GetStudyTypeAsync(string studyType, string tenantId, System.Threading.CancellationToken cancellationToken);
+
+        /// <returns>OK</returns>
+        /// <exception cref="CanopyApiException">A server side error occurred.</exception>
+        System.Threading.Tasks.Task<GetStudiesQueryResult> GetStudiesAsync(string tenantId, string filter, bool? includeTransient);
+
+        /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
+        /// <returns>OK</returns>
+        /// <exception cref="CanopyApiException">A server side error occurred.</exception>
+        System.Threading.Tasks.Task<GetStudiesQueryResult> GetStudiesAsync(string tenantId, string filter, bool? includeTransient, System.Threading.CancellationToken cancellationToken);
+
+        /// <returns>OK</returns>
+        /// <exception cref="CanopyApiException">A server side error occurred.</exception>
+        System.Threading.Tasks.Task<GetTenantAccessInformationQueryResult> GetTenantAccessInformationAsync(string tenantId);
+
+        /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
+        /// <returns>OK</returns>
+        /// <exception cref="CanopyApiException">A server side error occurred.</exception>
+        System.Threading.Tasks.Task<GetTenantAccessInformationQueryResult> GetTenantAccessInformationAsync(string tenantId, System.Threading.CancellationToken cancellationToken);
+
+        /// <returns>OK</returns>
+        /// <exception cref="CanopyApiException">A server side error occurred.</exception>
+        System.Threading.Tasks.Task<PostStudyResult> PostStudyAsync(string tenantId, string userId, NewStudyData data);
+
+        /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
+        /// <returns>OK</returns>
+        /// <exception cref="CanopyApiException">A server side error occurred.</exception>
+        System.Threading.Tasks.Task<PostStudyResult> PostStudyAsync(string tenantId, string userId, NewStudyData data, System.Threading.CancellationToken cancellationToken);
+
+        /// <returns>OK</returns>
+        /// <exception cref="CanopyApiException">A server side error occurred.</exception>
+        System.Threading.Tasks.Task<GetStudyQueryResult> GetStudyAsync(string tenantId, string userId, string studyId);
+
+        /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
+        /// <returns>OK</returns>
+        /// <exception cref="CanopyApiException">A server side error occurred.</exception>
+        System.Threading.Tasks.Task<GetStudyQueryResult> GetStudyAsync(string tenantId, string userId, string studyId, System.Threading.CancellationToken cancellationToken);
 
         /// <returns>No Content</returns>
         /// <exception cref="CanopyApiException">A server side error occurred.</exception>
-        System.Threading.Tasks.Task PutStudyAsyncAsync(string tenantId, string userId, string studyId, UpdatedStudyData data);
-
-        /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
-        /// <returns>No Content</returns>
-        /// <exception cref="CanopyApiException">A server side error occurred.</exception>
-        System.Threading.Tasks.Task PutStudyAsyncAsync(string tenantId, string userId, string studyId, UpdatedStudyData data, System.Threading.CancellationToken cancellationToken);
-
-        /// <returns>No Content</returns>
-        /// <exception cref="CanopyApiException">A server side error occurred.</exception>
-        System.Threading.Tasks.Task DeleteStudyAsyncAsync(string tenantId, string userId, string studyId);
+        System.Threading.Tasks.Task PutStudyAsync(string tenantId, string userId, string studyId, UpdatedStudyData data);
 
         /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
         /// <returns>No Content</returns>
         /// <exception cref="CanopyApiException">A server side error occurred.</exception>
-        System.Threading.Tasks.Task DeleteStudyAsyncAsync(string tenantId, string userId, string studyId, System.Threading.CancellationToken cancellationToken);
+        System.Threading.Tasks.Task PutStudyAsync(string tenantId, string userId, string studyId, UpdatedStudyData data, System.Threading.CancellationToken cancellationToken);
+
+        /// <returns>No Content</returns>
+        /// <exception cref="CanopyApiException">A server side error occurred.</exception>
+        System.Threading.Tasks.Task DeleteStudyAsync(string tenantId, string userId, string studyId);
+
+        /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
+        /// <returns>No Content</returns>
+        /// <exception cref="CanopyApiException">A server side error occurred.</exception>
+        System.Threading.Tasks.Task DeleteStudyAsync(string tenantId, string userId, string studyId, System.Threading.CancellationToken cancellationToken);
 
         /// <returns>OK</returns>
         /// <exception cref="CanopyApiException">A server side error occurred.</exception>
-        System.Threading.Tasks.Task<object> GetStudyDownloadAsyncAsync(string tenantId, string userId, string studyId, string accessSignature, string expiry, string fileName, bool? full, bool? channelsAsCsv);
+        System.Threading.Tasks.Task<object> GetStudyDownloadAsync(string tenantId, string userId, string studyId, string accessSignature, string expiry, string fileName, bool? full, bool? channelsAsCsv);
 
         /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
         /// <returns>OK</returns>
         /// <exception cref="CanopyApiException">A server side error occurred.</exception>
-        System.Threading.Tasks.Task<object> GetStudyDownloadAsyncAsync(string tenantId, string userId, string studyId, string accessSignature, string expiry, string fileName, bool? full, bool? channelsAsCsv, System.Threading.CancellationToken cancellationToken);
+        System.Threading.Tasks.Task<object> GetStudyDownloadAsync(string tenantId, string userId, string studyId, string accessSignature, string expiry, string fileName, bool? full, bool? channelsAsCsv, System.Threading.CancellationToken cancellationToken);
 
         /// <returns>OK</returns>
         /// <exception cref="CanopyApiException">A server side error occurred.</exception>
-        System.Threading.Tasks.Task<object> GetStudyJobDownloadAsyncAsync(string tenantId, string userId, string studyId, string jobId, string accessSignature, string expiry, string fileName, bool? channelsAsCsv);
-
-        /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
-        /// <returns>OK</returns>
-        /// <exception cref="CanopyApiException">A server side error occurred.</exception>
-        System.Threading.Tasks.Task<object> GetStudyJobDownloadAsyncAsync(string tenantId, string userId, string studyId, string jobId, string accessSignature, string expiry, string fileName, bool? channelsAsCsv, System.Threading.CancellationToken cancellationToken);
-
-        /// <returns>OK</returns>
-        /// <exception cref="CanopyApiException">A server side error occurred.</exception>
-        System.Threading.Tasks.Task<GetStudyDownloadUrlQueryResult> GetStudyDownloadUrlAsyncAsync(string tenantId, string userId, string studyId);
+        System.Threading.Tasks.Task<object> GetStudyJobDownloadAsync(string tenantId, string userId, string studyId, string jobId, string accessSignature, string expiry, string fileName, bool? channelsAsCsv);
 
         /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
         /// <returns>OK</returns>
         /// <exception cref="CanopyApiException">A server side error occurred.</exception>
-        System.Threading.Tasks.Task<GetStudyDownloadUrlQueryResult> GetStudyDownloadUrlAsyncAsync(string tenantId, string userId, string studyId, System.Threading.CancellationToken cancellationToken);
+        System.Threading.Tasks.Task<object> GetStudyJobDownloadAsync(string tenantId, string userId, string studyId, string jobId, string accessSignature, string expiry, string fileName, bool? channelsAsCsv, System.Threading.CancellationToken cancellationToken);
 
         /// <returns>OK</returns>
         /// <exception cref="CanopyApiException">A server side error occurred.</exception>
-        System.Threading.Tasks.Task<GetStudyQueryResult> GetStudyMetadataAsyncAsync(string tenantId, string userId, string studyId);
-
-        /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
-        /// <returns>OK</returns>
-        /// <exception cref="CanopyApiException">A server side error occurred.</exception>
-        System.Threading.Tasks.Task<GetStudyQueryResult> GetStudyMetadataAsyncAsync(string tenantId, string userId, string studyId, System.Threading.CancellationToken cancellationToken);
-
-        /// <returns>OK</returns>
-        /// <exception cref="CanopyApiException">A server side error occurred.</exception>
-        System.Threading.Tasks.Task<GetStudyJobsQueryResult> GetStudyJobsAsyncAsync(string tenantId, string userId, string studyId, string filter);
+        System.Threading.Tasks.Task<GetStudyDownloadUrlQueryResult> GetStudyDownloadUrlAsync(string tenantId, string userId, string studyId);
 
         /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
         /// <returns>OK</returns>
         /// <exception cref="CanopyApiException">A server side error occurred.</exception>
-        System.Threading.Tasks.Task<GetStudyJobsQueryResult> GetStudyJobsAsyncAsync(string tenantId, string userId, string studyId, string filter, System.Threading.CancellationToken cancellationToken);
+        System.Threading.Tasks.Task<GetStudyDownloadUrlQueryResult> GetStudyDownloadUrlAsync(string tenantId, string userId, string studyId, System.Threading.CancellationToken cancellationToken);
 
         /// <returns>OK</returns>
         /// <exception cref="CanopyApiException">A server side error occurred.</exception>
-        System.Threading.Tasks.Task<GetStudyJobQueryResult> GetStudyJobAsyncAsync(string tenantId, string userId, string studyId, string jobId);
-
-        /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
-        /// <returns>OK</returns>
-        /// <exception cref="CanopyApiException">A server side error occurred.</exception>
-        System.Threading.Tasks.Task<GetStudyJobQueryResult> GetStudyJobAsyncAsync(string tenantId, string userId, string studyId, string jobId, System.Threading.CancellationToken cancellationToken);
-
-        /// <returns>OK</returns>
-        /// <exception cref="CanopyApiException">A server side error occurred.</exception>
-        System.Threading.Tasks.Task<GetStudyJobMetadataQueryResult> GetStudyJobMetadataAsyncAsync(string tenantId, string userId, string studyId, string jobId);
+        System.Threading.Tasks.Task<GetStudyQueryResult> GetStudyMetadataAsync(string tenantId, string userId, string studyId);
 
         /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
         /// <returns>OK</returns>
         /// <exception cref="CanopyApiException">A server side error occurred.</exception>
-        System.Threading.Tasks.Task<GetStudyJobMetadataQueryResult> GetStudyJobMetadataAsyncAsync(string tenantId, string userId, string studyId, string jobId, System.Threading.CancellationToken cancellationToken);
+        System.Threading.Tasks.Task<GetStudyQueryResult> GetStudyMetadataAsync(string tenantId, string userId, string studyId, System.Threading.CancellationToken cancellationToken);
+
+        /// <returns>OK</returns>
+        /// <exception cref="CanopyApiException">A server side error occurred.</exception>
+        System.Threading.Tasks.Task<GetStudyJobsQueryResult> GetStudyJobsAsync(string tenantId, string userId, string studyId, string filter);
+
+        /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
+        /// <returns>OK</returns>
+        /// <exception cref="CanopyApiException">A server side error occurred.</exception>
+        System.Threading.Tasks.Task<GetStudyJobsQueryResult> GetStudyJobsAsync(string tenantId, string userId, string studyId, string filter, System.Threading.CancellationToken cancellationToken);
+
+        /// <returns>OK</returns>
+        /// <exception cref="CanopyApiException">A server side error occurred.</exception>
+        System.Threading.Tasks.Task<GetStudyJobQueryResult> GetStudyJobAsync(string tenantId, string userId, string studyId, string jobId);
+
+        /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
+        /// <returns>OK</returns>
+        /// <exception cref="CanopyApiException">A server side error occurred.</exception>
+        System.Threading.Tasks.Task<GetStudyJobQueryResult> GetStudyJobAsync(string tenantId, string userId, string studyId, string jobId, System.Threading.CancellationToken cancellationToken);
+
+        /// <returns>OK</returns>
+        /// <exception cref="CanopyApiException">A server side error occurred.</exception>
+        System.Threading.Tasks.Task<GetStudyJobMetadataQueryResult> GetStudyJobMetadataAsync(string tenantId, string userId, string studyId, string jobId);
+
+        /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
+        /// <returns>OK</returns>
+        /// <exception cref="CanopyApiException">A server side error occurred.</exception>
+        System.Threading.Tasks.Task<GetStudyJobMetadataQueryResult> GetStudyJobMetadataAsync(string tenantId, string userId, string studyId, string jobId, System.Threading.CancellationToken cancellationToken);
 
     }
 
@@ -2693,15 +2693,15 @@ namespace Canopy.Api.Client
 
         /// <returns>OK</returns>
         /// <exception cref="CanopyApiException">A server side error occurred.</exception>
-        public System.Threading.Tasks.Task<GetAllTenantsStudyStatisticsQueryResult> GetAllTenantsStudyStatisticsAsyncAsync(string startDate, string endDate)
+        public System.Threading.Tasks.Task<GetAllTenantsStudyStatisticsQueryResult> GetAllTenantsStudyStatisticsAsync(string startDate, string endDate)
         {
-            return GetAllTenantsStudyStatisticsAsyncAsync(startDate, endDate, System.Threading.CancellationToken.None);
+            return GetAllTenantsStudyStatisticsAsync(startDate, endDate, System.Threading.CancellationToken.None);
         }
 
         /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
         /// <returns>OK</returns>
         /// <exception cref="CanopyApiException">A server side error occurred.</exception>
-        public async System.Threading.Tasks.Task<GetAllTenantsStudyStatisticsQueryResult> GetAllTenantsStudyStatisticsAsyncAsync(string startDate, string endDate, System.Threading.CancellationToken cancellationToken)
+        public async System.Threading.Tasks.Task<GetAllTenantsStudyStatisticsQueryResult> GetAllTenantsStudyStatisticsAsync(string startDate, string endDate, System.Threading.CancellationToken cancellationToken)
         {
             var urlBuilder_ = new System.Text.StringBuilder();
             urlBuilder_.Append("studies/statistics?");
@@ -2771,15 +2771,15 @@ namespace Canopy.Api.Client
 
         /// <returns>OK</returns>
         /// <exception cref="CanopyApiException">A server side error occurred.</exception>
-        public System.Threading.Tasks.Task<GetTenantStudyStatisticsQueryResult> GetTenantStudyStatisticsAsyncAsync(string tenantId, string startDate, string endDate)
+        public System.Threading.Tasks.Task<GetTenantStudyStatisticsQueryResult> GetTenantStudyStatisticsAsync(string tenantId, string startDate, string endDate)
         {
-            return GetTenantStudyStatisticsAsyncAsync(tenantId, startDate, endDate, System.Threading.CancellationToken.None);
+            return GetTenantStudyStatisticsAsync(tenantId, startDate, endDate, System.Threading.CancellationToken.None);
         }
 
         /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
         /// <returns>OK</returns>
         /// <exception cref="CanopyApiException">A server side error occurred.</exception>
-        public async System.Threading.Tasks.Task<GetTenantStudyStatisticsQueryResult> GetTenantStudyStatisticsAsyncAsync(string tenantId, string startDate, string endDate, System.Threading.CancellationToken cancellationToken)
+        public async System.Threading.Tasks.Task<GetTenantStudyStatisticsQueryResult> GetTenantStudyStatisticsAsync(string tenantId, string startDate, string endDate, System.Threading.CancellationToken cancellationToken)
         {
             if (tenantId == null)
                 throw new System.ArgumentNullException("tenantId");
@@ -2853,15 +2853,15 @@ namespace Canopy.Api.Client
 
         /// <returns>OK</returns>
         /// <exception cref="CanopyApiException">A server side error occurred.</exception>
-        public System.Threading.Tasks.Task<GetStudyTypesQueryResult> GetStudyTypesAsyncAsync(string tenantId)
+        public System.Threading.Tasks.Task<GetStudyTypesQueryResult> GetStudyTypesAsync(string tenantId)
         {
-            return GetStudyTypesAsyncAsync(tenantId, System.Threading.CancellationToken.None);
+            return GetStudyTypesAsync(tenantId, System.Threading.CancellationToken.None);
         }
 
         /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
         /// <returns>OK</returns>
         /// <exception cref="CanopyApiException">A server side error occurred.</exception>
-        public async System.Threading.Tasks.Task<GetStudyTypesQueryResult> GetStudyTypesAsyncAsync(string tenantId, System.Threading.CancellationToken cancellationToken)
+        public async System.Threading.Tasks.Task<GetStudyTypesQueryResult> GetStudyTypesAsync(string tenantId, System.Threading.CancellationToken cancellationToken)
         {
             var urlBuilder_ = new System.Text.StringBuilder();
             urlBuilder_.Append("studies/types?");
@@ -2930,15 +2930,15 @@ namespace Canopy.Api.Client
 
         /// <returns>OK</returns>
         /// <exception cref="CanopyApiException">A server side error occurred.</exception>
-        public System.Threading.Tasks.Task<SimTypeDefinition> GetSimTypeAsyncAsync(string simType, string tenantId)
+        public System.Threading.Tasks.Task<SimTypeDefinition> GetSimTypeAsync(string simType, string tenantId)
         {
-            return GetSimTypeAsyncAsync(simType, tenantId, System.Threading.CancellationToken.None);
+            return GetSimTypeAsync(simType, tenantId, System.Threading.CancellationToken.None);
         }
 
         /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
         /// <returns>OK</returns>
         /// <exception cref="CanopyApiException">A server side error occurred.</exception>
-        public async System.Threading.Tasks.Task<SimTypeDefinition> GetSimTypeAsyncAsync(string simType, string tenantId, System.Threading.CancellationToken cancellationToken)
+        public async System.Threading.Tasks.Task<SimTypeDefinition> GetSimTypeAsync(string simType, string tenantId, System.Threading.CancellationToken cancellationToken)
         {
             if (simType == null)
                 throw new System.ArgumentNullException("simType");
@@ -3011,15 +3011,15 @@ namespace Canopy.Api.Client
 
         /// <returns>OK</returns>
         /// <exception cref="CanopyApiException">A server side error occurred.</exception>
-        public System.Threading.Tasks.Task<StudyTypeDefinition> GetStudyTypeAsyncAsync(string studyType, string tenantId)
+        public System.Threading.Tasks.Task<StudyTypeDefinition> GetStudyTypeAsync(string studyType, string tenantId)
         {
-            return GetStudyTypeAsyncAsync(studyType, tenantId, System.Threading.CancellationToken.None);
+            return GetStudyTypeAsync(studyType, tenantId, System.Threading.CancellationToken.None);
         }
 
         /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
         /// <returns>OK</returns>
         /// <exception cref="CanopyApiException">A server side error occurred.</exception>
-        public async System.Threading.Tasks.Task<StudyTypeDefinition> GetStudyTypeAsyncAsync(string studyType, string tenantId, System.Threading.CancellationToken cancellationToken)
+        public async System.Threading.Tasks.Task<StudyTypeDefinition> GetStudyTypeAsync(string studyType, string tenantId, System.Threading.CancellationToken cancellationToken)
         {
             if (studyType == null)
                 throw new System.ArgumentNullException("studyType");
@@ -3092,15 +3092,15 @@ namespace Canopy.Api.Client
 
         /// <returns>OK</returns>
         /// <exception cref="CanopyApiException">A server side error occurred.</exception>
-        public System.Threading.Tasks.Task<GetStudiesQueryResult> GetStudiesAsyncAsync(string tenantId, string filter, bool? includeTransient)
+        public System.Threading.Tasks.Task<GetStudiesQueryResult> GetStudiesAsync(string tenantId, string filter, bool? includeTransient)
         {
-            return GetStudiesAsyncAsync(tenantId, filter, includeTransient, System.Threading.CancellationToken.None);
+            return GetStudiesAsync(tenantId, filter, includeTransient, System.Threading.CancellationToken.None);
         }
 
         /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
         /// <returns>OK</returns>
         /// <exception cref="CanopyApiException">A server side error occurred.</exception>
-        public async System.Threading.Tasks.Task<GetStudiesQueryResult> GetStudiesAsyncAsync(string tenantId, string filter, bool? includeTransient, System.Threading.CancellationToken cancellationToken)
+        public async System.Threading.Tasks.Task<GetStudiesQueryResult> GetStudiesAsync(string tenantId, string filter, bool? includeTransient, System.Threading.CancellationToken cancellationToken)
         {
             if (tenantId == null)
                 throw new System.ArgumentNullException("tenantId");
@@ -3174,15 +3174,15 @@ namespace Canopy.Api.Client
 
         /// <returns>OK</returns>
         /// <exception cref="CanopyApiException">A server side error occurred.</exception>
-        public System.Threading.Tasks.Task<GetTenantAccessInformationQueryResult> GetTenantAccessInformationAsyncAsync(string tenantId)
+        public System.Threading.Tasks.Task<GetTenantAccessInformationQueryResult> GetTenantAccessInformationAsync(string tenantId)
         {
-            return GetTenantAccessInformationAsyncAsync(tenantId, System.Threading.CancellationToken.None);
+            return GetTenantAccessInformationAsync(tenantId, System.Threading.CancellationToken.None);
         }
 
         /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
         /// <returns>OK</returns>
         /// <exception cref="CanopyApiException">A server side error occurred.</exception>
-        public async System.Threading.Tasks.Task<GetTenantAccessInformationQueryResult> GetTenantAccessInformationAsyncAsync(string tenantId, System.Threading.CancellationToken cancellationToken)
+        public async System.Threading.Tasks.Task<GetTenantAccessInformationQueryResult> GetTenantAccessInformationAsync(string tenantId, System.Threading.CancellationToken cancellationToken)
         {
             if (tenantId == null)
                 throw new System.ArgumentNullException("tenantId");
@@ -3253,15 +3253,15 @@ namespace Canopy.Api.Client
 
         /// <returns>OK</returns>
         /// <exception cref="CanopyApiException">A server side error occurred.</exception>
-        public System.Threading.Tasks.Task<PostStudyResult> PostStudyAsyncAsync(string tenantId, string userId, NewStudyData data)
+        public System.Threading.Tasks.Task<PostStudyResult> PostStudyAsync(string tenantId, string userId, NewStudyData data)
         {
-            return PostStudyAsyncAsync(tenantId, userId, data, System.Threading.CancellationToken.None);
+            return PostStudyAsync(tenantId, userId, data, System.Threading.CancellationToken.None);
         }
 
         /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
         /// <returns>OK</returns>
         /// <exception cref="CanopyApiException">A server side error occurred.</exception>
-        public async System.Threading.Tasks.Task<PostStudyResult> PostStudyAsyncAsync(string tenantId, string userId, NewStudyData data, System.Threading.CancellationToken cancellationToken)
+        public async System.Threading.Tasks.Task<PostStudyResult> PostStudyAsync(string tenantId, string userId, NewStudyData data, System.Threading.CancellationToken cancellationToken)
         {
             if (tenantId == null)
                 throw new System.ArgumentNullException("tenantId");
@@ -3339,15 +3339,15 @@ namespace Canopy.Api.Client
 
         /// <returns>OK</returns>
         /// <exception cref="CanopyApiException">A server side error occurred.</exception>
-        public System.Threading.Tasks.Task<GetStudyQueryResult> GetStudyAsyncAsync(string tenantId, string userId, string studyId)
+        public System.Threading.Tasks.Task<GetStudyQueryResult> GetStudyAsync(string tenantId, string userId, string studyId)
         {
-            return GetStudyAsyncAsync(tenantId, userId, studyId, System.Threading.CancellationToken.None);
+            return GetStudyAsync(tenantId, userId, studyId, System.Threading.CancellationToken.None);
         }
 
         /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
         /// <returns>OK</returns>
         /// <exception cref="CanopyApiException">A server side error occurred.</exception>
-        public async System.Threading.Tasks.Task<GetStudyQueryResult> GetStudyAsyncAsync(string tenantId, string userId, string studyId, System.Threading.CancellationToken cancellationToken)
+        public async System.Threading.Tasks.Task<GetStudyQueryResult> GetStudyAsync(string tenantId, string userId, string studyId, System.Threading.CancellationToken cancellationToken)
         {
             if (tenantId == null)
                 throw new System.ArgumentNullException("tenantId");
@@ -3426,15 +3426,15 @@ namespace Canopy.Api.Client
 
         /// <returns>No Content</returns>
         /// <exception cref="CanopyApiException">A server side error occurred.</exception>
-        public System.Threading.Tasks.Task PutStudyAsyncAsync(string tenantId, string userId, string studyId, UpdatedStudyData data)
+        public System.Threading.Tasks.Task PutStudyAsync(string tenantId, string userId, string studyId, UpdatedStudyData data)
         {
-            return PutStudyAsyncAsync(tenantId, userId, studyId, data, System.Threading.CancellationToken.None);
+            return PutStudyAsync(tenantId, userId, studyId, data, System.Threading.CancellationToken.None);
         }
 
         /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
         /// <returns>No Content</returns>
         /// <exception cref="CanopyApiException">A server side error occurred.</exception>
-        public async System.Threading.Tasks.Task PutStudyAsyncAsync(string tenantId, string userId, string studyId, UpdatedStudyData data, System.Threading.CancellationToken cancellationToken)
+        public async System.Threading.Tasks.Task PutStudyAsync(string tenantId, string userId, string studyId, UpdatedStudyData data, System.Threading.CancellationToken cancellationToken)
         {
             if (tenantId == null)
                 throw new System.ArgumentNullException("tenantId");
@@ -3503,15 +3503,15 @@ namespace Canopy.Api.Client
 
         /// <returns>No Content</returns>
         /// <exception cref="CanopyApiException">A server side error occurred.</exception>
-        public System.Threading.Tasks.Task DeleteStudyAsyncAsync(string tenantId, string userId, string studyId)
+        public System.Threading.Tasks.Task DeleteStudyAsync(string tenantId, string userId, string studyId)
         {
-            return DeleteStudyAsyncAsync(tenantId, userId, studyId, System.Threading.CancellationToken.None);
+            return DeleteStudyAsync(tenantId, userId, studyId, System.Threading.CancellationToken.None);
         }
 
         /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
         /// <returns>No Content</returns>
         /// <exception cref="CanopyApiException">A server side error occurred.</exception>
-        public async System.Threading.Tasks.Task DeleteStudyAsyncAsync(string tenantId, string userId, string studyId, System.Threading.CancellationToken cancellationToken)
+        public async System.Threading.Tasks.Task DeleteStudyAsync(string tenantId, string userId, string studyId, System.Threading.CancellationToken cancellationToken)
         {
             if (tenantId == null)
                 throw new System.ArgumentNullException("tenantId");
@@ -3577,15 +3577,15 @@ namespace Canopy.Api.Client
 
         /// <returns>OK</returns>
         /// <exception cref="CanopyApiException">A server side error occurred.</exception>
-        public System.Threading.Tasks.Task<object> GetStudyDownloadAsyncAsync(string tenantId, string userId, string studyId, string accessSignature, string expiry, string fileName, bool? full, bool? channelsAsCsv)
+        public System.Threading.Tasks.Task<object> GetStudyDownloadAsync(string tenantId, string userId, string studyId, string accessSignature, string expiry, string fileName, bool? full, bool? channelsAsCsv)
         {
-            return GetStudyDownloadAsyncAsync(tenantId, userId, studyId, accessSignature, expiry, fileName, full, channelsAsCsv, System.Threading.CancellationToken.None);
+            return GetStudyDownloadAsync(tenantId, userId, studyId, accessSignature, expiry, fileName, full, channelsAsCsv, System.Threading.CancellationToken.None);
         }
 
         /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
         /// <returns>OK</returns>
         /// <exception cref="CanopyApiException">A server side error occurred.</exception>
-        public async System.Threading.Tasks.Task<object> GetStudyDownloadAsyncAsync(string tenantId, string userId, string studyId, string accessSignature, string expiry, string fileName, bool? full, bool? channelsAsCsv, System.Threading.CancellationToken cancellationToken)
+        public async System.Threading.Tasks.Task<object> GetStudyDownloadAsync(string tenantId, string userId, string studyId, string accessSignature, string expiry, string fileName, bool? full, bool? channelsAsCsv, System.Threading.CancellationToken cancellationToken)
         {
             if (tenantId == null)
                 throw new System.ArgumentNullException("tenantId");
@@ -3676,15 +3676,15 @@ namespace Canopy.Api.Client
 
         /// <returns>OK</returns>
         /// <exception cref="CanopyApiException">A server side error occurred.</exception>
-        public System.Threading.Tasks.Task<object> GetStudyJobDownloadAsyncAsync(string tenantId, string userId, string studyId, string jobId, string accessSignature, string expiry, string fileName, bool? channelsAsCsv)
+        public System.Threading.Tasks.Task<object> GetStudyJobDownloadAsync(string tenantId, string userId, string studyId, string jobId, string accessSignature, string expiry, string fileName, bool? channelsAsCsv)
         {
-            return GetStudyJobDownloadAsyncAsync(tenantId, userId, studyId, jobId, accessSignature, expiry, fileName, channelsAsCsv, System.Threading.CancellationToken.None);
+            return GetStudyJobDownloadAsync(tenantId, userId, studyId, jobId, accessSignature, expiry, fileName, channelsAsCsv, System.Threading.CancellationToken.None);
         }
 
         /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
         /// <returns>OK</returns>
         /// <exception cref="CanopyApiException">A server side error occurred.</exception>
-        public async System.Threading.Tasks.Task<object> GetStudyJobDownloadAsyncAsync(string tenantId, string userId, string studyId, string jobId, string accessSignature, string expiry, string fileName, bool? channelsAsCsv, System.Threading.CancellationToken cancellationToken)
+        public async System.Threading.Tasks.Task<object> GetStudyJobDownloadAsync(string tenantId, string userId, string studyId, string jobId, string accessSignature, string expiry, string fileName, bool? channelsAsCsv, System.Threading.CancellationToken cancellationToken)
         {
             if (tenantId == null)
                 throw new System.ArgumentNullException("tenantId");
@@ -3778,15 +3778,15 @@ namespace Canopy.Api.Client
 
         /// <returns>OK</returns>
         /// <exception cref="CanopyApiException">A server side error occurred.</exception>
-        public System.Threading.Tasks.Task<GetStudyDownloadUrlQueryResult> GetStudyDownloadUrlAsyncAsync(string tenantId, string userId, string studyId)
+        public System.Threading.Tasks.Task<GetStudyDownloadUrlQueryResult> GetStudyDownloadUrlAsync(string tenantId, string userId, string studyId)
         {
-            return GetStudyDownloadUrlAsyncAsync(tenantId, userId, studyId, System.Threading.CancellationToken.None);
+            return GetStudyDownloadUrlAsync(tenantId, userId, studyId, System.Threading.CancellationToken.None);
         }
 
         /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
         /// <returns>OK</returns>
         /// <exception cref="CanopyApiException">A server side error occurred.</exception>
-        public async System.Threading.Tasks.Task<GetStudyDownloadUrlQueryResult> GetStudyDownloadUrlAsyncAsync(string tenantId, string userId, string studyId, System.Threading.CancellationToken cancellationToken)
+        public async System.Threading.Tasks.Task<GetStudyDownloadUrlQueryResult> GetStudyDownloadUrlAsync(string tenantId, string userId, string studyId, System.Threading.CancellationToken cancellationToken)
         {
             if (tenantId == null)
                 throw new System.ArgumentNullException("tenantId");
@@ -3865,15 +3865,15 @@ namespace Canopy.Api.Client
 
         /// <returns>OK</returns>
         /// <exception cref="CanopyApiException">A server side error occurred.</exception>
-        public System.Threading.Tasks.Task<GetStudyQueryResult> GetStudyMetadataAsyncAsync(string tenantId, string userId, string studyId)
+        public System.Threading.Tasks.Task<GetStudyQueryResult> GetStudyMetadataAsync(string tenantId, string userId, string studyId)
         {
-            return GetStudyMetadataAsyncAsync(tenantId, userId, studyId, System.Threading.CancellationToken.None);
+            return GetStudyMetadataAsync(tenantId, userId, studyId, System.Threading.CancellationToken.None);
         }
 
         /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
         /// <returns>OK</returns>
         /// <exception cref="CanopyApiException">A server side error occurred.</exception>
-        public async System.Threading.Tasks.Task<GetStudyQueryResult> GetStudyMetadataAsyncAsync(string tenantId, string userId, string studyId, System.Threading.CancellationToken cancellationToken)
+        public async System.Threading.Tasks.Task<GetStudyQueryResult> GetStudyMetadataAsync(string tenantId, string userId, string studyId, System.Threading.CancellationToken cancellationToken)
         {
             if (tenantId == null)
                 throw new System.ArgumentNullException("tenantId");
@@ -3952,15 +3952,15 @@ namespace Canopy.Api.Client
 
         /// <returns>OK</returns>
         /// <exception cref="CanopyApiException">A server side error occurred.</exception>
-        public System.Threading.Tasks.Task<GetStudyJobsQueryResult> GetStudyJobsAsyncAsync(string tenantId, string userId, string studyId, string filter)
+        public System.Threading.Tasks.Task<GetStudyJobsQueryResult> GetStudyJobsAsync(string tenantId, string userId, string studyId, string filter)
         {
-            return GetStudyJobsAsyncAsync(tenantId, userId, studyId, filter, System.Threading.CancellationToken.None);
+            return GetStudyJobsAsync(tenantId, userId, studyId, filter, System.Threading.CancellationToken.None);
         }
 
         /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
         /// <returns>OK</returns>
         /// <exception cref="CanopyApiException">A server side error occurred.</exception>
-        public async System.Threading.Tasks.Task<GetStudyJobsQueryResult> GetStudyJobsAsyncAsync(string tenantId, string userId, string studyId, string filter, System.Threading.CancellationToken cancellationToken)
+        public async System.Threading.Tasks.Task<GetStudyJobsQueryResult> GetStudyJobsAsync(string tenantId, string userId, string studyId, string filter, System.Threading.CancellationToken cancellationToken)
         {
             if (tenantId == null)
                 throw new System.ArgumentNullException("tenantId");
@@ -4041,15 +4041,15 @@ namespace Canopy.Api.Client
 
         /// <returns>OK</returns>
         /// <exception cref="CanopyApiException">A server side error occurred.</exception>
-        public System.Threading.Tasks.Task<GetStudyJobQueryResult> GetStudyJobAsyncAsync(string tenantId, string userId, string studyId, string jobId)
+        public System.Threading.Tasks.Task<GetStudyJobQueryResult> GetStudyJobAsync(string tenantId, string userId, string studyId, string jobId)
         {
-            return GetStudyJobAsyncAsync(tenantId, userId, studyId, jobId, System.Threading.CancellationToken.None);
+            return GetStudyJobAsync(tenantId, userId, studyId, jobId, System.Threading.CancellationToken.None);
         }
 
         /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
         /// <returns>OK</returns>
         /// <exception cref="CanopyApiException">A server side error occurred.</exception>
-        public async System.Threading.Tasks.Task<GetStudyJobQueryResult> GetStudyJobAsyncAsync(string tenantId, string userId, string studyId, string jobId, System.Threading.CancellationToken cancellationToken)
+        public async System.Threading.Tasks.Task<GetStudyJobQueryResult> GetStudyJobAsync(string tenantId, string userId, string studyId, string jobId, System.Threading.CancellationToken cancellationToken)
         {
             if (tenantId == null)
                 throw new System.ArgumentNullException("tenantId");
@@ -4132,15 +4132,15 @@ namespace Canopy.Api.Client
 
         /// <returns>OK</returns>
         /// <exception cref="CanopyApiException">A server side error occurred.</exception>
-        public System.Threading.Tasks.Task<GetStudyJobMetadataQueryResult> GetStudyJobMetadataAsyncAsync(string tenantId, string userId, string studyId, string jobId)
+        public System.Threading.Tasks.Task<GetStudyJobMetadataQueryResult> GetStudyJobMetadataAsync(string tenantId, string userId, string studyId, string jobId)
         {
-            return GetStudyJobMetadataAsyncAsync(tenantId, userId, studyId, jobId, System.Threading.CancellationToken.None);
+            return GetStudyJobMetadataAsync(tenantId, userId, studyId, jobId, System.Threading.CancellationToken.None);
         }
 
         /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
         /// <returns>OK</returns>
         /// <exception cref="CanopyApiException">A server side error occurred.</exception>
-        public async System.Threading.Tasks.Task<GetStudyJobMetadataQueryResult> GetStudyJobMetadataAsyncAsync(string tenantId, string userId, string studyId, string jobId, System.Threading.CancellationToken cancellationToken)
+        public async System.Threading.Tasks.Task<GetStudyJobMetadataQueryResult> GetStudyJobMetadataAsync(string tenantId, string userId, string studyId, string jobId, System.Threading.CancellationToken cancellationToken)
         {
             if (tenantId == null)
                 throw new System.ArgumentNullException("tenantId");
@@ -4228,30 +4228,30 @@ namespace Canopy.Api.Client
     {
         /// <returns>OK</returns>
         /// <exception cref="CanopyApiException">A server side error occurred.</exception>
-        System.Threading.Tasks.Task<GetAllSupportSessionsQueryResult> GetAllSupportSessionsAsyncAsync();
+        System.Threading.Tasks.Task<GetAllSupportSessionsQueryResult> GetAllSupportSessionsAsync();
 
         /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
         /// <returns>OK</returns>
         /// <exception cref="CanopyApiException">A server side error occurred.</exception>
-        System.Threading.Tasks.Task<GetAllSupportSessionsQueryResult> GetAllSupportSessionsAsyncAsync(System.Threading.CancellationToken cancellationToken);
+        System.Threading.Tasks.Task<GetAllSupportSessionsQueryResult> GetAllSupportSessionsAsync(System.Threading.CancellationToken cancellationToken);
 
         /// <returns>OK</returns>
         /// <exception cref="CanopyApiException">A server side error occurred.</exception>
-        System.Threading.Tasks.Task<GetSupportSessionQueryResult> GetSupportSessionAsyncAsync(string tenantId, string userId, string documentId);
+        System.Threading.Tasks.Task<GetSupportSessionQueryResult> GetSupportSessionAsync(string tenantId, string userId, string documentId);
 
         /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
         /// <returns>OK</returns>
         /// <exception cref="CanopyApiException">A server side error occurred.</exception>
-        System.Threading.Tasks.Task<GetSupportSessionQueryResult> GetSupportSessionAsyncAsync(string tenantId, string userId, string documentId, System.Threading.CancellationToken cancellationToken);
+        System.Threading.Tasks.Task<GetSupportSessionQueryResult> GetSupportSessionAsync(string tenantId, string userId, string documentId, System.Threading.CancellationToken cancellationToken);
 
         /// <returns>No Content</returns>
         /// <exception cref="CanopyApiException">A server side error occurred.</exception>
-        System.Threading.Tasks.Task PutSupportSessionAsyncAsync(string tenantId, string userId, string documentId, SupportSessionData data);
+        System.Threading.Tasks.Task PutSupportSessionAsync(string tenantId, string userId, string documentId, SupportSessionData data);
 
         /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
         /// <returns>No Content</returns>
         /// <exception cref="CanopyApiException">A server side error occurred.</exception>
-        System.Threading.Tasks.Task PutSupportSessionAsyncAsync(string tenantId, string userId, string documentId, SupportSessionData data, System.Threading.CancellationToken cancellationToken);
+        System.Threading.Tasks.Task PutSupportSessionAsync(string tenantId, string userId, string documentId, SupportSessionData data, System.Threading.CancellationToken cancellationToken);
 
     }
 
@@ -4268,15 +4268,15 @@ namespace Canopy.Api.Client
 
         /// <returns>OK</returns>
         /// <exception cref="CanopyApiException">A server side error occurred.</exception>
-        public System.Threading.Tasks.Task<GetAllSupportSessionsQueryResult> GetAllSupportSessionsAsyncAsync()
+        public System.Threading.Tasks.Task<GetAllSupportSessionsQueryResult> GetAllSupportSessionsAsync()
         {
-            return GetAllSupportSessionsAsyncAsync(System.Threading.CancellationToken.None);
+            return GetAllSupportSessionsAsync(System.Threading.CancellationToken.None);
         }
 
         /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
         /// <returns>OK</returns>
         /// <exception cref="CanopyApiException">A server side error occurred.</exception>
-        public async System.Threading.Tasks.Task<GetAllSupportSessionsQueryResult> GetAllSupportSessionsAsyncAsync(System.Threading.CancellationToken cancellationToken)
+        public async System.Threading.Tasks.Task<GetAllSupportSessionsQueryResult> GetAllSupportSessionsAsync(System.Threading.CancellationToken cancellationToken)
         {
             var urlBuilder_ = new System.Text.StringBuilder();
             urlBuilder_.Append("support-sessions/all");
@@ -4343,15 +4343,15 @@ namespace Canopy.Api.Client
 
         /// <returns>OK</returns>
         /// <exception cref="CanopyApiException">A server side error occurred.</exception>
-        public System.Threading.Tasks.Task<GetSupportSessionQueryResult> GetSupportSessionAsyncAsync(string tenantId, string userId, string documentId)
+        public System.Threading.Tasks.Task<GetSupportSessionQueryResult> GetSupportSessionAsync(string tenantId, string userId, string documentId)
         {
-            return GetSupportSessionAsyncAsync(tenantId, userId, documentId, System.Threading.CancellationToken.None);
+            return GetSupportSessionAsync(tenantId, userId, documentId, System.Threading.CancellationToken.None);
         }
 
         /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
         /// <returns>OK</returns>
         /// <exception cref="CanopyApiException">A server side error occurred.</exception>
-        public async System.Threading.Tasks.Task<GetSupportSessionQueryResult> GetSupportSessionAsyncAsync(string tenantId, string userId, string documentId, System.Threading.CancellationToken cancellationToken)
+        public async System.Threading.Tasks.Task<GetSupportSessionQueryResult> GetSupportSessionAsync(string tenantId, string userId, string documentId, System.Threading.CancellationToken cancellationToken)
         {
             if (tenantId == null)
                 throw new System.ArgumentNullException("tenantId");
@@ -4430,15 +4430,15 @@ namespace Canopy.Api.Client
 
         /// <returns>No Content</returns>
         /// <exception cref="CanopyApiException">A server side error occurred.</exception>
-        public System.Threading.Tasks.Task PutSupportSessionAsyncAsync(string tenantId, string userId, string documentId, SupportSessionData data)
+        public System.Threading.Tasks.Task PutSupportSessionAsync(string tenantId, string userId, string documentId, SupportSessionData data)
         {
-            return PutSupportSessionAsyncAsync(tenantId, userId, documentId, data, System.Threading.CancellationToken.None);
+            return PutSupportSessionAsync(tenantId, userId, documentId, data, System.Threading.CancellationToken.None);
         }
 
         /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
         /// <returns>No Content</returns>
         /// <exception cref="CanopyApiException">A server side error occurred.</exception>
-        public async System.Threading.Tasks.Task PutSupportSessionAsyncAsync(string tenantId, string userId, string documentId, SupportSessionData data, System.Threading.CancellationToken cancellationToken)
+        public async System.Threading.Tasks.Task PutSupportSessionAsync(string tenantId, string userId, string documentId, SupportSessionData data, System.Threading.CancellationToken cancellationToken)
         {
             if (tenantId == null)
                 throw new System.ArgumentNullException("tenantId");
@@ -4512,48 +4512,48 @@ namespace Canopy.Api.Client
     {
         /// <returns>OK</returns>
         /// <exception cref="CanopyApiException">A server side error occurred.</exception>
-        System.Threading.Tasks.Task<GetTenantsQueryResult> GetTenantsAsyncAsync();
+        System.Threading.Tasks.Task<GetTenantsQueryResult> GetTenantsAsync();
 
         /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
         /// <returns>OK</returns>
         /// <exception cref="CanopyApiException">A server side error occurred.</exception>
-        System.Threading.Tasks.Task<GetTenantsQueryResult> GetTenantsAsyncAsync(System.Threading.CancellationToken cancellationToken);
+        System.Threading.Tasks.Task<GetTenantsQueryResult> GetTenantsAsync(System.Threading.CancellationToken cancellationToken);
 
         /// <returns>No Content</returns>
         /// <exception cref="CanopyApiException">A server side error occurred.</exception>
-        System.Threading.Tasks.Task PostTenantAsyncAsync(NewTenantData data);
-
-        /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
-        /// <returns>No Content</returns>
-        /// <exception cref="CanopyApiException">A server side error occurred.</exception>
-        System.Threading.Tasks.Task PostTenantAsyncAsync(NewTenantData data, System.Threading.CancellationToken cancellationToken);
-
-        /// <returns>OK</returns>
-        /// <exception cref="CanopyApiException">A server side error occurred.</exception>
-        System.Threading.Tasks.Task<GetTenantQueryResult> GetTenantAsyncAsync(string tenantId);
-
-        /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
-        /// <returns>OK</returns>
-        /// <exception cref="CanopyApiException">A server side error occurred.</exception>
-        System.Threading.Tasks.Task<GetTenantQueryResult> GetTenantAsyncAsync(string tenantId, System.Threading.CancellationToken cancellationToken);
-
-        /// <returns>No Content</returns>
-        /// <exception cref="CanopyApiException">A server side error occurred.</exception>
-        System.Threading.Tasks.Task PutTenantAsyncAsync(string tenantId, UpdatedTenantData data);
+        System.Threading.Tasks.Task PostTenantAsync(NewTenantData data);
 
         /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
         /// <returns>No Content</returns>
         /// <exception cref="CanopyApiException">A server side error occurred.</exception>
-        System.Threading.Tasks.Task PutTenantAsyncAsync(string tenantId, UpdatedTenantData data, System.Threading.CancellationToken cancellationToken);
+        System.Threading.Tasks.Task PostTenantAsync(NewTenantData data, System.Threading.CancellationToken cancellationToken);
 
         /// <returns>OK</returns>
         /// <exception cref="CanopyApiException">A server side error occurred.</exception>
-        System.Threading.Tasks.Task<GetTenantUsersQueryResult> GetTenantUsersAsyncAsync(string tenantId);
+        System.Threading.Tasks.Task<GetTenantQueryResult> GetTenantAsync(string tenantId);
 
         /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
         /// <returns>OK</returns>
         /// <exception cref="CanopyApiException">A server side error occurred.</exception>
-        System.Threading.Tasks.Task<GetTenantUsersQueryResult> GetTenantUsersAsyncAsync(string tenantId, System.Threading.CancellationToken cancellationToken);
+        System.Threading.Tasks.Task<GetTenantQueryResult> GetTenantAsync(string tenantId, System.Threading.CancellationToken cancellationToken);
+
+        /// <returns>No Content</returns>
+        /// <exception cref="CanopyApiException">A server side error occurred.</exception>
+        System.Threading.Tasks.Task PutTenantAsync(string tenantId, UpdatedTenantData data);
+
+        /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
+        /// <returns>No Content</returns>
+        /// <exception cref="CanopyApiException">A server side error occurred.</exception>
+        System.Threading.Tasks.Task PutTenantAsync(string tenantId, UpdatedTenantData data, System.Threading.CancellationToken cancellationToken);
+
+        /// <returns>OK</returns>
+        /// <exception cref="CanopyApiException">A server side error occurred.</exception>
+        System.Threading.Tasks.Task<GetTenantUsersQueryResult> GetTenantUsersAsync(string tenantId);
+
+        /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
+        /// <returns>OK</returns>
+        /// <exception cref="CanopyApiException">A server side error occurred.</exception>
+        System.Threading.Tasks.Task<GetTenantUsersQueryResult> GetTenantUsersAsync(string tenantId, System.Threading.CancellationToken cancellationToken);
 
     }
 
@@ -4570,15 +4570,15 @@ namespace Canopy.Api.Client
 
         /// <returns>OK</returns>
         /// <exception cref="CanopyApiException">A server side error occurred.</exception>
-        public System.Threading.Tasks.Task<GetTenantsQueryResult> GetTenantsAsyncAsync()
+        public System.Threading.Tasks.Task<GetTenantsQueryResult> GetTenantsAsync()
         {
-            return GetTenantsAsyncAsync(System.Threading.CancellationToken.None);
+            return GetTenantsAsync(System.Threading.CancellationToken.None);
         }
 
         /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
         /// <returns>OK</returns>
         /// <exception cref="CanopyApiException">A server side error occurred.</exception>
-        public async System.Threading.Tasks.Task<GetTenantsQueryResult> GetTenantsAsyncAsync(System.Threading.CancellationToken cancellationToken)
+        public async System.Threading.Tasks.Task<GetTenantsQueryResult> GetTenantsAsync(System.Threading.CancellationToken cancellationToken)
         {
             var urlBuilder_ = new System.Text.StringBuilder();
             urlBuilder_.Append("tenants");
@@ -4645,15 +4645,15 @@ namespace Canopy.Api.Client
 
         /// <returns>No Content</returns>
         /// <exception cref="CanopyApiException">A server side error occurred.</exception>
-        public System.Threading.Tasks.Task PostTenantAsyncAsync(NewTenantData data)
+        public System.Threading.Tasks.Task PostTenantAsync(NewTenantData data)
         {
-            return PostTenantAsyncAsync(data, System.Threading.CancellationToken.None);
+            return PostTenantAsync(data, System.Threading.CancellationToken.None);
         }
 
         /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
         /// <returns>No Content</returns>
         /// <exception cref="CanopyApiException">A server side error occurred.</exception>
-        public async System.Threading.Tasks.Task PostTenantAsyncAsync(NewTenantData data, System.Threading.CancellationToken cancellationToken)
+        public async System.Threading.Tasks.Task PostTenantAsync(NewTenantData data, System.Threading.CancellationToken cancellationToken)
         {
             var urlBuilder_ = new System.Text.StringBuilder();
             urlBuilder_.Append("tenants");
@@ -4710,15 +4710,15 @@ namespace Canopy.Api.Client
 
         /// <returns>OK</returns>
         /// <exception cref="CanopyApiException">A server side error occurred.</exception>
-        public System.Threading.Tasks.Task<GetTenantQueryResult> GetTenantAsyncAsync(string tenantId)
+        public System.Threading.Tasks.Task<GetTenantQueryResult> GetTenantAsync(string tenantId)
         {
-            return GetTenantAsyncAsync(tenantId, System.Threading.CancellationToken.None);
+            return GetTenantAsync(tenantId, System.Threading.CancellationToken.None);
         }
 
         /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
         /// <returns>OK</returns>
         /// <exception cref="CanopyApiException">A server side error occurred.</exception>
-        public async System.Threading.Tasks.Task<GetTenantQueryResult> GetTenantAsyncAsync(string tenantId, System.Threading.CancellationToken cancellationToken)
+        public async System.Threading.Tasks.Task<GetTenantQueryResult> GetTenantAsync(string tenantId, System.Threading.CancellationToken cancellationToken)
         {
             if (tenantId == null)
                 throw new System.ArgumentNullException("tenantId");
@@ -4789,15 +4789,15 @@ namespace Canopy.Api.Client
 
         /// <returns>No Content</returns>
         /// <exception cref="CanopyApiException">A server side error occurred.</exception>
-        public System.Threading.Tasks.Task PutTenantAsyncAsync(string tenantId, UpdatedTenantData data)
+        public System.Threading.Tasks.Task PutTenantAsync(string tenantId, UpdatedTenantData data)
         {
-            return PutTenantAsyncAsync(tenantId, data, System.Threading.CancellationToken.None);
+            return PutTenantAsync(tenantId, data, System.Threading.CancellationToken.None);
         }
 
         /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
         /// <returns>No Content</returns>
         /// <exception cref="CanopyApiException">A server side error occurred.</exception>
-        public async System.Threading.Tasks.Task PutTenantAsyncAsync(string tenantId, UpdatedTenantData data, System.Threading.CancellationToken cancellationToken)
+        public async System.Threading.Tasks.Task PutTenantAsync(string tenantId, UpdatedTenantData data, System.Threading.CancellationToken cancellationToken)
         {
             if (tenantId == null)
                 throw new System.ArgumentNullException("tenantId");
@@ -4858,15 +4858,15 @@ namespace Canopy.Api.Client
 
         /// <returns>OK</returns>
         /// <exception cref="CanopyApiException">A server side error occurred.</exception>
-        public System.Threading.Tasks.Task<GetTenantUsersQueryResult> GetTenantUsersAsyncAsync(string tenantId)
+        public System.Threading.Tasks.Task<GetTenantUsersQueryResult> GetTenantUsersAsync(string tenantId)
         {
-            return GetTenantUsersAsyncAsync(tenantId, System.Threading.CancellationToken.None);
+            return GetTenantUsersAsync(tenantId, System.Threading.CancellationToken.None);
         }
 
         /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
         /// <returns>OK</returns>
         /// <exception cref="CanopyApiException">A server side error occurred.</exception>
-        public async System.Threading.Tasks.Task<GetTenantUsersQueryResult> GetTenantUsersAsyncAsync(string tenantId, System.Threading.CancellationToken cancellationToken)
+        public async System.Threading.Tasks.Task<GetTenantUsersQueryResult> GetTenantUsersAsync(string tenantId, System.Threading.CancellationToken cancellationToken)
         {
             if (tenantId == null)
                 throw new System.ArgumentNullException("tenantId");
@@ -4942,39 +4942,39 @@ namespace Canopy.Api.Client
     {
         /// <returns>OK</returns>
         /// <exception cref="CanopyApiException">A server side error occurred.</exception>
-        System.Threading.Tasks.Task<GetTenantSettingsQueryResult> GetTenantSettingsAsyncAsync(string tenantId);
+        System.Threading.Tasks.Task<GetTenantSettingsQueryResult> GetTenantSettingsAsync(string tenantId);
 
         /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
         /// <returns>OK</returns>
         /// <exception cref="CanopyApiException">A server side error occurred.</exception>
-        System.Threading.Tasks.Task<GetTenantSettingsQueryResult> GetTenantSettingsAsyncAsync(string tenantId, System.Threading.CancellationToken cancellationToken);
+        System.Threading.Tasks.Task<GetTenantSettingsQueryResult> GetTenantSettingsAsync(string tenantId, System.Threading.CancellationToken cancellationToken);
 
         /// <returns>OK</returns>
         /// <exception cref="CanopyApiException">A server side error occurred.</exception>
-        System.Threading.Tasks.Task<string> PutTenantSettingsAsyncAsync(string tenantId, UpdatedTenantSettings data);
-
-        /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
-        /// <returns>OK</returns>
-        /// <exception cref="CanopyApiException">A server side error occurred.</exception>
-        System.Threading.Tasks.Task<string> PutTenantSettingsAsyncAsync(string tenantId, UpdatedTenantSettings data, System.Threading.CancellationToken cancellationToken);
-
-        /// <returns>OK</returns>
-        /// <exception cref="CanopyApiException">A server side error occurred.</exception>
-        System.Threading.Tasks.Task<GetAdminTenantSettingsQueryResult> GetAdminTenantSettingsAsyncAsync(string tenantId);
+        System.Threading.Tasks.Task<string> PutTenantSettingsAsync(string tenantId, UpdatedTenantSettings data);
 
         /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
         /// <returns>OK</returns>
         /// <exception cref="CanopyApiException">A server side error occurred.</exception>
-        System.Threading.Tasks.Task<GetAdminTenantSettingsQueryResult> GetAdminTenantSettingsAsyncAsync(string tenantId, System.Threading.CancellationToken cancellationToken);
+        System.Threading.Tasks.Task<string> PutTenantSettingsAsync(string tenantId, UpdatedTenantSettings data, System.Threading.CancellationToken cancellationToken);
 
         /// <returns>OK</returns>
         /// <exception cref="CanopyApiException">A server side error occurred.</exception>
-        System.Threading.Tasks.Task<string> PutAdminTenantSettingsAsyncAsync(string tenantId, UpdatedAdminTenantSettings data);
+        System.Threading.Tasks.Task<GetAdminTenantSettingsQueryResult> GetAdminTenantSettingsAsync(string tenantId);
 
         /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
         /// <returns>OK</returns>
         /// <exception cref="CanopyApiException">A server side error occurred.</exception>
-        System.Threading.Tasks.Task<string> PutAdminTenantSettingsAsyncAsync(string tenantId, UpdatedAdminTenantSettings data, System.Threading.CancellationToken cancellationToken);
+        System.Threading.Tasks.Task<GetAdminTenantSettingsQueryResult> GetAdminTenantSettingsAsync(string tenantId, System.Threading.CancellationToken cancellationToken);
+
+        /// <returns>OK</returns>
+        /// <exception cref="CanopyApiException">A server side error occurred.</exception>
+        System.Threading.Tasks.Task<string> PutAdminTenantSettingsAsync(string tenantId, UpdatedAdminTenantSettings data);
+
+        /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
+        /// <returns>OK</returns>
+        /// <exception cref="CanopyApiException">A server side error occurred.</exception>
+        System.Threading.Tasks.Task<string> PutAdminTenantSettingsAsync(string tenantId, UpdatedAdminTenantSettings data, System.Threading.CancellationToken cancellationToken);
 
     }
 
@@ -4991,15 +4991,15 @@ namespace Canopy.Api.Client
 
         /// <returns>OK</returns>
         /// <exception cref="CanopyApiException">A server side error occurred.</exception>
-        public System.Threading.Tasks.Task<GetTenantSettingsQueryResult> GetTenantSettingsAsyncAsync(string tenantId)
+        public System.Threading.Tasks.Task<GetTenantSettingsQueryResult> GetTenantSettingsAsync(string tenantId)
         {
-            return GetTenantSettingsAsyncAsync(tenantId, System.Threading.CancellationToken.None);
+            return GetTenantSettingsAsync(tenantId, System.Threading.CancellationToken.None);
         }
 
         /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
         /// <returns>OK</returns>
         /// <exception cref="CanopyApiException">A server side error occurred.</exception>
-        public async System.Threading.Tasks.Task<GetTenantSettingsQueryResult> GetTenantSettingsAsyncAsync(string tenantId, System.Threading.CancellationToken cancellationToken)
+        public async System.Threading.Tasks.Task<GetTenantSettingsQueryResult> GetTenantSettingsAsync(string tenantId, System.Threading.CancellationToken cancellationToken)
         {
             if (tenantId == null)
                 throw new System.ArgumentNullException("tenantId");
@@ -5070,15 +5070,15 @@ namespace Canopy.Api.Client
 
         /// <returns>OK</returns>
         /// <exception cref="CanopyApiException">A server side error occurred.</exception>
-        public System.Threading.Tasks.Task<string> PutTenantSettingsAsyncAsync(string tenantId, UpdatedTenantSettings data)
+        public System.Threading.Tasks.Task<string> PutTenantSettingsAsync(string tenantId, UpdatedTenantSettings data)
         {
-            return PutTenantSettingsAsyncAsync(tenantId, data, System.Threading.CancellationToken.None);
+            return PutTenantSettingsAsync(tenantId, data, System.Threading.CancellationToken.None);
         }
 
         /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
         /// <returns>OK</returns>
         /// <exception cref="CanopyApiException">A server side error occurred.</exception>
-        public async System.Threading.Tasks.Task<string> PutTenantSettingsAsyncAsync(string tenantId, UpdatedTenantSettings data, System.Threading.CancellationToken cancellationToken)
+        public async System.Threading.Tasks.Task<string> PutTenantSettingsAsync(string tenantId, UpdatedTenantSettings data, System.Threading.CancellationToken cancellationToken)
         {
             if (tenantId == null)
                 throw new System.ArgumentNullException("tenantId");
@@ -5152,15 +5152,15 @@ namespace Canopy.Api.Client
 
         /// <returns>OK</returns>
         /// <exception cref="CanopyApiException">A server side error occurred.</exception>
-        public System.Threading.Tasks.Task<GetAdminTenantSettingsQueryResult> GetAdminTenantSettingsAsyncAsync(string tenantId)
+        public System.Threading.Tasks.Task<GetAdminTenantSettingsQueryResult> GetAdminTenantSettingsAsync(string tenantId)
         {
-            return GetAdminTenantSettingsAsyncAsync(tenantId, System.Threading.CancellationToken.None);
+            return GetAdminTenantSettingsAsync(tenantId, System.Threading.CancellationToken.None);
         }
 
         /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
         /// <returns>OK</returns>
         /// <exception cref="CanopyApiException">A server side error occurred.</exception>
-        public async System.Threading.Tasks.Task<GetAdminTenantSettingsQueryResult> GetAdminTenantSettingsAsyncAsync(string tenantId, System.Threading.CancellationToken cancellationToken)
+        public async System.Threading.Tasks.Task<GetAdminTenantSettingsQueryResult> GetAdminTenantSettingsAsync(string tenantId, System.Threading.CancellationToken cancellationToken)
         {
             if (tenantId == null)
                 throw new System.ArgumentNullException("tenantId");
@@ -5231,15 +5231,15 @@ namespace Canopy.Api.Client
 
         /// <returns>OK</returns>
         /// <exception cref="CanopyApiException">A server side error occurred.</exception>
-        public System.Threading.Tasks.Task<string> PutAdminTenantSettingsAsyncAsync(string tenantId, UpdatedAdminTenantSettings data)
+        public System.Threading.Tasks.Task<string> PutAdminTenantSettingsAsync(string tenantId, UpdatedAdminTenantSettings data)
         {
-            return PutAdminTenantSettingsAsyncAsync(tenantId, data, System.Threading.CancellationToken.None);
+            return PutAdminTenantSettingsAsync(tenantId, data, System.Threading.CancellationToken.None);
         }
 
         /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
         /// <returns>OK</returns>
         /// <exception cref="CanopyApiException">A server side error occurred.</exception>
-        public async System.Threading.Tasks.Task<string> PutAdminTenantSettingsAsyncAsync(string tenantId, UpdatedAdminTenantSettings data, System.Threading.CancellationToken cancellationToken)
+        public async System.Threading.Tasks.Task<string> PutAdminTenantSettingsAsync(string tenantId, UpdatedAdminTenantSettings data, System.Threading.CancellationToken cancellationToken)
         {
             if (tenantId == null)
                 throw new System.ArgumentNullException("tenantId");
@@ -5318,21 +5318,21 @@ namespace Canopy.Api.Client
     {
         /// <returns>OK</returns>
         /// <exception cref="CanopyApiException">A server side error occurred.</exception>
-        System.Threading.Tasks.Task<GetUserSettingsQueryResult> GetUserSettingsAsyncAsync(string tenantId, string userId);
+        System.Threading.Tasks.Task<GetUserSettingsQueryResult> GetUserSettingsAsync(string tenantId, string userId);
 
         /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
         /// <returns>OK</returns>
         /// <exception cref="CanopyApiException">A server side error occurred.</exception>
-        System.Threading.Tasks.Task<GetUserSettingsQueryResult> GetUserSettingsAsyncAsync(string tenantId, string userId, System.Threading.CancellationToken cancellationToken);
+        System.Threading.Tasks.Task<GetUserSettingsQueryResult> GetUserSettingsAsync(string tenantId, string userId, System.Threading.CancellationToken cancellationToken);
 
         /// <returns>OK</returns>
         /// <exception cref="CanopyApiException">A server side error occurred.</exception>
-        System.Threading.Tasks.Task<string> PutUserSettingsAsyncAsync(string tenantId, string userId, UpdatedUserSettings data);
+        System.Threading.Tasks.Task<string> PutUserSettingsAsync(string tenantId, string userId, UpdatedUserSettings data);
 
         /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
         /// <returns>OK</returns>
         /// <exception cref="CanopyApiException">A server side error occurred.</exception>
-        System.Threading.Tasks.Task<string> PutUserSettingsAsyncAsync(string tenantId, string userId, UpdatedUserSettings data, System.Threading.CancellationToken cancellationToken);
+        System.Threading.Tasks.Task<string> PutUserSettingsAsync(string tenantId, string userId, UpdatedUserSettings data, System.Threading.CancellationToken cancellationToken);
 
     }
 
@@ -5349,15 +5349,15 @@ namespace Canopy.Api.Client
 
         /// <returns>OK</returns>
         /// <exception cref="CanopyApiException">A server side error occurred.</exception>
-        public System.Threading.Tasks.Task<GetUserSettingsQueryResult> GetUserSettingsAsyncAsync(string tenantId, string userId)
+        public System.Threading.Tasks.Task<GetUserSettingsQueryResult> GetUserSettingsAsync(string tenantId, string userId)
         {
-            return GetUserSettingsAsyncAsync(tenantId, userId, System.Threading.CancellationToken.None);
+            return GetUserSettingsAsync(tenantId, userId, System.Threading.CancellationToken.None);
         }
 
         /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
         /// <returns>OK</returns>
         /// <exception cref="CanopyApiException">A server side error occurred.</exception>
-        public async System.Threading.Tasks.Task<GetUserSettingsQueryResult> GetUserSettingsAsyncAsync(string tenantId, string userId, System.Threading.CancellationToken cancellationToken)
+        public async System.Threading.Tasks.Task<GetUserSettingsQueryResult> GetUserSettingsAsync(string tenantId, string userId, System.Threading.CancellationToken cancellationToken)
         {
             if (tenantId == null)
                 throw new System.ArgumentNullException("tenantId");
@@ -5432,15 +5432,15 @@ namespace Canopy.Api.Client
 
         /// <returns>OK</returns>
         /// <exception cref="CanopyApiException">A server side error occurred.</exception>
-        public System.Threading.Tasks.Task<string> PutUserSettingsAsyncAsync(string tenantId, string userId, UpdatedUserSettings data)
+        public System.Threading.Tasks.Task<string> PutUserSettingsAsync(string tenantId, string userId, UpdatedUserSettings data)
         {
-            return PutUserSettingsAsyncAsync(tenantId, userId, data, System.Threading.CancellationToken.None);
+            return PutUserSettingsAsync(tenantId, userId, data, System.Threading.CancellationToken.None);
         }
 
         /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
         /// <returns>OK</returns>
         /// <exception cref="CanopyApiException">A server side error occurred.</exception>
-        public async System.Threading.Tasks.Task<string> PutUserSettingsAsyncAsync(string tenantId, string userId, UpdatedUserSettings data, System.Threading.CancellationToken cancellationToken)
+        public async System.Threading.Tasks.Task<string> PutUserSettingsAsync(string tenantId, string userId, UpdatedUserSettings data, System.Threading.CancellationToken cancellationToken)
         {
             if (tenantId == null)
                 throw new System.ArgumentNullException("tenantId");
