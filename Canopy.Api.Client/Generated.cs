@@ -2518,21 +2518,21 @@ namespace Canopy.Api.Client
     {
         /// <returns>OK</returns>
         /// <exception cref="CanopyApiException">A server side error occurred.</exception>
-        System.Threading.Tasks.Task<GetAllTenantsStudyStatisticsQueryResult> GetAllTenantsStudyStatisticsAsyncAsync();
+        System.Threading.Tasks.Task<GetAllTenantsStudyStatisticsQueryResult> GetAllTenantsStudyStatisticsAsyncAsync(string startDate, string endDate);
 
         /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
         /// <returns>OK</returns>
         /// <exception cref="CanopyApiException">A server side error occurred.</exception>
-        System.Threading.Tasks.Task<GetAllTenantsStudyStatisticsQueryResult> GetAllTenantsStudyStatisticsAsyncAsync(System.Threading.CancellationToken cancellationToken);
+        System.Threading.Tasks.Task<GetAllTenantsStudyStatisticsQueryResult> GetAllTenantsStudyStatisticsAsyncAsync(string startDate, string endDate, System.Threading.CancellationToken cancellationToken);
 
         /// <returns>OK</returns>
         /// <exception cref="CanopyApiException">A server side error occurred.</exception>
-        System.Threading.Tasks.Task<GetTenantStudyStatisticsQueryResult> GetTenantStudyStatisticsAsyncAsync(string tenantId);
+        System.Threading.Tasks.Task<GetTenantStudyStatisticsQueryResult> GetTenantStudyStatisticsAsyncAsync(string tenantId, string startDate, string endDate);
 
         /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
         /// <returns>OK</returns>
         /// <exception cref="CanopyApiException">A server side error occurred.</exception>
-        System.Threading.Tasks.Task<GetTenantStudyStatisticsQueryResult> GetTenantStudyStatisticsAsyncAsync(string tenantId, System.Threading.CancellationToken cancellationToken);
+        System.Threading.Tasks.Task<GetTenantStudyStatisticsQueryResult> GetTenantStudyStatisticsAsyncAsync(string tenantId, string startDate, string endDate, System.Threading.CancellationToken cancellationToken);
 
         /// <returns>OK</returns>
         /// <exception cref="CanopyApiException">A server side error occurred.</exception>
@@ -2693,18 +2693,21 @@ namespace Canopy.Api.Client
 
         /// <returns>OK</returns>
         /// <exception cref="CanopyApiException">A server side error occurred.</exception>
-        public System.Threading.Tasks.Task<GetAllTenantsStudyStatisticsQueryResult> GetAllTenantsStudyStatisticsAsyncAsync()
+        public System.Threading.Tasks.Task<GetAllTenantsStudyStatisticsQueryResult> GetAllTenantsStudyStatisticsAsyncAsync(string startDate, string endDate)
         {
-            return GetAllTenantsStudyStatisticsAsyncAsync(System.Threading.CancellationToken.None);
+            return GetAllTenantsStudyStatisticsAsyncAsync(startDate, endDate, System.Threading.CancellationToken.None);
         }
 
         /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
         /// <returns>OK</returns>
         /// <exception cref="CanopyApiException">A server side error occurred.</exception>
-        public async System.Threading.Tasks.Task<GetAllTenantsStudyStatisticsQueryResult> GetAllTenantsStudyStatisticsAsyncAsync(System.Threading.CancellationToken cancellationToken)
+        public async System.Threading.Tasks.Task<GetAllTenantsStudyStatisticsQueryResult> GetAllTenantsStudyStatisticsAsyncAsync(string startDate, string endDate, System.Threading.CancellationToken cancellationToken)
         {
             var urlBuilder_ = new System.Text.StringBuilder();
-            urlBuilder_.Append("studies/statistics");
+            urlBuilder_.Append("studies/statistics?");
+            if (startDate != null) urlBuilder_.Append("startDate=").Append(System.Uri.EscapeDataString(startDate.ToString())).Append("&");
+            if (endDate != null) urlBuilder_.Append("endDate=").Append(System.Uri.EscapeDataString(endDate.ToString())).Append("&");
+            urlBuilder_.Length--;
 
             var client_ = await CreateHttpClientAsync(cancellationToken).ConfigureAwait(false);
             try
@@ -2768,22 +2771,25 @@ namespace Canopy.Api.Client
 
         /// <returns>OK</returns>
         /// <exception cref="CanopyApiException">A server side error occurred.</exception>
-        public System.Threading.Tasks.Task<GetTenantStudyStatisticsQueryResult> GetTenantStudyStatisticsAsyncAsync(string tenantId)
+        public System.Threading.Tasks.Task<GetTenantStudyStatisticsQueryResult> GetTenantStudyStatisticsAsyncAsync(string tenantId, string startDate, string endDate)
         {
-            return GetTenantStudyStatisticsAsyncAsync(tenantId, System.Threading.CancellationToken.None);
+            return GetTenantStudyStatisticsAsyncAsync(tenantId, startDate, endDate, System.Threading.CancellationToken.None);
         }
 
         /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
         /// <returns>OK</returns>
         /// <exception cref="CanopyApiException">A server side error occurred.</exception>
-        public async System.Threading.Tasks.Task<GetTenantStudyStatisticsQueryResult> GetTenantStudyStatisticsAsyncAsync(string tenantId, System.Threading.CancellationToken cancellationToken)
+        public async System.Threading.Tasks.Task<GetTenantStudyStatisticsQueryResult> GetTenantStudyStatisticsAsyncAsync(string tenantId, string startDate, string endDate, System.Threading.CancellationToken cancellationToken)
         {
             if (tenantId == null)
                 throw new System.ArgumentNullException("tenantId");
 
             var urlBuilder_ = new System.Text.StringBuilder();
-            urlBuilder_.Append("studies/statistics/{tenantId}");
+            urlBuilder_.Append("studies/statistics/{tenantId}?");
             urlBuilder_.Replace("{tenantId}", System.Uri.EscapeDataString(tenantId.ToString()));
+            if (startDate != null) urlBuilder_.Append("startDate=").Append(System.Uri.EscapeDataString(startDate.ToString())).Append("&");
+            if (endDate != null) urlBuilder_.Append("endDate=").Append(System.Uri.EscapeDataString(endDate.ToString())).Append("&");
+            urlBuilder_.Length--;
 
             var client_ = await CreateHttpClientAsync(cancellationToken).ConfigureAwait(false);
             try
@@ -5724,12 +5730,12 @@ namespace Canopy.Api.Client
     [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "8.33.6323.36213")]
     public partial class UpgradeConfigData : System.ComponentModel.INotifyPropertyChanged
     {
-        private DocumentSubType _configType;
+        private string _configType;
         private object _config;
         private string _simVersion;
 
         [Newtonsoft.Json.JsonProperty("configType", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
-        public DocumentSubType ConfigType
+        public string ConfigType
         {
             get { return _configType; }
             set
@@ -5780,62 +5786,6 @@ namespace Canopy.Api.Client
         public static UpgradeConfigData FromJson(string data)
         {
             return Newtonsoft.Json.JsonConvert.DeserializeObject<UpgradeConfigData>(data);
-        }
-
-        protected virtual void RaisePropertyChanged([System.Runtime.CompilerServices.CallerMemberName] string propertyName = null)
-        {
-            var handler = PropertyChanged;
-            if (handler != null)
-                handler(this, new System.ComponentModel.PropertyChangedEventArgs(propertyName));
-        }
-    }
-
-    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "8.33.6323.36213")]
-    public partial class DocumentSubType : System.ComponentModel.INotifyPropertyChanged
-    {
-        private DocumentSubTypeRoot? _root;
-        private DocumentSubTypeModifier? _modifier;
-
-        [Newtonsoft.Json.JsonProperty("root", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
-        [Newtonsoft.Json.JsonConverter(typeof(Newtonsoft.Json.Converters.StringEnumConverter))]
-        public DocumentSubTypeRoot? Root
-        {
-            get { return _root; }
-            set
-            {
-                if (_root != value)
-                {
-                    _root = value;
-                    RaisePropertyChanged();
-                }
-            }
-        }
-
-        [Newtonsoft.Json.JsonProperty("modifier", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
-        [Newtonsoft.Json.JsonConverter(typeof(Newtonsoft.Json.Converters.StringEnumConverter))]
-        public DocumentSubTypeModifier? Modifier
-        {
-            get { return _modifier; }
-            set
-            {
-                if (_modifier != value)
-                {
-                    _modifier = value;
-                    RaisePropertyChanged();
-                }
-            }
-        }
-
-        public event System.ComponentModel.PropertyChangedEventHandler PropertyChanged;
-
-        public string ToJson()
-        {
-            return Newtonsoft.Json.JsonConvert.SerializeObject(this);
-        }
-
-        public static DocumentSubType FromJson(string data)
-        {
-            return Newtonsoft.Json.JsonConvert.DeserializeObject<DocumentSubType>(data);
         }
 
         protected virtual void RaisePropertyChanged([System.Runtime.CompilerServices.CallerMemberName] string propertyName = null)
@@ -6139,7 +6089,7 @@ namespace Canopy.Api.Client
         private string _userId;
         private string _name;
         private CanopyDocumentType? _type;
-        private DocumentSubType _subType;
+        private string _subType;
         private string _simVersion;
         private System.DateTime? _creationDate;
         private System.DateTime? _modifiedDate;
@@ -6219,7 +6169,7 @@ namespace Canopy.Api.Client
         }
 
         [Newtonsoft.Json.JsonProperty("subType", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
-        public DocumentSubType SubType
+        public string SubType
         {
             get { return _subType; }
             set
@@ -6907,7 +6857,7 @@ namespace Canopy.Api.Client
     public partial class NewConfigData : System.ComponentModel.INotifyPropertyChanged
     {
         private string _name;
-        private DocumentSubType _configType;
+        private string _configType;
         private System.Collections.Generic.List<DocumentCustomPropertyData> _properties;
         private object _config;
         private string _simVersion;
@@ -6927,7 +6877,7 @@ namespace Canopy.Api.Client
         }
 
         [Newtonsoft.Json.JsonProperty("configType", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
-        public DocumentSubType ConfigType
+        public string ConfigType
         {
             get { return _configType; }
             set
@@ -7060,7 +7010,7 @@ namespace Canopy.Api.Client
     public partial class UpdatedConfigData : System.ComponentModel.INotifyPropertyChanged
     {
         private string _name;
-        private DocumentSubType _configType;
+        private string _configType;
         private System.Collections.Generic.List<DocumentCustomPropertyData> _properties;
         private object _config;
         private string _simVersion;
@@ -7080,7 +7030,7 @@ namespace Canopy.Api.Client
         }
 
         [Newtonsoft.Json.JsonProperty("configType", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
-        public DocumentSubType ConfigType
+        public string ConfigType
         {
             get { return _configType; }
             set
@@ -7770,6 +7720,8 @@ namespace Canopy.Api.Client
         private GetPoolStatusQueryResultAllocationState? _allocationState;
         private int? _currentDedicated;
         private int? _targetDedicated;
+        private int? _currentLowPriority;
+        private int? _targetLowPriority;
         private int? _maximumTasksPerNode;
         private int? _schedulableComputeNodes;
         private int? _runningTasks;
@@ -7842,6 +7794,34 @@ namespace Canopy.Api.Client
                 if (_targetDedicated != value)
                 {
                     _targetDedicated = value;
+                    RaisePropertyChanged();
+                }
+            }
+        }
+
+        [Newtonsoft.Json.JsonProperty("currentLowPriority", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public int? CurrentLowPriority
+        {
+            get { return _currentLowPriority; }
+            set
+            {
+                if (_currentLowPriority != value)
+                {
+                    _currentLowPriority = value;
+                    RaisePropertyChanged();
+                }
+            }
+        }
+
+        [Newtonsoft.Json.JsonProperty("targetLowPriority", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public int? TargetLowPriority
+        {
+            get { return _targetLowPriority; }
+            set
+            {
+                if (_targetLowPriority != value)
+                {
+                    _targetLowPriority = value;
                     RaisePropertyChanged();
                 }
             }
@@ -7929,6 +7909,7 @@ namespace Canopy.Api.Client
         private string _computeNodeId;
         private ComputeNodeResultState? _state;
         private int? _runningTasks;
+        private bool? _isDedicated;
 
         [Newtonsoft.Json.JsonProperty("computeNodeId", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public string ComputeNodeId
@@ -7968,6 +7949,20 @@ namespace Canopy.Api.Client
                 if (_runningTasks != value)
                 {
                     _runningTasks = value;
+                    RaisePropertyChanged();
+                }
+            }
+        }
+
+        [Newtonsoft.Json.JsonProperty("isDedicated", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public bool? IsDedicated
+        {
+            get { return _isDedicated; }
+            set
+            {
+                if (_isDedicated != value)
+                {
+                    _isDedicated = value;
                     RaisePropertyChanged();
                 }
             }
@@ -8038,6 +8033,8 @@ namespace Canopy.Api.Client
         private string _poolId;
         private int? _currentDedicated;
         private int? _targetDedicated;
+        private int? _currentLowPriority;
+        private int? _targetLowPriority;
         private System.Collections.Generic.List<GetPoolsItemInterval> _intervals;
 
         [Newtonsoft.Json.JsonProperty("poolId", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
@@ -8077,6 +8074,34 @@ namespace Canopy.Api.Client
                 if (_targetDedicated != value)
                 {
                     _targetDedicated = value;
+                    RaisePropertyChanged();
+                }
+            }
+        }
+
+        [Newtonsoft.Json.JsonProperty("currentLowPriority", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public int? CurrentLowPriority
+        {
+            get { return _currentLowPriority; }
+            set
+            {
+                if (_currentLowPriority != value)
+                {
+                    _currentLowPriority = value;
+                    RaisePropertyChanged();
+                }
+            }
+        }
+
+        [Newtonsoft.Json.JsonProperty("targetLowPriority", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public int? TargetLowPriority
+        {
+            get { return _targetLowPriority; }
+            set
+            {
+                if (_targetLowPriority != value)
+                {
+                    _targetLowPriority = value;
                     RaisePropertyChanged();
                 }
             }
@@ -8616,7 +8641,7 @@ namespace Canopy.Api.Client
     {
         private System.Collections.Generic.List<StudyTypeDefinition> _studyTypes;
         private System.Collections.Generic.List<SimTypeDefinition> _simTypes;
-        private System.Collections.Generic.List<DocumentSubType> _configTypes;
+        private System.Collections.Generic.List<string> _configTypes;
 
         [Newtonsoft.Json.JsonProperty("studyTypes", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public System.Collections.Generic.List<StudyTypeDefinition> StudyTypes
@@ -8647,7 +8672,7 @@ namespace Canopy.Api.Client
         }
 
         [Newtonsoft.Json.JsonProperty("configTypes", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
-        public System.Collections.Generic.List<DocumentSubType> ConfigTypes
+        public System.Collections.Generic.List<string> ConfigTypes
         {
             get { return _configTypes; }
             set
@@ -8854,11 +8879,11 @@ namespace Canopy.Api.Client
     [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "8.33.6323.36213")]
     public partial class SimulationInput : System.ComponentModel.INotifyPropertyChanged
     {
-        private DocumentSubType _configType;
+        private string _configType;
         private bool? _isRequired;
 
         [Newtonsoft.Json.JsonProperty("configType", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
-        public DocumentSubType ConfigType
+        public string ConfigType
         {
             get { return _configType; }
             set
@@ -9230,14 +9255,14 @@ namespace Canopy.Api.Client
     [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "8.33.6323.36213")]
     public partial class NewStudyDataSource : System.ComponentModel.INotifyPropertyChanged
     {
-        private DocumentSubType _configType;
+        private string _configType;
         private string _userId;
         private string _configId;
         private string _name;
         private bool? _isEdited;
 
         [Newtonsoft.Json.JsonProperty("configType", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
-        public DocumentSubType ConfigType
+        public string ConfigType
         {
             get { return _configType; }
             set
@@ -10607,7 +10632,7 @@ namespace Canopy.Api.Client
         private TenantSettings _settings;
         private System.Collections.Generic.List<DocumentTypeCustomPropertyGroups> _customPropertyGroups;
         private System.Collections.Generic.List<Anonymous3> _studyTypes;
-        private System.Collections.Generic.List<DocumentSubType> _configTypes;
+        private System.Collections.Generic.List<string> _configTypes;
         private string _eTag;
 
         [Newtonsoft.Json.JsonProperty("settings", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
@@ -10653,7 +10678,7 @@ namespace Canopy.Api.Client
         }
 
         [Newtonsoft.Json.JsonProperty("configTypes", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
-        public System.Collections.Generic.List<DocumentSubType> ConfigTypes
+        public System.Collections.Generic.List<string> ConfigTypes
         {
             get { return _configTypes; }
             set
@@ -11497,13 +11522,13 @@ namespace Canopy.Api.Client
     [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "8.33.6323.36213")]
     public partial class ChartSettings : System.ComponentModel.INotifyPropertyChanged
     {
-        private DocumentSubType _chartType;
+        private string _chartType;
         private string _chartId;
         private string _preferredChartId;
         private string _preferredChartUserId;
 
         [Newtonsoft.Json.JsonProperty("chartType", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
-        public DocumentSubType ChartType
+        public string ChartType
         {
             get { return _chartType; }
             set
@@ -11687,76 +11712,6 @@ namespace Canopy.Api.Client
     }
 
     [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "8.33.6323.36213")]
-    public enum DocumentSubTypeRoot
-    {
-        [System.Runtime.Serialization.EnumMember(Value = "automatedTest")]
-        AutomatedTest = 0,
-
-        [System.Runtime.Serialization.EnumMember(Value = "automatedTest2")]
-        AutomatedTest2 = 1,
-
-        [System.Runtime.Serialization.EnumMember(Value = "car")]
-        Car = 2,
-
-        [System.Runtime.Serialization.EnumMember(Value = "track")]
-        Track = 3,
-
-        [System.Runtime.Serialization.EnumMember(Value = "weather")]
-        Weather = 4,
-
-        [System.Runtime.Serialization.EnumMember(Value = "exploration")]
-        Exploration = 5,
-
-        [System.Runtime.Serialization.EnumMember(Value = "virtual4PostOptions")]
-        Virtual4PostOptions = 6,
-
-        [System.Runtime.Serialization.EnumMember(Value = "driveCycle")]
-        DriveCycle = 7,
-
-        [System.Runtime.Serialization.EnumMember(Value = "lineMultiPlot")]
-        LineMultiPlot = 8,
-
-        [System.Runtime.Serialization.EnumMember(Value = "pointMultiPlot")]
-        PointMultiPlot = 9,
-
-        [System.Runtime.Serialization.EnumMember(Value = "parallelCoordinates")]
-        ParallelCoordinates = 10,
-
-        [System.Runtime.Serialization.EnumMember(Value = "definition")]
-        Definition = 11,
-
-        [System.Runtime.Serialization.EnumMember(Value = "job")]
-        Job = 12,
-
-        [System.Runtime.Serialization.EnumMember(Value = "result")]
-        Result = 13,
-
-        [System.Runtime.Serialization.EnumMember(Value = "baseline")]
-        Baseline = 14,
-
-        [System.Runtime.Serialization.EnumMember(Value = "deletedDefinition")]
-        DeletedDefinition = 15,
-
-        [System.Runtime.Serialization.EnumMember(Value = "study")]
-        Study = 16,
-
-    }
-
-    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "8.33.6323.36213")]
-    public enum DocumentSubTypeModifier
-    {
-        [System.Runtime.Serialization.EnumMember(Value = "customView")]
-        CustomView = 0,
-
-        [System.Runtime.Serialization.EnumMember(Value = "filter")]
-        Filter = 1,
-
-        [System.Runtime.Serialization.EnumMember(Value = "viewer")]
-        Viewer = 2,
-
-    }
-
-    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "8.33.6323.36213")]
     public enum CanopyDocumentType
     {
         [System.Runtime.Serialization.EnumMember(Value = "automatedTest")]
@@ -11851,6 +11806,9 @@ namespace Canopy.Api.Client
 
         [System.Runtime.Serialization.EnumMember(Value = "offline")]
         Offline = 11,
+
+        [System.Runtime.Serialization.EnumMember(Value = "preempted")]
+        Preempted = 12,
 
     }
 
@@ -12105,11 +12063,14 @@ namespace Canopy.Api.Client
         [System.Runtime.Serialization.EnumMember(Value = "virtual4PostOptions")]
         Virtual4PostOptions = 4,
 
+        [System.Runtime.Serialization.EnumMember(Value = "userMaths")]
+        UserMaths = 5,
+
         [System.Runtime.Serialization.EnumMember(Value = "driveCycle")]
-        DriveCycle = 5,
+        DriveCycle = 6,
 
         [System.Runtime.Serialization.EnumMember(Value = "study")]
-        Study = 6,
+        Study = 7,
 
     }
 
@@ -12131,11 +12092,14 @@ namespace Canopy.Api.Client
         [System.Runtime.Serialization.EnumMember(Value = "virtual4PostOptions")]
         Virtual4PostOptions = 4,
 
+        [System.Runtime.Serialization.EnumMember(Value = "userMaths")]
+        UserMaths = 5,
+
         [System.Runtime.Serialization.EnumMember(Value = "driveCycle")]
-        DriveCycle = 5,
+        DriveCycle = 6,
 
         [System.Runtime.Serialization.EnumMember(Value = "study")]
-        Study = 6,
+        Study = 7,
 
     }
 

@@ -105,28 +105,38 @@
 
         private async Task Authenticate()
         {
-            Console.WriteLine("Authenticating...");
-            var now = DateTime.UtcNow;
-            var client = new HttpClient();
-            var request = new HttpRequestMessage();
-            var connection = ConnectionManager.Instance.Connection;
-            request.Method = new HttpMethod("POST");
-            request.RequestUri = new Uri(connection.Endpoint + "/token");
-            request.Content = new StringContent(
-                $"grant_type=password&username={this.username}&tenant={this.tenantName}&password={this.password}" +
-                $"&client_id={connection.ClientId}&client_secret={connection.ClientSecret}",
-                Encoding.UTF8,
-                "application/x-www-form-urlencoded");
+            Console.Write("Authenticating... ");
+            try
+            {
+                var now = DateTime.UtcNow;
+                var client = new HttpClient();
+                var request = new HttpRequestMessage();
+                var connection = ConnectionManager.Instance.Connection;
+                request.Method = new HttpMethod("POST");
+                request.RequestUri = new Uri(connection.Endpoint + "/token");
+                request.Content = new StringContent(
+                    $"grant_type=password&username={this.username}&tenant={this.tenantName}&password={this.password}" +
+                    $"&client_id={connection.ClientId}&client_secret={connection.ClientSecret}",
+                    Encoding.UTF8,
+                    "application/x-www-form-urlencoded");
 
-            var response = await client.SendAsync(request, HttpCompletionOption.ResponseContentRead);
-            await ProcessTokenResponse(response, now);
+                var response = await client.SendAsync(request, HttpCompletionOption.ResponseContentRead);
+                await ProcessTokenResponse(response, now);
+
+                Console.WriteLine("done.");
+            }
+            catch (Exception)
+            {
+                Console.WriteLine("failed.");
+                throw;
+            }
         }
 
         private async Task RefreshAccessToken()
         {
+            Console.Write("Refreshing access token... ");
             try
             {
-                Console.WriteLine("Refreshing access token...");
                 var now = DateTime.UtcNow;
                 var client = new HttpClient();
                 var request = new HttpRequestMessage();
@@ -141,12 +151,13 @@
 
                 var response = await client.SendAsync(request, HttpCompletionOption.ResponseContentRead);
                 await ProcessTokenResponse(response, now);
+                Console.WriteLine("done.");
             }
             catch (Exception)
             {
                 // This is a crappy way of handling an expired refresh token.
                 // The application will quit and the user will be forced to log in again next time.
-                Console.WriteLine("Failed to refresh access token.");
+                Console.WriteLine("failed.");
                 this.DeleteAuthenticatedUser();
                 throw;
             }

@@ -42,6 +42,7 @@ namespace Canopy.Cli.Executable.Commands
             var password = this.passwordOption.ValueOrPrompt("Password: ", "Password is required.", true);
 
 			AuthenticationManager.Instance.SetAuthenticationInformation(username, company, password);
+            this.authenticatedUser = await AuthenticationManager.Instance.GetAuthenticatedUser();
 
             await this.TestAuthenticated();
 		}

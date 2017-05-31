@@ -90,6 +90,7 @@ namespace Canopy.Cli.Executable
 				ConsoleKeyInfo i = Console.ReadKey(true);
 				if (i.Key == ConsoleKey.Enter)
 				{
+                    Console.WriteLine();
 					break;
 				}
 				else if (i.Key == ConsoleKey.Backspace)
@@ -106,6 +107,7 @@ namespace Canopy.Cli.Executable
 					Console.Write("*");
 				}
 			}
+
 			return result.ToString();
 		}
 
