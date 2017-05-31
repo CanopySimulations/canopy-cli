@@ -1,4 +1,4 @@
-version: 1.0.{build}
+version: 0.{build}
 os: Visual Studio 2017
 build:
   verbosity: minimal
@@ -11,7 +11,7 @@ build_script:
   - dotnet restore -r win10-x64
   - dotnet publish -c Release -r win10-x64
   - dotnet restore -r osx.10.12-x64
-  - dotnet publish -c Release -rosx.10.12-x64
+  - dotnet publish -c Release -r osx.10.12-x64
 
 artifacts:
   - path: win10-x64
