@@ -2,11 +2,12 @@ version: 0.0.{build}
 os: Visual Studio 2017
 build:
   verbosity: minimal
+  publish_nuget: true
 
 branches:
   only:
     - master
-    - /$v[0-9]+\.*/
+    - /^v[0-9]+\.*/
 
 init:
   # Set "build version number" to "short-commit-hash" or when tagged to "tag name" (Travis style)
@@ -25,7 +26,6 @@ build_script:
   - ps: |
       (Get-Content '.\canopy-cli.nuspec' -Raw).Replace("<version>0.0.0</version>", "<version>$($env:APPVEYOR_BUILD_VERSION)</version>") | Out-File '.\canopy-cli.nuspec'
       choco pack
-  - appveyor PushArtifact canopy-cli.%APPVEYOR_BUILD_VERSION%.nupkg
 
 artifacts:
   - path: Canopy.Cli.Executable\bin\Release\netcoreapp1.1\win10-x64\publish
