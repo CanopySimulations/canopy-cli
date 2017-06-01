@@ -21,8 +21,7 @@ namespace Canopy.Cli.Executable
             }
             catch (Exception t)
             {
-                Console.WriteLine();
-                Console.WriteLine(t);
+                Utilities.HandleError(t);
                 return 1;
             }
         }

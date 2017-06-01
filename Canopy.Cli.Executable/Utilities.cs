@@ -1,12 +1,18 @@
-﻿using System;
+﻿using Canopy.Api.Client;
+using Microsoft.Extensions.CommandLineUtils;
+using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Net.Http;
 using System.Text;
 
 namespace Canopy.Cli.Executable
 {
     public static class Utilities
     {
+        public const string ErrorLogFileName = "error.txt";
+
         public static void WriteTable(IEnumerable<string> headers, IEnumerable<IEnumerable<string>> values, int padding = 1)
         {
             var lines = new List<List<string>>
@@ -41,6 +47,64 @@ namespace Canopy.Cli.Executable
             }
 
             Console.WriteLine(sb.ToString());
-        }        
+        }
+
+        public static void HandleError(Exception t)
+        {
+            if (t is RecoverableException
+                || t is HttpRequestException
+                || t is CommandParsingException)
+            {
+                DisplayErrorMessage(t);
+            }
+            else
+            {
+                DisplayUnexpectedErrorMessage(t);
+            }
+        }
+
+        private static void DisplayUnexpectedErrorMessage(Exception t)
+        {
+            Console.ForegroundColor = ConsoleColor.Red;
+            Console.WriteLine();
+            Console.WriteLine($"An error occurred. See {ErrorLogFileName} for more details.");
+            Console.ResetColor();
+            WriteError(t);
+        }
+
+        private static void DisplayErrorMessage(Exception error)
+        {
+            Console.ForegroundColor = ConsoleColor.Red;
+            Console.WriteLine();
+            Console.WriteLine(error.Message);
+            if (error.InnerException != null)
+            {
+                Console.WriteLine(error.InnerException.Message);
+            }
+            Console.ResetColor();
+            WriteError(error);
+        }
+
+        private static void WriteError(Exception error)
+        {
+            try
+            {
+                var saveFolder = PlatformUtilities.AppDataFolder();
+                var saveFile = Path.Combine(saveFolder, ErrorLogFileName);
+                File.WriteAllText(saveFile, error.ToString());
+            }
+            catch (Exception t)
+            {
+                Console.ForegroundColor = ConsoleColor.DarkYellow;
+                Console.WriteLine();
+                Console.WriteLine("Failed to log error:");
+                Console.WriteLine(t);
+                Console.ForegroundColor = ConsoleColor.White;
+                Console.WriteLine();
+                Console.WriteLine("Original error:");
+                Console.WriteLine(error);
+                Console.ResetColor();
+            }
+        }
     }
 }

@@ -9,7 +9,6 @@ namespace Canopy.Cli.Executable
 {
     public abstract class CanopyCommandBase : CommandLineApplication
     {
-        public const string ErrorLogFileName = "error.txt";
 
         protected CanopyApiConfiguration configuration = new CanopyApiConfiguration();
         protected AuthenticatedUser authenticatedUser = null;
@@ -51,61 +50,13 @@ namespace Canopy.Cli.Executable
                 await this.ExecuteAsync();
                 return 0;
             }
-            catch (RecoverableException t)
-            {
-                this.DisplayErrorMessage(t);
-				return 1;
-            }
-            catch(HttpRequestException t)
-            {
-				this.DisplayErrorMessage(t);
-				return 1;
-			}
             catch (Exception t)
             {
-				Console.ForegroundColor = ConsoleColor.Red;
-				Console.WriteLine();
-				Console.WriteLine($"An error occurred. See {ErrorLogFileName} for more details.");
-				Console.ResetColor();
-				this.WriteError(t);
+                Utilities.HandleError(t);
                 return 1;
             }
         }
 
-        private void DisplayErrorMessage(Exception error)
-        {
-			Console.ForegroundColor = ConsoleColor.Red;
-			Console.WriteLine();
-			Console.WriteLine(error.Message);
-            if(error.InnerException != null)
-            {
-				Console.WriteLine(error.InnerException.Message);
-		    }
-			Console.ResetColor();
-			this.WriteError(error);
-		}
-
-        private void WriteError(Exception error)
-        {
-            try
-            {
-				var saveFolder = PlatformUtilities.AppDataFolder();
-                var saveFile = Path.Combine(saveFolder, ErrorLogFileName);
-                File.WriteAllText(saveFile, error.ToString());
-			}
-            catch(Exception t)
-            {
-				Console.ForegroundColor = ConsoleColor.DarkYellow;
-				Console.WriteLine();
-				Console.WriteLine("Failed to log error:");
-				Console.WriteLine(t);
-				Console.ForegroundColor = ConsoleColor.White;
-				Console.WriteLine();
-				Console.WriteLine("Original error:");
-				Console.WriteLine(error);
-				Console.ResetColor();
-			}
-		}
 
         protected abstract Task ExecuteAsync();
     }
