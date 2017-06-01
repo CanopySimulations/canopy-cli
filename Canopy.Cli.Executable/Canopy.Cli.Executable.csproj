@@ -10,6 +10,7 @@
     <Authors>Canopy Simulations</Authors>
     <Copyright>Canopy Simulations Limited</Copyright>
     <RuntimeIdentifiers>win10-x64;osx.10.12-x64</RuntimeIdentifiers>
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
   </PropertyGroup>
 
   <ItemGroup>

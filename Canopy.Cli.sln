@@ -7,6 +7,13 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Canopy.Api.Client", "Canopy
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Canopy.Cli.Executable", "Canopy.Cli.Executable\Canopy.Cli.Executable.csproj", "{45106155-B13E-4E6A-99F1-43A5A037C1F4}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Files", "Files", "{BFCF08C2-AF07-4F40-912C-A778077BFE26}"
+	ProjectSection(SolutionItems) = preProject
+		appveyor.yml = appveyor.yml
+		canopy-cli.nuspec = canopy-cli.nuspec
+		README.md = README.md
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
