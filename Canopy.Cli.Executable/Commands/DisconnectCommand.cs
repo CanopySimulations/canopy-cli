@@ -8,7 +8,10 @@ namespace Canopy.Cli.Executable.Commands
     {
         public DisconnectCommand()
         {
-			this.Name = "disconnect";
+            this.RequiresConnection = false;
+            this.RequiresAuthentication = false;
+
+            this.Name = "disconnect";
 			this.Description = "Disconnects from the API endpoint, and removes any authentication information.";
 		}
 

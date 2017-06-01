@@ -38,25 +38,7 @@ namespace Canopy.Cli.Executable.Commands
 
         protected override async Task ExecuteAsync()
         {
-            var outputFolder = this.outputFolderOption.Value();
-            if (string.IsNullOrWhiteSpace(outputFolder))
-            {
-                outputFolder = "./";
-            }
-            else
-            {
-                try
-                {
-                    if (!Directory.Exists(outputFolder))
-                    {
-                        Directory.CreateDirectory(outputFolder);
-                    }
-                }
-                catch (Exception t)
-                {
-                    throw new RecoverableException("Failed to create output folder.", t);
-                }
-            }
+            var outputFolder = Utilities.GetCreatedOutputFolder(this.outputFolderOption);
 
             var tenantId = this.tenantIdOption.Value();
             if (string.IsNullOrWhiteSpace(tenantId))
@@ -70,7 +52,7 @@ namespace Canopy.Cli.Executable.Commands
                 simVersion = Constants.CurrentSimVersion;
             }
 
-            Console.WriteLine("Requesting configs...");
+            Console.WriteLine("Requesting schemas...");
             var client = new SimVersionClient(this.configuration);
             var result = await client.GetDocumentsAsync(simVersion, tenantId);
 

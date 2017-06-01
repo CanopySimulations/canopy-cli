@@ -13,6 +13,31 @@ namespace Canopy.Cli.Executable
     {
         public const string ErrorLogFileName = "error.txt";
 
+        public static string GetCreatedOutputFolder(CommandOption option)
+        {
+            var outputFolder = option.Value();
+            if (string.IsNullOrWhiteSpace(outputFolder))
+            {
+                outputFolder = "./";
+            }
+            else
+            {
+                try
+                {
+                    if (!Directory.Exists(outputFolder))
+                    {
+                        Directory.CreateDirectory(outputFolder);
+                    }
+                }
+                catch (Exception t)
+                {
+                    throw new RecoverableException("Failed to create output folder.", t);
+                }
+            }
+
+            return outputFolder;
+        }
+
         public static void WriteTable(IEnumerable<string> headers, IEnumerable<IEnumerable<string>> values, int padding = 1)
         {
             var lines = new List<List<string>>
@@ -53,7 +78,8 @@ namespace Canopy.Cli.Executable
         {
             if (t is RecoverableException
                 || t is HttpRequestException
-                || t is CommandParsingException)
+                || t is CommandParsingException
+                || t is CanopyApiException)
             {
                 DisplayErrorMessage(t);
             }
@@ -67,7 +93,7 @@ namespace Canopy.Cli.Executable
         {
             Console.ForegroundColor = ConsoleColor.Red;
             Console.WriteLine();
-            Console.WriteLine($"An error occurred. See {ErrorLogFileName} for more details.");
+            Console.WriteLine($"An error occurred. Run \"canopy last-error\" for more details.");
             Console.ResetColor();
             WriteError(t);
         }
@@ -81,6 +107,12 @@ namespace Canopy.Cli.Executable
             {
                 Console.WriteLine(error.InnerException.Message);
             }
+
+            if (error is CanopyApiException apiError)
+            {
+                Console.WriteLine(apiError.Response);
+            }
+
             Console.ResetColor();
             WriteError(error);
         }
@@ -105,6 +137,18 @@ namespace Canopy.Cli.Executable
                 Console.WriteLine(error);
                 Console.ResetColor();
             }
+        }
+
+        public static string ReadError()
+        {
+            var saveFolder = PlatformUtilities.AppDataFolder();
+            var saveFile = Path.Combine(saveFolder, ErrorLogFileName);
+            if (!File.Exists(saveFile))
+            {
+                return null;
+            }
+
+            return File.ReadAllText(saveFile);
         }
     }
 }
