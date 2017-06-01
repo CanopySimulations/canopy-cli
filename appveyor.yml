@@ -25,6 +25,7 @@ build_script:
   - ps: |
       (Get-Content '.\canopy-cli.nuspec' -Raw).Replace("<version>0.0.0</version>", "<version>$($env:APPVEYOR_BUILD_VERSION)</version>") | Out-File '.\canopy-cli.nuspec'
       choco pack
+  - appveyor PushArtifact canopy-cli.%APPVEYOR_BUILD_VERSION%.nupkg
 
 artifacts:
   - path: Canopy.Cli.Executable\bin\Release\netcoreapp1.1\win10-x64\publish
