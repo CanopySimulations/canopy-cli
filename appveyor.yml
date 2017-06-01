@@ -3,6 +3,11 @@ os: Visual Studio 2017
 build:
   verbosity: minimal
 
+branches:
+  only:
+    - master
+    - /$v[0-9]+\.*/
+
 init:
   # Set "build version number" to "short-commit-hash" or when tagged to "tag name" (Travis style)
   # https://github.com/appveyor/ci/issues/691
@@ -23,9 +28,9 @@ build_script:
 
 artifacts:
   - path: Canopy.Cli.Executable\bin\Release\netcoreapp1.1\win10-x64\publish
-    name: windows
+    name: canopy-cli-windows
   - path: Canopy.Cli.Executable\bin\Release\netcoreapp1.1\osx.10.12-x64\publish
-    name: macos
+    name: canopy-cli-mac
   - path: .\canopy-cli.*.nupkg
     name: nupkg
 
@@ -36,11 +41,11 @@ notifications:
     channel: '#services'
 
 deploy:
-  description: 'Canopy Simulations Command Line Interface'
+  description: 'Canopy Simulations CLI release.'
   provider: GitHub
   auth_token:
     secure: cHJ+kuG4xEMsSca6/+sT13XOrQMppwPbtPbFirijXcvJIpR4YjTeURw4xWghZkEk
-  artifact: windows
+  artifact: canopy-cli-windows,canopy-cli-mac
   draft: false
   prerelease: false
   on:
