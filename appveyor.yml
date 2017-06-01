@@ -31,6 +31,7 @@ notifications:
     channel: '#services'
 
 deploy:
+  tag: v$(appveyor_build_version)
   release: canopy-cli-v$(appveyor_build_version)
   description: 'Canopy Simulations Command Line Interface'
   provider: GitHub
