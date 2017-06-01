@@ -8,7 +8,10 @@ namespace Canopy.Cli.Executable.Commands
 	{
 		public UnauthenticateCommand()
 		{
-			this.Name = "unauthenticate";
+            this.RequiresConnection = false;
+            this.RequiresAuthentication = false;
+
+            this.Name = "unauthenticate";
 			this.Description = "Unauthenticates from the API and removes local sign-in information.";
 		}
 
