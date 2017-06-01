@@ -12,10 +12,6 @@ init:
         Update-AppveyorBuild -Version "$($env:APPVEYOR_REPO_TAG_NAME.TrimStart("v"))"
       }
 
-branches:
-  only:
-    - master
-
 build_script:
   - dotnet restore -r win10-x64
   - dotnet publish -c Release -r win10-x64
