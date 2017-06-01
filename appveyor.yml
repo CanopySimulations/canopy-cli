@@ -21,7 +21,7 @@ artifacts:
     name: windows
   - path: Canopy.Cli.Executable\bin\Release\netcoreapp1.1\osx.10.12-x64\publish
     name: macos
-  - path: .\canopy-cli.$ENV:APPVEYOR_BUILD_VERSION.nupkg
+  - path: .\canopy-cli.*.nupkg
     name: nupkg
 
 notifications:
