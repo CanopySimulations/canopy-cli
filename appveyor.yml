@@ -14,7 +14,7 @@ build_script:
   - dotnet publish -c Release -r osx.10.12-x64
   - ps: |
       (Get-Content '.\canopy-cli.nuspec' -Raw).Replace("<version>0.0.0</version>", "<version>$($env:APPVEYOR_BUILD_VERSION)</version>") | Out-File '.\canopy-cli.nuspec'
-      cpack
+      choco pack
 
 artifacts:
   - path: Canopy.Cli.Executable\bin\Release\netcoreapp1.1\win10-x64\publish
