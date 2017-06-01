@@ -1,4 +1,4 @@
-version: 0.{build}
+version: 0.0.{build}
 os: Visual Studio 2017
 build:
   verbosity: minimal
@@ -12,15 +12,32 @@ build_script:
   - dotnet publish -c Release -r win10-x64
   - dotnet restore -r osx.10.12-x64
   - dotnet publish -c Release -r osx.10.12-x64
+  - ps: |
+      (Get-Content '.\canopy-cli.nuspec' -Raw).Replace("<version>0.0.0</version>", "<version>$($env:APPVEYOR_BUILD_VERSION)</version>") | Out-File '.\canopy-cli.nuspec'
+      cpack
 
 artifacts:
-  - path: Canopy.Cli.Executable\bin\Release\netcoreapp1.1\win10-x64
-    name: win10-x64
-  - path: Canopy.Cli.Executable\bin\Release\netcoreapp1.1\osx.10.12-x64
-    name: osx.10.12-x64
+  - path: Canopy.Cli.Executable\bin\Release\netcoreapp1.1\win10-x64\publish
+    name: windows
+  - path: Canopy.Cli.Executable\bin\Release\netcoreapp1.1\osx.10.12-x64\publish
+    name: macos
+  - path: .\canopy-cli.$ENV:APPVEYOR_BUILD_VERSION.nupkg
+    name: nupkg
 
 notifications:
   - provider: Slack
     auth_token:
       secure: 6JPs22qT50igyFG/AaVJAP4YnOcLEptYqXKF+5yC47SNA83YcikLBeGpA0CstoQqGLzUDiXdEPXuhaVpCL1bRA==
     channel: '#services'
+
+deploy:
+  release: canopy-cli-v$(appveyor_build_version)
+  description: 'Canopy Simulations Command Line Interface'
+  provider: GitHub
+  auth_token:
+    secure: cHJ+kuG4xEMsSca6/+sT13XOrQMppwPbtPbFirijXcvJIpR4YjTeURw4xWghZkEk
+  artifact: windows,macos,nupkg
+  draft: false
+  prerelease: false
+  on:
+    branch: master
