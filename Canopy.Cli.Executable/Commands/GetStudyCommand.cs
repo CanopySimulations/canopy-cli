@@ -13,8 +13,10 @@ namespace Canopy.Cli.Executable.Commands
         private readonly CommandOption outputFolderOption;
         private readonly CommandOption studyIdOption;
         private readonly CommandOption jobIndexOption;
+        private readonly CommandOption jobIdOption;
+        private readonly CommandOption channelOption;
 
-        private readonly CommandOption binaryOption;
+        private readonly CommandOption rawOption;
 
         public GetStudyCommand()
         {
@@ -32,13 +34,23 @@ namespace Canopy.Cli.Executable.Commands
                 CommandOptionType.SingleValue);
 
             this.jobIndexOption = this.Option(
-                "-j | --job-index",
+                "-i | --job-index",
                 $"The study job index to download (if omitted the entire study is downloaded).",
-                CommandOptionType.SingleValue);
+                CommandOptionType.MultipleValue);
 
-            this.binaryOption = this.Option(
-                "-b | --binary",
-                $"Keep downloaded channels as binary files (if omitted the binary files will be converted to CSV).",
+            this.jobIdOption = this.Option(
+                "-j | --job-id",
+                $"The job id to download (study ID is not required if the job ID is given).",
+                CommandOptionType.MultipleValue);
+
+            this.channelOption = this.Option(
+                "-c | --channel",
+                $"The channel or channels to download (if omitted all channels are downloaded).",
+                CommandOptionType.MultipleValue);
+
+            this.rawOption = this.Option(
+                "--raw",
+                $"Do not perform any processing on downloaded data (if omitted the binary files will be converted to CSV with unit conversion applied).",
                 CommandOptionType.NoValue);
         }
 
@@ -46,6 +58,8 @@ namespace Canopy.Cli.Executable.Commands
         {
             var outputFolder = Utilities.GetCreatedOutputFolder(this.outputFolderOption);
 
+
+            
             var studyId = this.studyIdOption.ValueOrPrompt("Study ID: ", "Study ID is required.");
 
             var jobIndex = this.jobIndexOption.Value();
@@ -59,7 +73,7 @@ namespace Canopy.Cli.Executable.Commands
                 throw new RecoverableException("Job index must be a valid non-negative integer.");
             }
 
-            var keepBinaryFiles = this.binaryOption.HasValue();
+            var keepBinaryFiles = this.rawOption.HasValue();
 
             var studyClient = new StudyClient(this.configuration);
             var studyMetadata = await studyClient.GetStudyMetadataWithoutUserIdAsync(this.authenticatedUser.TenantId, studyId);
@@ -68,6 +82,55 @@ namespace Canopy.Cli.Executable.Commands
             
             Console.WriteLine("This command is not yet complete.");
             //var container = new CloudBlobContainer(new Uri(studyMetadata.AccessInformation.)
+        }
+
+        private class StudyDownloadTask
+        {
+            public StudyDownloadTask(string studyId, bool downloadStudyData, IReadOnlyList<StudyJobDownloadTask> jobs)
+            {
+                this.DownloadStudyData = downloadStudyData;
+            }
+
+            public string StudyId { get; }
+
+            public bool DownloadStudyData { get; }
+        }
+
+        private class StudyJobDownloadTask
+        {
+            public StudyJobDownloadTask(string jobId)
+            {
+                this.JobId = jobId;
+                var hyphenIndex = jobId.IndexOf('-');
+                if(hyphenIndex == -1)
+                {
+                    throw new RecoverableException("Invalid job ID: " + jobId);
+                }
+
+                this.StudyId = jobId.Substring(0, hyphenIndex);
+
+                var jobIndexString = jobId.Substring(hyphenIndex + 1);
+                int jobIndex;
+                if(!int.TryParse(jobIndexString, out jobIndex))
+                {
+                    throw new RecoverableException("Invalid job index: " + jobIndex);
+                }
+
+                this.JobIndex = jobIndex;
+            }
+
+            public StudyJobDownloadTask(string studyId, int jobIndex)
+            {
+                this.StudyId = studyId;
+                this.JobIndex = jobIndex;
+                this.JobId = $"{studyId}-{jobIndex}";
+            }
+
+            public string StudyId { get; }
+
+            public string JobId { get; }
+
+            public int JobIndex { get; }
         }
     }
 }
