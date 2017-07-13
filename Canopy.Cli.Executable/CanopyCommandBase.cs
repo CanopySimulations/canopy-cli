@@ -9,7 +9,6 @@ namespace Canopy.Cli.Executable
 {
     public abstract class CanopyCommandBase : CommandLineApplication
     {
-
         protected CanopyApiConfiguration configuration = new CanopyApiConfiguration();
         protected AuthenticatedUser authenticatedUser = null;
 
