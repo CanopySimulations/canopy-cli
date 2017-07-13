@@ -127,7 +127,7 @@ namespace Canopy.Cli.Executable.Commands
                     var contentString = content.ToString(formatting);
 
                     File.WriteAllText(
-                        Path.Combine(outputFolder, config.Config.Name + ".json"), 
+                        Path.Combine(outputFolder, FileNameUtilities.Sanitize(config.Config.Name) + ".json"), 
                         contentString);
 
                     sizes.Add(contentString.Length);
