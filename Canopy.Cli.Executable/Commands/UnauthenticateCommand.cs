@@ -15,10 +15,10 @@ namespace Canopy.Cli.Executable.Commands
 			this.Description = "Unauthenticates from the API and removes local sign-in information.";
 		}
 
-		protected override Task ExecuteAsync()
+		protected override Task<int> ExecuteAsync()
 		{
             AuthenticationManager.Instance.ClearAuthenticatedUser();
-			return Task.CompletedTask;
+			return Task.FromResult(0);
 		}
 	}
 }

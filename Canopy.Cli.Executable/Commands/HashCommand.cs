@@ -21,12 +21,12 @@ namespace Canopy.Cli.Executable.Commands
             this.inputArgument = this.Argument("<input>", "The input string to hash.");
         }
 
-        protected override Task ExecuteAsync()
+        protected override Task<int> ExecuteAsync()
         {
             var input = this.inputArgument.ValueOrPrompt("Input string: ", "Input string is required.");
 
             Console.WriteLine(GetHash(input));
-            return Task.CompletedTask;
+            return Task.FromResult(0);
         }
 
 		public static string GetHash(string input)

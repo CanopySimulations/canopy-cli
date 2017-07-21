@@ -14,6 +14,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Files", "Files", "{BFCF08C2
 		README.md = README.md
 	EndProjectSection
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Canopy.Cli.Shared", "Canopy.Cli.Shared\Canopy.Cli.Shared.csproj", "{B2F1EF93-6F77-4A60-BF01-D7F8EDFA73DD}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -28,6 +30,10 @@ Global
 		{45106155-B13E-4E6A-99F1-43A5A037C1F4}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{45106155-B13E-4E6A-99F1-43A5A037C1F4}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{45106155-B13E-4E6A-99F1-43A5A037C1F4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B2F1EF93-6F77-4A60-BF01-D7F8EDFA73DD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B2F1EF93-6F77-4A60-BF01-D7F8EDFA73DD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B2F1EF93-6F77-4A60-BF01-D7F8EDFA73DD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B2F1EF93-6F77-4A60-BF01-D7F8EDFA73DD}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

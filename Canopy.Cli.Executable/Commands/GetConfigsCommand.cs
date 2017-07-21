@@ -63,7 +63,7 @@ namespace Canopy.Cli.Executable.Commands
                 CommandOptionType.NoValue);
         }
 
-        protected override async Task ExecuteAsync()
+        protected override async Task<int> ExecuteAsync()
         {
             var configType = this.configTypeOption.ValueOrPrompt("Config Type: ", "Config type is required.");
 
@@ -144,6 +144,8 @@ namespace Canopy.Cli.Executable.Commands
                     new[] { "Name", "Id", "UserId" },
                     result.QueryResults.Documents.Select(v => new string[] { v.Name, v.DocumentId, v.UserId }));
             }
+
+            return 0;
         }
     }
 }

@@ -46,8 +46,7 @@ namespace Canopy.Cli.Executable
                     this.authenticatedUser = await AuthenticationManager.Instance.GetAuthenticatedUser();
                 }
 
-                await this.ExecuteAsync();
-                return 0;
+                return await this.ExecuteAsync();
             }
             catch (Exception t)
             {
@@ -57,6 +56,6 @@ namespace Canopy.Cli.Executable
         }
 
 
-        protected abstract Task ExecuteAsync();
+        protected abstract Task<int> ExecuteAsync();
     }
 }

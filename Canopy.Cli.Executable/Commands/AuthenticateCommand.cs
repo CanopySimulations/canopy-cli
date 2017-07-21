@@ -35,7 +35,7 @@ namespace Canopy.Cli.Executable.Commands
 				CommandOptionType.SingleValue);
 		}
 
-        protected override async Task ExecuteAsync()
+        protected override async Task<int> ExecuteAsync()
         {
             var username = this.usernameOption.ValueOrPrompt("Username: ", "Username is required.");
             var company = this.companyOption.ValueOrPrompt("Company: ", "Company is required.");
@@ -45,7 +45,8 @@ namespace Canopy.Cli.Executable.Commands
             this.authenticatedUser = await AuthenticationManager.Instance.GetAuthenticatedUser();
 
             await this.TestAuthenticated();
-		}
+            return 0;
+        }
 
         private async Task TestAuthenticated()
         {

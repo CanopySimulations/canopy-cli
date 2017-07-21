@@ -35,7 +35,7 @@ namespace Canopy.Cli.Executable.Commands
 				CommandOptionType.SingleValue);
 		}
 
-        protected override async Task ExecuteAsync()
+        protected override async Task<int> ExecuteAsync()
         {
 			var endpoint = this.endpointOption.Value();
             if(string.IsNullOrWhiteSpace(endpoint))
@@ -50,7 +50,8 @@ namespace Canopy.Cli.Executable.Commands
                 new ConnectionInformation(endpoint, clientId, clientSecret));
 
             var availabilityClient = new AvailabilityClient(this.configuration);
-            var result = await availabilityClient.GetAsync();
+            await availabilityClient.GetAsync();
+            return 0;
 		}
     }
 }

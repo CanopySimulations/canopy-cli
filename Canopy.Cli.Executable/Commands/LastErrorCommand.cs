@@ -16,14 +16,14 @@ namespace Canopy.Cli.Executable.Commands
             this.Description = "Shows the last logged error.";
         }
 
-        protected override Task ExecuteAsync()
+        protected override Task<int> ExecuteAsync()
         {
             Console.WriteLine("Last Error:");
             Console.WriteLine();
             Console.ForegroundColor = ConsoleColor.Yellow;
             Console.WriteLine(Utilities.ReadError());
             Console.ResetColor();
-            return Task.CompletedTask;
+            return Task.FromResult(0);
         }
     }
 }

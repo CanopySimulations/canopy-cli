@@ -54,7 +54,7 @@ namespace Canopy.Cli.Executable.Commands
                 CommandOptionType.NoValue);
         }
 
-        protected override async Task ExecuteAsync()
+        protected override async Task<int> ExecuteAsync()
         {
             var outputFolder = Utilities.GetCreatedOutputFolder(this.outputFolderOption);
 
@@ -82,6 +82,8 @@ namespace Canopy.Cli.Executable.Commands
             
             Console.WriteLine("This command is not yet complete.");
             //var container = new CloudBlobContainer(new Uri(studyMetadata.AccessInformation.)
+
+            return 0;
         }
 
         private class StudyDownloadTask

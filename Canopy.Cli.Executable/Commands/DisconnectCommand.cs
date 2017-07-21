@@ -15,11 +15,11 @@ namespace Canopy.Cli.Executable.Commands
 			this.Description = "Disconnects from the API endpoint, and removes any authentication information.";
 		}
 
-		protected override Task ExecuteAsync()
+		protected override Task<int> ExecuteAsync()
 		{
 			AuthenticationManager.Instance.ClearAuthenticatedUser();
 			ConnectionManager.Instance.ClearConnectionInformation();
-            return Task.CompletedTask;
+            return Task.FromResult(0);
 		}
     }
 }

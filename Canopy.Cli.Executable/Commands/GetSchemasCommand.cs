@@ -36,7 +36,7 @@ namespace Canopy.Cli.Executable.Commands
                 CommandOptionType.SingleValue);
         }
 
-        protected override async Task ExecuteAsync()
+        protected override async Task<int> ExecuteAsync()
         {
             var outputFolder = Utilities.GetCreatedOutputFolder(this.outputFolderOption);
 
@@ -77,6 +77,8 @@ namespace Canopy.Cli.Executable.Commands
             Utilities.WriteTable(
                 new[] { "Name", "Size" },
                 writtenFiles.Select(v => new string[] { v.Name, v.Content.Length.ToString() }));
+
+            return 0;
         }
     }
 }

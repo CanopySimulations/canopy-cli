@@ -1,0 +1,53 @@
+﻿using System;
+using System.Collections.Concurrent;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace Canopy.Cli.Shared.StudyProcessing
+{
+    using Canopy.Cli.Shared.StudyProcessing.ChannelData;
+    using Canopy.Cli.Shared.StudyProcessing.StudyScalars;
+
+    public class ProcessStudyResults
+    {
+        public async Task ExecuteAsync(
+            IRootFolder root,
+            IFileWriter writer,
+            bool channelsAsCsv,
+            bool deleteProcessedFiles,
+            int parallelism)
+        {
+            var studyScalarFiles = new StudyScalarFiles();
+            var channelDataColumns = new ChannelDataColumns();
+
+            var allFiles = await root.GetFilesAsync();
+            foreach (var file in allFiles)
+            {
+                try
+                {
+                    TryAddFileToStudyScalarResults.Execute(file, studyScalarFiles);
+
+                    if (channelsAsCsv && TryGetChannelMetadata.Execute(file, out var channelMetadata))
+                    {
+                        channelDataColumns.Add(new CsvColumn(channelMetadata, file));
+                    }
+                    else
+                    {
+                        await writer.WriteExistingFile(root, file);
+                    }
+                }
+                catch (Exception t)
+                {
+                    Console.WriteLine();
+                    Console.WriteLine("Failed to process file: " + file);
+                    Console.WriteLine(t);
+                }
+            }
+
+            await WriteChannelDataAsCsv.ExecuteAsync(root, writer, deleteProcessedFiles, parallelism, channelDataColumns);
+            await WriteCombinedStudyScalarData.ExecuteAsync(root, writer, studyScalarFiles);
+        }
+    }
+}

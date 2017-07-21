@@ -17,12 +17,12 @@ namespace Canopy.Cli.Executable.Commands
             this.Description = "Displays the current canopy-cli version.";
         }
 
-        protected override Task ExecuteAsync()
+        protected override Task<int> ExecuteAsync()
         {
             Console.ForegroundColor = ConsoleColor.Green;
             Console.WriteLine(Assembly.GetEntryAssembly().GetName().Version);
             Console.ResetColor();
-            return Task.CompletedTask;
+            return Task.FromResult(0);
         }
     }
 }

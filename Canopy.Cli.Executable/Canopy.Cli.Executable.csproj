@@ -15,6 +15,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Canopy.Api.Client\Canopy.Api.Client.csproj" />
+    <ProjectReference Include="..\Canopy.Cli.Shared\Canopy.Cli.Shared.csproj" />
   </ItemGroup>
 
   <ItemGroup>
