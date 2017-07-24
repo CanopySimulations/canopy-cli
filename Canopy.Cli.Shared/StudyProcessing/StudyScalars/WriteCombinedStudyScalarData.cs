@@ -38,12 +38,15 @@
             var scalarMetadata = await LoadScalarMetadata(studyScalarFiles.ScalarMetadata);
 
             var jobIndexColumn = scalarResults.First();
-            scalarResults = scalarResults.Skip(1).Select((r, i) => r.WithMetadata(scalarMetadata?[i])).ToList();
+            scalarResults = scalarResults.Skip(1).ToList(); // Skip the job index column.
+            scalarMetadata = scalarMetadata.Skip(1).ToList(); // Skip the column titles row.
+            scalarResults = scalarResults.Select((r, i) => r.WithMetadata(scalarMetadata?.Count > i ? scalarMetadata[i] : null)).ToList();
 
             var scalarInputs = await LoadScalarResults(studyScalarFiles.ScalarInputs);
             var scalarInputsMetadata = await LoadScalarInputsMetadata(studyScalarFiles.ScalarInputsMetadata);
+            scalarInputsMetadata = scalarInputsMetadata.Skip(1).ToList(); // Skip the column titles row.
 
-            scalarInputs = scalarInputs.Select((v, i) => v.WithMetadata(scalarInputsMetadata?[i])).ToList();
+            scalarInputs = scalarInputs.Select((v, i) => v.WithMetadata(scalarInputsMetadata?.Count > i ? scalarInputsMetadata[i] : null)).ToList();
 
             // Now we add the job index, then the scalar inputs, then the scalar results.
             results.Add(jobIndexColumn);
@@ -61,9 +64,9 @@
             for (int resultDataIndex = 0; resultDataIndex < jobIndexColumn.Data.Count; resultDataIndex++)
             {
                 var jobIndex = (int)jobIndexColumn.Data[resultDataIndex];
-                var lineData = new List<double> {jobIndex}
-                    .Concat(scalarInputs.Select(v => v.Data[jobIndex]))
-                    .Concat(scalarResults.Select(v => v.Data[resultDataIndex])).ToList();
+                var lineData = new List<string> {jobIndex.ToJavascriptString()}
+                    .Concat(scalarInputs.Select(v => v.Data[jobIndex].ToJavascriptString()))
+                    .Concat(scalarResults.Select(v => v.Data[resultDataIndex].ToJavascriptString())).ToList();
 
                 csv.AppendLine(string.Join(",", lineData));
             }
@@ -82,7 +85,7 @@
             var columns = content.ToCsvColumns();
             var result = columns.Select(c => new ScalarResultItem(
                 c[0], 
-                c.Skip(1).Select(double.Parse).ToList())).ToList();
+                c.Skip(1).Select(Extensions.ParseJavascriptDouble).ToList())).ToList();
 
             return result;
         }

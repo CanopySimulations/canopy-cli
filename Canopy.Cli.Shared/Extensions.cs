@@ -6,6 +6,8 @@ using System.Threading.Tasks;
 
 namespace Canopy.Cli.Shared
 {
+    using System.Globalization;
+
     public static class Extensions
     {
         /// <summary>
@@ -102,6 +104,21 @@ namespace Canopy.Cli.Shared
             }
 
             return "\"" + input.WithoutQuotes() + "\"";
+        }
+
+        public static double ParseJavascriptDouble(this string input)
+        {
+            return double.Parse(input.Replace("inf", "Infinity"), System.Globalization.CultureInfo.InvariantCulture);
+        }
+
+        public static string ToJavascriptString(this double input)
+        {
+            return input.ToString(CultureInfo.InvariantCulture).Replace("Infinity", "inf").Replace("∞", "inf");
+        }
+
+        public static string ToJavascriptString(this int input)
+        {
+            return ToJavascriptString((double) input);
         }
     }
 }

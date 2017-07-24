@@ -28,7 +28,7 @@ namespace Canopy.Cli.Executable.Commands
 
             this.keepOriginalFilesOption = this.Option(
                 "-ko | --keep-original",
-                $"Do not delete files which have been processed.",
+                $"Do not delete files which have been processed (faster).",
                 CommandOptionType.NoValue);
         }
 
@@ -140,7 +140,7 @@ namespace Canopy.Cli.Executable.Commands
 
             public Task<IReadOnlyList<IFile>> GetFilesAsync()
             {
-                var files = Directory.GetFiles(this.FolderPath, "*.bin", SearchOption.TopDirectoryOnly);
+                var files = Directory.GetFiles(this.FolderPath, "*.*", SearchOption.TopDirectoryOnly);
                 return Task.FromResult<IReadOnlyList<IFile>>(files.Select(v => new LocalFile(v)).ToList());
             }
 
