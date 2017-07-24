@@ -25,6 +25,10 @@ init:
       }
 
 build_script:
+  - ps: |
+      (Get-Content '.\Canopy.Cli.Shared\Canopy.Cli.Shared.csproj' -Raw).Replace("<Version>0.0.0</Version>", "<Version>$($env:APPVEYOR_BUILD_VERSION)</Version>") | Out-File '.\Canopy.Cli.Shared\Canopy.Cli.Shared.csproj'
+      (Get-Content '.\Canopy.Cli.Shared\Canopy.Cli.Shared.csproj' -Raw).Replace("<AssemblyVersion>0.0.0.0</AssemblyVersion>", "<AssemblyVersion>$($env:APPVEYOR_BUILD_VERSION)</AssemblyVersion>") | Out-File '.\Canopy.Cli.Shared\Canopy.Cli.Shared.csproj'
+      (Get-Content '.\Canopy.Cli.Shared\Canopy.Cli.Shared.csproj' -Raw).Replace("<FileVersion>0.0.0.0</FileVersion>", "<FileVersion>$($env:APPVEYOR_BUILD_VERSION)</FileVersion>") | Out-File '.\Canopy.Cli.Shared\Canopy.Cli.Shared.csproj'
   - dotnet restore -r win10-x64
   - dotnet publish -c Release -r win10-x64
   - dotnet restore -r osx.10.12-x64
@@ -32,6 +36,10 @@ build_script:
   - ps: |
       (Get-Content '.\canopy-cli.nuspec' -Raw).Replace("<version>0.0.0</version>", "<version>$($env:APPVEYOR_BUILD_VERSION)</version>") | Out-File '.\canopy-cli.nuspec'
       choco pack
+  - mkdir "cli-shared-package"
+  
+on_success:
+ - appveyor PushArtifact ".\Canopy.Cli.Shared\bin\Release\Canopy.Cli.Shared.%APPVEYOR_BUILD_VERSION%.nupkg"
 
 artifacts:
   - path: Canopy.Cli.Executable\bin\Release\netcoreapp1.1\win10-x64\publish
