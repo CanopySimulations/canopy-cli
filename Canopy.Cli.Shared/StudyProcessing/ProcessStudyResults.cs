@@ -10,7 +10,7 @@ namespace Canopy.Cli.Shared.StudyProcessing
     using Canopy.Cli.Shared.StudyProcessing.ChannelData;
     using Canopy.Cli.Shared.StudyProcessing.StudyScalars;
 
-    public class ProcessStudyResults
+    public class ProcessStudyResults : IProcessStudyResults
     {
         public async Task ExecuteAsync(
             IRootFolder root,
