@@ -63,10 +63,10 @@
 
             for (int resultDataIndex = 0; resultDataIndex < jobIndexColumn.Data.Count; resultDataIndex++)
             {
-                var jobIndex = (int)jobIndexColumn.Data[resultDataIndex];
+                var jobIndex = (int)jobIndexColumn.Data[resultDataIndex].ParseJavascriptDouble();
                 var lineData = new List<string> {jobIndex.ToJavascriptString()}
-                    .Concat(scalarInputs.Select(v => v.Data[jobIndex].ToJavascriptString()))
-                    .Concat(scalarResults.Select(v => v.Data[resultDataIndex].ToJavascriptString())).ToList();
+                    .Concat(scalarInputs.Select(v => v.Data[jobIndex].WithQuotes()))
+                    .Concat(scalarResults.Select(v => v.Data[resultDataIndex].WithQuotes())).ToList();
 
                 csv.AppendLine(string.Join(",", lineData));
             }
@@ -85,7 +85,7 @@
             var columns = content.ToCsvColumns();
             var result = columns.Select(c => new ScalarResultItem(
                 c[0], 
-                c.Skip(1).Select(Extensions.ParseJavascriptDouble).ToList())).ToList();
+                c.Skip(1).ToList())).ToList();
 
             return result;
         }
@@ -129,7 +129,7 @@
 
     public class ScalarResultItem
     {
-        public ScalarResultItem(string name, IReadOnlyList<double> data, ScalarMetadataItem metadata = null)
+        public ScalarResultItem(string name, IReadOnlyList<string> data, ScalarMetadataItem metadata = null)
         {
             this.Name = name;
             this.Data = data;
@@ -138,7 +138,7 @@
 
         public string Name { get; }
 
-        public IReadOnlyList<double> Data { get; }
+        public IReadOnlyList<string> Data { get; }
 
         public ScalarMetadataItem Metadata { get; }
 
