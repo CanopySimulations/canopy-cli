@@ -8,15 +8,23 @@ using System.Threading.Tasks;
 
 namespace Canopy.Cli.Executable.Commands
 {
+    using System.IO;
+    using System.Linq;
+    using System.Text.RegularExpressions;
+    using Canopy.Cli.Executable.Helpers;
+    using Canopy.Cli.Shared;
+
     public class GetStudyCommand : CanopyCommandBase
     {
+        private readonly ProcessLocalStudyResults processLocalStudyResults = new ProcessLocalStudyResults();
+
         private readonly CommandOption outputFolderOption;
         private readonly CommandOption studyIdOption;
-        private readonly CommandOption jobIndexOption;
-        private readonly CommandOption jobIdOption;
-        private readonly CommandOption channelOption;
+        //private readonly CommandOption jobIndexOption;
+        //private readonly CommandOption jobIdOption;
+        //private readonly CommandOption channelOption;
 
-        private readonly CommandOption rawOption;
+        private readonly CommandOption keepOriginalFilesOption;
 
         public GetStudyCommand()
         {
@@ -32,7 +40,7 @@ namespace Canopy.Cli.Executable.Commands
                 "-s | --study-id",
                 $"The study to download.",
                 CommandOptionType.SingleValue);
-
+            /*
             this.jobIndexOption = this.Option(
                 "-i | --job-index",
                 $"The study job index to download (if omitted the entire study is downloaded).",
@@ -47,21 +55,20 @@ namespace Canopy.Cli.Executable.Commands
                 "-c | --channel",
                 $"The channel or channels to download (if omitted all channels are downloaded).",
                 CommandOptionType.MultipleValue);
-
-            this.rawOption = this.Option(
-                "--raw",
-                $"Do not perform any processing on downloaded data (if omitted the binary files will be converted to CSV with unit conversion applied).",
+            */
+            this.keepOriginalFilesOption = this.Option(
+                "-ko | --keep-original",
+                $"Do not delete files which have been processed (faster).",
                 CommandOptionType.NoValue);
         }
 
         protected override async Task<int> ExecuteAsync()
         {
             var outputFolder = Utilities.GetCreatedOutputFolder(this.outputFolderOption);
-
-
             
             var studyId = this.studyIdOption.ValueOrPrompt("Study ID: ", "Study ID is required.");
 
+            /*
             var jobIndex = this.jobIndexOption.Value();
             if (string.IsNullOrWhiteSpace(jobIndex))
             {
@@ -72,30 +79,87 @@ namespace Canopy.Cli.Executable.Commands
             {
                 throw new RecoverableException("Job index must be a valid non-negative integer.");
             }
+            */
 
-            var keepBinaryFiles = this.rawOption.HasValue();
+            var deleteProcessedFiles = !this.keepOriginalFilesOption.HasValue();
 
             var studyClient = new StudyClient(this.configuration);
             var studyMetadata = await studyClient.GetStudyMetadataWithoutUserIdAsync(this.authenticatedUser.TenantId, studyId);
 
-            Console.WriteLine(studyMetadata.AccessInformation.Url);
-            
-            Console.WriteLine("This command is not yet complete.");
-            //var container = new CloudBlobContainer(new Uri(studyMetadata.AccessInformation.)
+            // TODO: Handle expiration of access signatures.
+            var directories = this.GetAllStudyBlobDirectories(studyMetadata.AccessInformation);
+
+            const int crossServerParallelism = 4;
+            const int perServerParallelism = 2;
+            await directories.ForEachAsync(crossServerParallelism, async directory =>
+            {
+                BlobContinuationToken continuationToken = null;
+                do
+                {
+                    var segment = await directory.ListBlobsSegmentedAsync(true, BlobListingDetails.None, 1000, continuationToken, null, null);
+
+                    await segment.Results.OfType<CloudBlockBlob>().ForEachAsync(perServerParallelism, async blob =>
+                    {
+                        Console.Write(".");
+                        var relativeUri = directory.Uri.MakeRelativeUri(blob.Uri).ToString();
+                        var filePath = Path.Combine(outputFolder, relativeUri);
+                        Directory.CreateDirectory(Path.GetDirectoryName(filePath));
+                        await blob.DownloadToFileAsync(filePath, FileMode.Create);
+                    });
+
+                    continuationToken = segment.ContinuationToken;
+                }
+                while (continuationToken != null);
+            });
+
+            await this.processLocalStudyResults.ExecuteAsync(outputFolder, deleteProcessedFiles);
 
             return 0;
+        }
+
+        private IReadOnlyList<CloudBlobDirectory> GetAllStudyBlobDirectories(StudyBlobAccessInformation accessInformation)
+        {
+            var mainDirectory = this.GetStudyBlobDirectory(accessInformation.Url, accessInformation.AccessSignature);
+
+            var jobDirectories = accessInformation.Jobs.Select(v => this.GetStudyBlobDirectory(v.Url, v.AccessSignature));
+
+            return new List<CloudBlobDirectory> {mainDirectory}
+                .Concat(jobDirectories).ToList();
+        }
+
+        private CloudBlobDirectory GetStudyBlobDirectory(string url, string accessSignature)
+        {
+            const string containerUrlKey = "containerUrl";
+            const string studyPathKey = "studyPath";
+            var containerUrlMatch = Regex.Match(url, $@"^(?<{containerUrlKey}>.*)/(?<{studyPathKey}>[\w]*/[\w-]*/)$");
+            if (!containerUrlMatch.Success)
+            {
+                throw new RecoverableException("Unexpected study URL format: " + url);
+            }
+
+            var containerUrl = containerUrlMatch.Groups[containerUrlKey].Value;
+            var studyPath = containerUrlMatch.Groups[studyPathKey].Value;
+
+            var container = new CloudBlobContainer(new Uri(containerUrl + accessSignature));
+
+            var directory = container.GetDirectoryReference(studyPath);
+            return directory;
         }
 
         private class StudyDownloadTask
         {
             public StudyDownloadTask(string studyId, bool downloadStudyData, IReadOnlyList<StudyJobDownloadTask> jobs)
             {
+                this.StudyId = studyId;
                 this.DownloadStudyData = downloadStudyData;
+                this.Jobs = jobs;
             }
 
             public string StudyId { get; }
 
             public bool DownloadStudyData { get; }
+
+            public IReadOnlyList<StudyJobDownloadTask> Jobs { get; }
         }
 
         private class StudyJobDownloadTask
