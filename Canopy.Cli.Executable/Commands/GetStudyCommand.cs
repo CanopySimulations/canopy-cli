@@ -68,7 +68,7 @@ namespace Canopy.Cli.Executable.Commands
                 jobIndex = null;
             }
 
-            if(jobIndex != null && !uint.TryParse(jobIndex, out uint result))
+            if(jobIndex != null && !uint.TryParse(jobIndex, out uint _))
             {
                 throw new RecoverableException("Job index must be a valid non-negative integer.");
             }

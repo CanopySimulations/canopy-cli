@@ -40,8 +40,39 @@ namespace Canopy.Cli.Shared
         {
             var lines = input.SplitLines();
             var rowSets = lines.Select(v => v.SplitCsvLine().ToList()).ToList();
+            NormalizeCsvRows();
             return rowSets;
+
+            void NormalizeCsvRows()
+            {
+                if(rowSets.Count == 0)
+                {
+                    return;
+                }
+
+                var columnCount = rowSets.Select(v => v.Count).Max();
+                if(columnCount == 0)
+                {
+                    return;
+                }
+
+                // Pad out columns which are too short.
+                foreach(var row in rowSets)
+                {
+                    while(row.Count < columnCount)
+                    {
+                        row.Add(string.Empty);
+                    }
+                }
+
+                // Remove trailing empty columns.
+                while(rowSets.All(v => v.Count > 0 && string.IsNullOrWhiteSpace(v.Last())))
+                {
+                    rowSets.ForEach(v => v.RemoveAt(v.Count - 1));
+                }
+            }
         }
+
         public static IEnumerable<string> SplitLines(this string input)
         {
             return input.Split(new[] {'\r', '\n'}, StringSplitOptions.RemoveEmptyEntries);
@@ -68,7 +99,7 @@ namespace Canopy.Cli.Shared
             var innerCount = input.First().Count;
             if(input.Any(v => v.Count != innerCount))
             {
-                throw new InvalidOperationException("Every row must have the name number of columns.");
+                throw new InvalidOperationException("Every row must have the same number of columns.");
             }
 
             var result = new List<List<string>>();
