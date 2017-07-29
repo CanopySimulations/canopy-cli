@@ -3,7 +3,6 @@
     using System;
     using System.Collections.Concurrent;
     using System.Collections.Generic;
-    using System.Globalization;
     using System.Linq;
     using System.Text;
     using System.Threading.Tasks;
@@ -55,8 +54,19 @@
                     {
                         data.Sort((a, b) => String.Compare(a.ChannelName, b.ChannelName, StringComparison.OrdinalIgnoreCase));
 
-                        var maxDataLength = data.Select(v => v.Data.Length).Max();
+                        var firstItemLength = data[0].Data.Length;
+                        var excludedData = data.Where(v => v.Data.Length != firstItemLength).Select(v => v.ChannelName)
+                            .ToList();
 
+                        if (excludedData.Count > 0)
+                        {
+                            writer.ReportError(
+                                "Excluding channels from CSV download due to incorrect length: " +
+                                string.Join(",", excludedData),
+                                null);
+                        }
+
+                        data = data.Where(v => v.Data.Length == firstItemLength).ToList();
                         var csv = new StringBuilder();
                         csv.AppendLine(relativePathToFile + simType);
                         csv.AppendLine(string.Join(",", data.Select(v => v.ChannelName)));
@@ -72,12 +82,9 @@
                             return "\"" + units + "\"";
                         })));
 
-                        for (int i = 0; i < maxDataLength; i++)
+                        for (int i = 0; i < firstItemLength; i++)
                         {
-                            csv.AppendLine(
-                                string.Join(
-                                    ",", 
-                                    data.Select(v => v.Data.Length > i ? v.Data[i].ToString(CultureInfo.InvariantCulture) : "").ToList()));
+                            csv.AppendLine(string.Join(",", data.Select(v => v.Data[i])));
                         }
 
                         var bytes = Encoding.UTF8.GetBytes(csv.ToString());
