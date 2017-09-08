@@ -44,9 +44,9 @@ on_success:
  - appveyor PushArtifact ".\Canopy.Cli.Shared.%APPVEYOR_BUILD_VERSION%.nupkg"
 
 artifacts:
-  - path: Canopy.Cli.Executable\bin\Release\netcoreapp1.1\win10-x64\publish
+  - path: Canopy.Cli.Executable\bin\Release\netcoreapp2.0\win10-x64\publish
     name: canopy-cli-windows
-  - path: Canopy.Cli.Executable\bin\Release\netcoreapp1.1\osx.10.12-x64\publish
+  - path: Canopy.Cli.Executable\bin\Release\netcoreapp2.0\osx.10.12-x64\publish
     name: canopy-cli-mac
   - path: .\canopy-cli.*.nupkg
     name: nupkg
