@@ -3,6 +3,7 @@
     using System;
     using System.Collections.Concurrent;
     using System.Collections.Generic;
+    using System.Globalization;
     using System.Linq;
     using System.Text;
     using System.Threading.Tasks;
@@ -19,82 +20,80 @@
             foreach (var simType in channelDataColumns.SimTypes)
             {
                 var columns = channelDataColumns.GetColumns(simType);
-                var groupedColumns = columns.GroupBy(v => v.File.RelativePathToFile);
+                var folderGroups = columns.GroupBy(v => v.File.RelativePathToFile);
 
-                foreach (var group in groupedColumns)
+                foreach (var folderGroup in folderGroups)
                 {
-                    var relativePathToFile = group.Key;
-                    var unitsLookupTask = GetUnitsLookup(root, relativePathToFile, simType);
+                    var relativePathToFile = folderGroup.Key;
+                    var metadata = await GetSimTypeMetadataAsync(root, relativePathToFile, simType);
 
-                    var resolvedData = new ConcurrentQueue<ResolvedCsvColumn>();
-                    await group.ForEachAsync(
-                        parallelism,
-                        async column =>
-                        {
-                            try
-                            {
-                                var buffer = await column.File.GetContentAsBytesAsync();
-                                double[] values = new double[buffer.Length / sizeof(double)];
-                                Buffer.BlockCopy(buffer, 0, values, 0, buffer.Length);
-                                resolvedData.Enqueue(
-                                    new ResolvedCsvColumn(column.File, column.Metadata.ChannelName, values));
-                            }
-                            catch (Exception t)
-                            {
-                                writer.ReportError(
-                                    "Failed to parse file: " + column.File.FullPath,
-                                    t);
-                            }
-                        });
+                    var xDomainGroups = folderGroup.GroupBy(v => metadata.GetChannelXDomain(v.Metadata.ChannelName));
 
-                    var unitsLookup = await unitsLookupTask;
-
-                    var data = resolvedData.ToList();
-                    if (data.Count > 0)
+                    foreach (var xDomainGroup in xDomainGroups)
                     {
-                        data.Sort((a, b) => String.Compare(a.ChannelName, b.ChannelName, StringComparison.OrdinalIgnoreCase));
+                        var xDomain = xDomainGroup.Key.Trim();
+                        var fileSuffix = "_" + (string.IsNullOrWhiteSpace(xDomain) ? "Unspecified" : xDomain);
 
-                        var firstItemLength = data[0].Data.Length;
-                        var excludedData = data.Where(v => v.Data.Length != firstItemLength).Select(v => v.ChannelName)
-                            .ToList();
-
-                        if (excludedData.Count > 0)
-                        {
-                            writer.ReportError(
-                                "Excluding channels from CSV download due to incorrect length: " +
-                                string.Join(",", excludedData),
-                                null);
-                        }
-
-                        data = data.Where(v => v.Data.Length == firstItemLength).ToList();
-                        var csv = new StringBuilder();
-                        csv.AppendLine(relativePathToFile + simType);
-                        csv.AppendLine(string.Join(",", data.Select(v => v.ChannelName)));
-                        csv.AppendLine(string.Join(",", data.Select(v =>
-                        {
-                            string units;
-                            unitsLookup.TryGetValue(v.ChannelName, out units);
-                            if (string.IsNullOrWhiteSpace(units))
+                        var resolvedData = new ConcurrentQueue<ResolvedCsvColumn>();
+                        await xDomainGroup.ForEachAsync(
+                            parallelism,
+                            async column =>
                             {
-                                return "\"()\"";
+                                try
+                                {
+                                    var buffer = await column.File.GetContentAsBytesAsync();
+                                    double[] values = new double[buffer.Length / sizeof(double)];
+                                    Buffer.BlockCopy(buffer, 0, values, 0, buffer.Length);
+                                    resolvedData.Enqueue(
+                                        new ResolvedCsvColumn(column.File, column.Metadata.ChannelName, values));
+                                }
+                                catch (Exception t)
+                                {
+                                    writer.ReportError(
+                                        "Failed to parse file: " + column.File.FullPath,
+                                        t);
+                                }
+                            });
+
+                        var data = resolvedData.ToList();
+                        if (data.Count > 0)
+                        {
+                            data.Sort((a, b) => String.Compare(a.ChannelName, b.ChannelName, StringComparison.OrdinalIgnoreCase));
+
+                            var maxDataLength = data.Select(v => v.Data.Length).Max();
+                            var csv = new StringBuilder();
+                            csv.AppendLine(relativePathToFile + simType);
+                            csv.AppendLine(string.Join(",", data.Select(v => v.ChannelName)));
+                            csv.AppendLine(string.Join(",", data.Select(v =>
+                            {
+                                var units = metadata.GetChannelUnits(v.ChannelName);
+                                if (string.IsNullOrWhiteSpace(units))
+                                {
+                                    return "\"()\"";
+                                }
+
+                                return "\"" + units + "\"";
+                            })));
+
+                            for (int i = 0; i < maxDataLength; i++)
+                            {
+                                csv.AppendLine(
+                                    string.Join(
+                                        ",",
+                                        data.Select(v => v.Data.Length > i ? v.Data[i].ToString(CultureInfo.InvariantCulture) : "").ToList()));
                             }
 
-                            return "\"" + units + "\"";
-                        })));
+                            var bytes = Encoding.UTF8.GetBytes(csv.ToString());
+                            var fileName = simType + "_VectorResults" + fileSuffix + ".csv";
+                            Console.WriteLine($"Writing '{fileName}' to '{relativePathToFile}'.");
+                            await writer.WriteNewFile(root, relativePathToFile, simType + "_VectorResults" + fileSuffix +  ".csv", bytes);
 
-                        for (int i = 0; i < firstItemLength; i++)
-                        {
-                            csv.AppendLine(string.Join(",", data.Select(v => v.Data[i])));
-                        }
-
-                        var bytes = Encoding.UTF8.GetBytes(csv.ToString());
-                        await writer.WriteNewFile(root, relativePathToFile, simType + "_VectorResults.csv", bytes);
-
-                        if (deleteProcessedFiles)
-                        {
-                            foreach (var column in data)
+                            if (deleteProcessedFiles)
                             {
-                                await writer.DeleteProcessedFile(root, column.File);
+                                foreach (var column in data)
+                                {
+                                    await writer.DeleteProcessedFile(root, column.File);
+                                }
                             }
                         }
                     }
@@ -102,12 +101,13 @@
             }
         }
 
-        private static async Task<Dictionary<string, string>> GetUnitsLookup(
+        private static async Task<SimTypeMetadataResult> GetSimTypeMetadataAsync(
             IRootFolder baseDirectory,
             string relativePathToFile, 
             string simType)
         {
             var unitsLookup = new Dictionary<string, string>();
+            var xDomainLookup = new Dictionary<string, string>();
             try
             {
                 var text = await baseDirectory.GetContentAsTextAsync(
@@ -124,6 +124,10 @@
                             {
                                 unitsLookup[values[0].WithoutQuotes()] = values[1].WithoutQuotes();
                             }
+                            if (values.Count >= 5)
+                            {
+                                xDomainLookup[values[0].WithoutQuotes()] = values[4].WithoutQuotes();
+                            }
                         }
                         catch (Exception t)
                         {
@@ -139,7 +143,32 @@
                 Console.WriteLine(t);
             }
 
-            return unitsLookup;
+            return new SimTypeMetadataResult(unitsLookup, xDomainLookup);
+        }
+
+        public class SimTypeMetadataResult
+        {
+            private Dictionary<string, string> unitsLookup;
+
+            private Dictionary<string, string> xDomainLookup;
+
+            public SimTypeMetadataResult(Dictionary<string, string> unitsLookup, Dictionary<string, string> xDomainLookup)
+            {
+                this.unitsLookup = unitsLookup;
+                this.xDomainLookup = xDomainLookup;
+            }
+
+            public string GetChannelUnits(string channelName)
+            {
+                this.unitsLookup.TryGetValue(channelName, out var units);
+                return units ?? string.Empty;
+            }
+
+            public string GetChannelXDomain(string channelName)
+            {
+                this.xDomainLookup.TryGetValue(channelName, out var domain);
+                return domain ?? string.Empty;
+            }
         }
     }
 }

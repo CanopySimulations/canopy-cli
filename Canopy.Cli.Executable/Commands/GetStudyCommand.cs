@@ -11,6 +11,7 @@ namespace Canopy.Cli.Executable.Commands
     using System.IO;
     using System.Linq;
     using System.Text.RegularExpressions;
+    using System.Web;
     using Canopy.Cli.Executable.Helpers;
     using Canopy.Cli.Shared;
 
@@ -102,6 +103,7 @@ namespace Canopy.Cli.Executable.Commands
                     {
                         Console.Write(".");
                         var relativeUri = directory.Uri.MakeRelativeUri(blob.Uri).ToString();
+                        relativeUri = HttpUtility.UrlDecode(relativeUri);
                         var filePath = Path.Combine(outputFolder, relativeUri);
                         Directory.CreateDirectory(Path.GetDirectoryName(filePath));
                         await blob.DownloadToFileAsync(filePath, FileMode.Create);
