@@ -80,7 +80,7 @@
                                 csv.AppendLine(
                                     string.Join(
                                         ",",
-                                        data.Select(v => v.Data.Length > i ? v.Data[i].ToString(CultureInfo.InvariantCulture) : "").ToList()));
+                                        data.Select(v => v.Data.Length > i ? v.Data[i].NumericOrNaN().ToString(CultureInfo.InvariantCulture) : "").ToList()));
                             }
 
                             var bytes = Encoding.UTF8.GetBytes(csv.ToString());

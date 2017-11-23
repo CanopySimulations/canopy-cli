@@ -151,5 +151,15 @@ namespace Canopy.Cli.Shared
         {
             return ToJavascriptString((double) input);
         }
+
+        public static double NumericOrNaN(this double input)
+        {
+            if (double.IsInfinity(input))
+            {
+                return double.NaN;
+            }
+
+            return input;
+        }
     }
 }
