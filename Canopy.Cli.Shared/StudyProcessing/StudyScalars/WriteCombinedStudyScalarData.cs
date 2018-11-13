@@ -115,7 +115,8 @@
             var content = await file.GetContentAsTextAsync();
             var rows = content.ToCsvRows();
             var result = rows.Select(r => new ScalarMetadataItem(
-                r[0], 
+                r[0],
+                r[3],
                 $"{r[0]}:{r[3]}", 
                 r[1],
                 r[2])).ToList();
@@ -134,6 +135,7 @@
             var rows = content.ToCsvRows();
             var result = rows.Select(r => new ScalarMetadataItem(
                 r[0],
+                null,
                 r[0],
                 r[1],
                 r[2])).ToList();
@@ -165,15 +167,17 @@
 
     public class ScalarMetadataItem
     {
-        public ScalarMetadataItem(string name, string fullName, string units, string description)
+        public ScalarMetadataItem(string name, string simType, string fullName, string units, string description)
         {
             this.Name = name;
+            this.SimType = simType;
             this.FullName = fullName;
             this.Units = units;
             this.Description = description;
         }
 
         public string Name { get; }
+        public string SimType { get; }
         public string FullName { get; }
         public string Units { get; }
         public string Description { get; }
