@@ -30,11 +30,14 @@ build_script:
       (Get-Content '.\Canopy.Cli.Shared\Canopy.Cli.Shared.csproj' -Raw).Replace("<AssemblyVersion>0.0.0.0</AssemblyVersion>", "<AssemblyVersion>$($env:APPVEYOR_BUILD_VERSION)</AssemblyVersion>") | Out-File '.\Canopy.Cli.Shared\Canopy.Cli.Shared.csproj'
       (Get-Content '.\Canopy.Cli.Shared\Canopy.Cli.Shared.csproj' -Raw).Replace("<FileVersion>0.0.0.0</FileVersion>", "<FileVersion>$($env:APPVEYOR_BUILD_VERSION)</FileVersion>") | Out-File '.\Canopy.Cli.Shared\Canopy.Cli.Shared.csproj'
   - dotnet restore ".\Canopy.Cli.Shared\Canopy.Cli.Shared.csproj"
+  - dotnet build -c Release .\Canopy.Cli.Shared\Canopy.Cli.Shared.csproj
   - dotnet publish -c Release .\Canopy.Cli.Shared\Canopy.Cli.Shared.csproj
   - copy ".\Canopy.Cli.Shared\bin\Release\Canopy.Cli.Shared.%APPVEYOR_BUILD_VERSION%.nupkg" .
   - dotnet restore -r win10-x64
+  - dotnet build -c Release -r win10-x64
   - dotnet publish -c Release -r win10-x64
   - dotnet restore -r osx.10.12-x64
+  - dotnet build -c Release -r osx.10.12-x64
   - dotnet publish -c Release -r osx.10.12-x64
   - ps: |
       (Get-Content '.\canopy-cli.nuspec' -Raw).Replace("<version>0.0.0</version>", "<version>$($env:APPVEYOR_BUILD_VERSION)</version>") | Out-File '.\canopy-cli.nuspec'
