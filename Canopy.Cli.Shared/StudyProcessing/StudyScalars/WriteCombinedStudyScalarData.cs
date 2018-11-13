@@ -34,13 +34,10 @@
             var results = new List<ScalarResultItem>();
             var metadata = new List<ScalarMetadataItem>();
 
-            var scalarResults = await LoadScalarResults(studyScalarFiles.ScalarResults);
-            var scalarMetadata = await LoadScalarMetadata(studyScalarFiles.ScalarMetadata);
+            var scalarResultsFile = studyScalarFiles.ScalarResults;
+            var scalarMetadataFile = studyScalarFiles.ScalarMetadata;
 
-            var jobIndexColumn = scalarResults.First();
-            scalarResults = scalarResults.Skip(1).ToList(); // Skip the job index column.
-            scalarMetadata = scalarMetadata.Skip(1).ToList(); // Skip the column titles row.
-            scalarResults = scalarResults.Select((r, i) => r.WithMetadata(scalarMetadata?.Count > i ? scalarMetadata[i] : null)).ToList();
+            var (scalarResults, scalarMetadata, jobIndexColumn) = await GetStudyScalarResultsFileContent(scalarResultsFile, scalarMetadataFile);
 
             var scalarInputs = await LoadScalarResults(studyScalarFiles.ScalarInputs);
             var scalarInputsMetadata = await LoadScalarInputsMetadata(studyScalarFiles.ScalarInputsMetadata);
@@ -72,6 +69,24 @@
             }
 
             return csv.ToString();
+        }
+
+        public static async Task<IReadOnlyList<ScalarResultItem>> GetStudyScalarResultsFromMergedFiles(IFile scalarResultsFile, IFile scalarMetadataFile)
+        {
+            var (scalarResults, scalarMetadata, jobIndexColumn) = await GetStudyScalarResultsFileContent(scalarResultsFile, scalarMetadataFile);
+            return scalarResults;
+        }
+
+        private static async Task<(IReadOnlyList<ScalarResultItem> scalarResults, IReadOnlyList<ScalarMetadataItem> scalarMetadata, ScalarResultItem jobIndexColumn)> GetStudyScalarResultsFileContent(IFile scalarResultsFile, IFile scalarMetadataFile)
+        {
+            var scalarResults = await LoadScalarResults(scalarResultsFile);
+            var scalarMetadata = await LoadScalarMetadata(scalarMetadataFile);
+
+            var jobIndexColumn = scalarResults.First();
+            scalarResults = scalarResults.Skip(1).ToList(); // Skip the job index column.
+            scalarMetadata = scalarMetadata.Skip(1).ToList(); // Skip the column titles row.
+            scalarResults = scalarResults.Select((r, i) => r.WithMetadata(scalarMetadata?.Count > i ? scalarMetadata[i] : null)) .ToList();
+            return (scalarResults, scalarMetadata, jobIndexColumn);
         }
 
         private static async Task<IReadOnlyList<ScalarResultItem>> LoadScalarResults(IFile file)
