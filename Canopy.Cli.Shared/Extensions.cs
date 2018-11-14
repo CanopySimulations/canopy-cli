@@ -38,6 +38,11 @@ namespace Canopy.Cli.Shared
 
         public static IReadOnlyList<IReadOnlyList<string>> ToCsvRows(this string input)
         {
+            if (input == null)
+            {
+                return new List<IReadOnlyList<string>>();
+            }
+
             var lines = input.SplitLines();
             var rowSets = lines.Select(v => v.SplitCsvLine().ToList()).ToList();
             NormalizeCsvRows();

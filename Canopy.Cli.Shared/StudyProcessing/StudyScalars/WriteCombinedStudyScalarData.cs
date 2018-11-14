@@ -39,6 +39,11 @@
 
             var (scalarResults, scalarMetadata, jobIndexColumn) = await GetStudyScalarResultsFileContent(scalarResultsFile, scalarMetadataFile);
 
+            if (scalarResults.Count == 0 || scalarMetadata.Count == 0 || jobIndexColumn == null)
+            {
+                return null;
+            }
+
             var scalarInputs = await LoadScalarResults(studyScalarFiles.ScalarInputs);
             var scalarInputsMetadata = await LoadScalarInputsMetadata(studyScalarFiles.ScalarInputsMetadata);
             scalarInputsMetadata = scalarInputsMetadata.Skip(1).ToList(); // Skip the column titles row.
@@ -81,6 +86,11 @@
         {
             var scalarResults = await LoadScalarResults(scalarResultsFile);
             var scalarMetadata = await LoadScalarMetadata(scalarMetadataFile);
+
+            if (scalarResults.Count == 0 || scalarMetadata.Count == 0)
+            {
+                return (new List<ScalarResultItem>(), new List<ScalarMetadataItem>(), null);
+            }
 
             var jobIndexColumn = scalarResults.First();
             scalarResults = scalarResults.Skip(1).ToList(); // Skip the job index column.
