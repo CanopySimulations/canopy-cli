@@ -85,7 +85,7 @@ namespace Canopy.Cli.Shared
 
             foreach (Match match in csvSplit.Matches(input))
             {
-                yield return match.Value.TrimStart(',').WithoutQuotes();
+                yield return match.Value.TrimStart(',').Trim().WithoutQuotes().Trim();
             }
         }
 
