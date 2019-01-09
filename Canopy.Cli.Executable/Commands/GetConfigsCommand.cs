@@ -79,71 +79,83 @@ namespace Canopy.Cli.Executable.Commands
                 userId = this.userIdOption.Value();
             }
 
-            JObject filter = null;
+            var filter = new JObject(
+                new JProperty("continuationToken", null));
+
             if (!string.IsNullOrWhiteSpace(userId))
             {
-                filter = new JObject(
+                filter.Add(
                     new JProperty("filterUserId", userId));
             }
 
             Console.WriteLine("Requesting configs...");
 			var configClient = new ConfigClient(this.configuration);
-			var result = await configClient.GetConfigsAsync(
-                this.authenticatedUser.TenantId, 
-                configType, 
-                filter?.ToString(Formatting.None), 
-                null);
-
-            if (this.outputFolderOption.HasValue())
+			GetConfigsQueryResult result = null;
+            do
             {
-                var format = this.formatOption.HasValue();
-                var unwrap = this.unwrapOption.HasValue();
-                var outputFolder = Utilities.GetCreatedOutputFolder(this.outputFolderOption);
-                var simVersion = this.simVersionOption.Value();
-
-                var sizes = new List<int>();
-
-                foreach(var configMetadata in result.QueryResults.Documents)
+                if (result != null)
                 {
-                    Console.WriteLine($"Downloading {configMetadata.Name}...");
-
-                    var config = await configClient.GetConfigAsync(
-                        configMetadata.TenantId,
-                        configMetadata.UserId,
-                        configMetadata.DocumentId,
-                        null,
-                        simVersion);
-
-                    var content = JObject.FromObject(config.Config.Data);
-                    if (!unwrap)
-                    {
-                        content = new JObject(
-                            new JProperty("simVersion", config.ConvertedSimVersion),
-                            new JProperty("config", content));
-                    }
-
-                    var formatting = format ? Formatting.Indented : Formatting.None;
-
-                    var contentString = content.ToString(formatting);
-
-                    File.WriteAllText(
-                        Path.Combine(outputFolder, FileNameUtilities.Sanitize(config.Config.Name) + ".json"), 
-                        contentString);
-
-                    sizes.Add(contentString.Length);
+                    filter["continuationToken"] = result.QueryResults.ContinuationToken;
                 }
 
-                Utilities.WriteTable(
-                    new[] { "Name", "Id", "UserId", "Size" },
-                    result.QueryResults.Documents
-                        .Zip(sizes, (d, s) => new { d, s }).Select(v => new string[] { v.d.Name, v.d.DocumentId, v.d.UserId, v.s.ToString() }));
+                result = await configClient.GetConfigsAsync(
+                    this.authenticatedUser.TenantId,
+                    configType,
+                    filter.ToString(Formatting.None),
+                    null);
+
+                if (this.outputFolderOption.HasValue())
+                {
+                    var format = this.formatOption.HasValue();
+                    var unwrap = this.unwrapOption.HasValue();
+                    var outputFolder = Utilities.GetCreatedOutputFolder(this.outputFolderOption);
+                    var simVersion = this.simVersionOption.Value();
+
+                    var sizes = new List<int>();
+
+                    foreach (var configMetadata in result.QueryResults.Documents)
+                    {
+                        Console.WriteLine($"Downloading {configMetadata.Name}...");
+
+                        var config = await configClient.GetConfigAsync(
+                            configMetadata.TenantId,
+                            configMetadata.UserId,
+                            configMetadata.DocumentId,
+                            null,
+                            simVersion);
+
+                        var content = JObject.FromObject(config.Config.Data);
+                        if (!unwrap)
+                        {
+                            content = new JObject(
+                                new JProperty("simVersion", config.ConvertedSimVersion),
+                                new JProperty("config", content));
+                        }
+
+                        var formatting = format ? Formatting.Indented : Formatting.None;
+
+                        var contentString = content.ToString(formatting);
+
+                        File.WriteAllText(
+                            Path.Combine(outputFolder, FileNameUtilities.Sanitize(config.Config.Name) + ".json"),
+                            contentString);
+
+                        sizes.Add(contentString.Length);
+                    }
+
+                    Utilities.WriteTable(
+                        new[] { "Name", "Id", "UserId", "Size" },
+                        result.QueryResults.Documents
+                            .Zip(sizes, (d, s) => new { d, s }).Select(v => new string[] { v.d.Name, v.d.DocumentId, v.d.UserId, v.s.ToString() }));
+                }
+                else
+                {
+                    Utilities.WriteTable(
+                        new[] { "Name", "Id", "UserId" },
+                        result.QueryResults.Documents.Select(v => new string[] { v.Name, v.DocumentId, v.UserId }));
+                }
             }
-            else
-            {
-                Utilities.WriteTable(
-                    new[] { "Name", "Id", "UserId" },
-                    result.QueryResults.Documents.Select(v => new string[] { v.Name, v.DocumentId, v.UserId }));
-            }
+            while(result.QueryResults.HasMoreResults == true);
 
             return 0;
         }
