@@ -58,7 +58,27 @@
                         var data = resolvedData.ToList();
                         if (data.Count > 0)
                         {
-                            data.Sort((a, b) => String.Compare(a.ChannelName, b.ChannelName, StringComparison.OrdinalIgnoreCase));
+                            // Always put sLap at the start for ATLAS compatibility.
+                            const string AtlasPrimaryChannel = "tRun";
+                            data.Sort((a, b) =>
+                            {
+                                if (a == b)
+                                {
+                                    return 0;
+                                }
+
+                                if (a.ChannelName == AtlasPrimaryChannel)
+                                {
+                                    return -1;
+                                }
+
+                                if (b.ChannelName == AtlasPrimaryChannel)
+                                {
+                                    return 1;
+                                }
+
+                                return String.Compare(a.ChannelName, b.ChannelName, StringComparison.OrdinalIgnoreCase);
+                            });
 
                             var maxDataLength = data.Select(v => v.Data.Length).Max();
                             var csv = new StringBuilder();
