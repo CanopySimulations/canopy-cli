@@ -50,7 +50,7 @@ namespace Canopy.Cli.Executable.Commands
                 new ConnectionInformation(endpoint, clientId, clientSecret));
 
             var availabilityClient = new AvailabilityClient(this.configuration);
-            await availabilityClient.GetAsync();
+            await availabilityClient.GetAsync(false);
             return 0;
 		}
     }

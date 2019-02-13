@@ -51,7 +51,7 @@ namespace Canopy.Cli.Executable.Commands
         private async Task TestAuthenticated()
         {
 			var configClient = new ConfigClient(this.configuration);
-			var result = await configClient.GetConfigsAsync(this.authenticatedUser.TenantId, "car", null, null);
+			var result = await configClient.GetConfigsAsync(this.authenticatedUser.TenantId, "car", null, null, null);
 		}
 
     }

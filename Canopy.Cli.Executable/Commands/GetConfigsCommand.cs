@@ -102,6 +102,7 @@ namespace Canopy.Cli.Executable.Commands
                     this.authenticatedUser.TenantId,
                     configType,
                     filter.ToString(Formatting.None),
+                    null,
                     null);
 
                 if (this.outputFolderOption.HasValue())
@@ -122,7 +123,8 @@ namespace Canopy.Cli.Executable.Commands
                             configMetadata.UserId,
                             configMetadata.DocumentId,
                             null,
-                            simVersion);
+                            simVersion,
+                            null);
 
                         var content = JObject.FromObject(config.Config.Data);
                         if (!unwrap)
