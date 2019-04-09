@@ -120,7 +120,6 @@ namespace Canopy.Cli.Executable.Commands
 
                         var config = await configClient.GetConfigAsync(
                             configMetadata.TenantId,
-                            configMetadata.UserId,
                             configMetadata.DocumentId,
                             null,
                             simVersion,

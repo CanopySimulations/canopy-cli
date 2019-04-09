@@ -85,7 +85,7 @@ namespace Canopy.Cli.Executable.Commands
             var deleteProcessedFiles = !this.keepOriginalFilesOption.HasValue();
 
             var studyClient = new StudyClient(this.configuration);
-            var studyMetadata = await studyClient.GetStudyMetadataWithoutUserIdAsync(this.authenticatedUser.TenantId, studyId);
+            var studyMetadata = await studyClient.GetStudyMetadataAsync(this.authenticatedUser.TenantId, studyId);
 
             // TODO: Handle expiration of access signatures.
             var directories = this.GetAllStudyBlobDirectories(studyMetadata.AccessInformation);
