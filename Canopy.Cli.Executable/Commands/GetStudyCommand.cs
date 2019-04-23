@@ -133,7 +133,7 @@ namespace Canopy.Cli.Executable.Commands
         {
             const string containerUrlKey = "containerUrl";
             const string studyPathKey = "studyPath";
-            var containerUrlMatch = Regex.Match(url, $@"^(?<{containerUrlKey}>.*)/(?<{studyPathKey}>[\w]*/[\w-]*/)$");
+            var containerUrlMatch = Regex.Match(url, $@"^(?<{containerUrlKey}>https://[^/]*/[\w]*)/(?<{studyPathKey}>.*)$");
             if (!containerUrlMatch.Success)
             {
                 throw new RecoverableException("Unexpected study URL format: " + url);

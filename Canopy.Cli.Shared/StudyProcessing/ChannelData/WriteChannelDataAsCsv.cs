@@ -41,11 +41,27 @@
                             {
                                 try
                                 {
+                                    var pointsInChannel = metadata.GetPointsInChannel(column.Metadata.ChannelName);
                                     var buffer = await column.File.GetContentAsBytesAsync();
-                                    double[] values = new double[buffer.Length / sizeof(double)];
-                                    Buffer.BlockCopy(buffer, 0, values, 0, buffer.Length);
-                                    resolvedData.Enqueue(
-                                        new ResolvedCsvColumn(column.File, column.Metadata.ChannelName, values));
+                                    if (buffer.Length == pointsInChannel * 4)
+                                    {
+                                        var floatValues = new float[buffer.Length / sizeof(float)];
+                                        Buffer.BlockCopy(buffer, 0, floatValues, 0, buffer.Length);
+                                        var values = new double[floatValues.Length];
+                                        for (int i = 0; i < floatValues.Length; i++)
+                                        {
+                                            values[i] = (double) floatValues[i];
+                                        }
+                                        resolvedData.Enqueue(
+                                            new ResolvedCsvColumn(column.File, column.Metadata.ChannelName, values));
+                                    }
+                                    else
+                                    {
+                                        var values = new double[buffer.Length / sizeof(double)];
+                                        Buffer.BlockCopy(buffer, 0, values, 0, buffer.Length);
+                                        resolvedData.Enqueue(
+                                            new ResolvedCsvColumn(column.File, column.Metadata.ChannelName, values));
+                                    }
                                 }
                                 catch (Exception t)
                                 {
@@ -126,8 +142,7 @@
             string relativePathToFile, 
             string simType)
         {
-            var unitsLookup = new Dictionary<string, string>();
-            var xDomainLookup = new Dictionary<string, string>();
+            var lookup = new Dictionary<string, SimTypeMetadataRow>();
             try
             {
                 var text = await baseDirectory.GetContentAsTextAsync(
@@ -140,14 +155,15 @@
                         try
                         {
                             var values = line.SplitCsvLine().ToList();
-                            if (values.Count >= 2)
+                            var units = values.Count >= 2 ? values[1].WithoutQuotes() : null;
+                            var xDomain = values.Count >= 5 ? values[4].WithoutQuotes() : null;
+                            var pointsInChannel = 0;
+                            if (values.Count >= 4)
                             {
-                                unitsLookup[values[0].WithoutQuotes()] = values[1].WithoutQuotes();
+                                var pointsInChannelString = values[3].WithoutQuotes();
+                                int.TryParse(pointsInChannelString, out pointsInChannel);
                             }
-                            if (values.Count >= 5)
-                            {
-                                xDomainLookup[values[0].WithoutQuotes()] = values[4].WithoutQuotes();
-                            }
+                            lookup[values[0].WithoutQuotes()] = new SimTypeMetadataRow(units, xDomain, pointsInChannel);
                         }
                         catch (Exception t)
                         {
@@ -163,32 +179,50 @@
                 Console.WriteLine(t);
             }
 
-            return new SimTypeMetadataResult(unitsLookup, xDomainLookup);
+            return new SimTypeMetadataResult(lookup);
         }
 
         public class SimTypeMetadataResult
         {
-            private Dictionary<string, string> unitsLookup;
+            private Dictionary<string, SimTypeMetadataRow> lookup;
 
-            private Dictionary<string, string> xDomainLookup;
-
-            public SimTypeMetadataResult(Dictionary<string, string> unitsLookup, Dictionary<string, string> xDomainLookup)
+            public SimTypeMetadataResult(
+                Dictionary<string, SimTypeMetadataRow> lookup)
             {
-                this.unitsLookup = unitsLookup;
-                this.xDomainLookup = xDomainLookup;
+                this.lookup = lookup;
             }
 
             public string GetChannelUnits(string channelName)
             {
-                this.unitsLookup.TryGetValue(channelName, out var units);
-                return units ?? string.Empty;
+                this.lookup.TryGetValue(channelName, out var row);
+                return row?.Units ?? string.Empty;
             }
 
             public string GetChannelXDomain(string channelName)
             {
-                this.xDomainLookup.TryGetValue(channelName, out var domain);
-                return domain ?? string.Empty;
+                this.lookup.TryGetValue(channelName, out var row);
+                return row?.XDomain ?? string.Empty;
             }
+
+            public int GetPointsInChannel(string channelName)
+            {
+                this.lookup.TryGetValue(channelName, out var row);
+                return row?.PointsInChannel ?? 0;
+            }
+        }
+
+        public class SimTypeMetadataRow
+        {
+            public SimTypeMetadataRow(string units, string xDomain, int pointsInChannel)
+            {
+                this.Units = units;
+                this.XDomain = xDomain;
+                this.PointsInChannel = pointsInChannel;
+            }
+
+            public string Units { get; }
+            public string XDomain { get; }
+            public int PointsInChannel { get; }
         }
     }
 }
