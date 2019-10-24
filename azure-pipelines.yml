@@ -1,0 +1,38 @@
+# ASP.NET Core
+# Build and test ASP.NET Core projects targeting .NET Core.
+# Add steps that run tests, create a NuGet package, deploy, and more:
+# https://docs.microsoft.com/azure/devops/pipelines/languages/dotnet-core
+
+trigger:
+- master
+
+pool:
+  vmImage: 'windows-latest'
+
+variables:
+  major: 1
+  # Define a counter to continue on from AppVeyor.
+  minor: $[counter('temp', 0)]
+  version: $[format('{0}.{1}', variables.major, variables.minor)]
+
+steps:
+- script: |
+    echo Version is $(version)
+
+- powershell: |
+    (Get-Content '.\Canopy.Cli.Shared\Canopy.Cli.Shared.csproj' -Raw).Replace("<Version>0.0.0</Version>", "<Version>$($env:VERSION)</Version>") | Out-File '.\Canopy.Cli.Shared\Canopy.Cli.Shared.csproj'
+    (Get-Content '.\Canopy.Cli.Shared\Canopy.Cli.Shared.csproj' -Raw).Replace("<AssemblyVersion>0.0.0.0</AssemblyVersion>", "<AssemblyVersion>$($env:VERSION)</AssemblyVersion>") | Out-File '.\Canopy.Cli.Shared\Canopy.Cli.Shared.csproj'
+    (Get-Content '.\Canopy.Cli.Shared\Canopy.Cli.Shared.csproj' -Raw).Replace("<FileVersion>0.0.0.0</FileVersion>", "<FileVersion>$($env:VERSION)</FileVersion>") | Out-File '.\Canopy.Cli.Shared\Canopy.Cli.Shared.csproj'
+
+- script: |
+    dotnet restore ".\Canopy.Cli.Shared\Canopy.Cli.Shared.csproj"
+    dotnet build -c Release .\Canopy.Cli.Shared\Canopy.Cli.Shared.csproj
+    dotnet publish -c Release .\Canopy.Cli.Shared\Canopy.Cli.Shared.csproj
+    copy ".\Canopy.Cli.Shared\bin\Release\Canopy.Cli.Shared.%VERSION%.nupkg" .
+    dotnet restore -r win10-x64
+    dotnet build -c Release -r win10-x64
+    dotnet publish -c Release -r win10-x64
+    dotnet restore -r osx.10.12-x64
+    dotnet build -c Release -r osx.10.12-x64
+    dotnet publish -c Release -r osx.10.12-x64
+  displayName: 'dotnet build $(buildConfiguration)'
