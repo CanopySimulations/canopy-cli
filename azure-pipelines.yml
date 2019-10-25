@@ -77,7 +77,7 @@ steps:
     command: 'push'
     packagesToPush: '$(Build.ArtifactStagingDirectory)/**/*.nupkg;!$(Build.ArtifactStagingDirectory)/**/*.symbols.nupkg'
     nuGetFeedType: 'internal'
-    publishVstsFeed: '20d08566-c42a-44c8-b627-3f221476c5c4'
+    publishVstsFeed: '156d67a5-e250-4ecf-bbe2-086bde6e26c2/7705f740-1dee-41d0-ac4d-15e2db94bc0a'
 
 - task: GitHubRelease@1
   condition: startsWith(variables['Build.SourceBranch'], 'refs/tags/')
