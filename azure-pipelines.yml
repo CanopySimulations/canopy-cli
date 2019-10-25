@@ -71,6 +71,13 @@ steps:
     archiveType: 'zip'
     archiveFile: '$(Build.ArtifactStagingDirectory)/canopy-cli-mac.zip'
     replaceExistingArchive: true
+    
+- task: NuGetCommand@2
+  inputs:
+    command: 'push'
+    packagesToPush: '$(Build.ArtifactStagingDirectory)/**/*.nupkg;!$(Build.ArtifactStagingDirectory)/**/*.symbols.nupkg'
+    nuGetFeedType: 'internal'
+    publishVstsFeed: '20d08566-c42a-44c8-b627-3f221476c5c4'
 
 - task: GitHubRelease@1
   condition: startsWith(variables['Build.SourceBranch'], 'refs/tags/')
@@ -84,10 +91,3 @@ steps:
     releaseNotesSource: 'inline'
     releaseNotesInline: 'Canopy Simulations CLI release.'
     addChangeLog: false
-
-- task: NuGetCommand@2
-  inputs:
-    command: 'push'
-    packagesToPush: '$(Build.ArtifactStagingDirectory)/**/*.nupkg;!$(Build.ArtifactStagingDirectory)/**/*.symbols.nupkg'
-    nuGetFeedType: 'internal'
-    publishVstsFeed: '20d08566-c42a-44c8-b627-3f221476c5c4'
