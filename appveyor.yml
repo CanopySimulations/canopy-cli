@@ -5,8 +5,9 @@ build:
 
 branches:
   only:
-    - master
-    - /^v[0-9]+\.*/
+    - disabled
+    #- master
+    #- /^v[0-9]+\.*/
 
 assembly_info:
   patch: true
