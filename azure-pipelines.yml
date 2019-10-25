@@ -18,7 +18,7 @@ variables:
   major: 0
   # Define a counter to continue on from AppVeyor.
   minor: $[counter(variables.major, 87)]
-  buildVersion: $[format('{0}.{1}', variables.major, variables.minor)]
+  buildVersion: $[format('{0}.{1}.0', variables.major, variables.minor)]
 
 steps:
 - powershell: |
@@ -35,18 +35,26 @@ steps:
     (Get-Content '.\Canopy.Cli.Shared\Canopy.Cli.Shared.csproj' -Raw).Replace("<FileVersion>0.0.0.0</FileVersion>", "<FileVersion>$($env:BUILDVERSION)</FileVersion>") | Out-File '.\Canopy.Cli.Shared\Canopy.Cli.Shared.csproj'
   displayName: 'Update release version in files'
 
-- script: |
+- powershell: |
+    Write-Host "Building nupkg"
     dotnet restore ".\Canopy.Cli.Shared\Canopy.Cli.Shared.csproj"
     dotnet build -c Release .\Canopy.Cli.Shared\Canopy.Cli.Shared.csproj
     dotnet publish -c Release .\Canopy.Cli.Shared\Canopy.Cli.Shared.csproj
-    copy ".\Canopy.Cli.Shared\bin\Release\Canopy.Cli.Shared.%BUILDVERSION%.nupkg" "%BUILD_ARTIFACTSTAGINGDIRECTORY%"
+    $packageSource = "$env:BUILD_SOURCESDIRECTORY\Canopy.Cli.Shared\bin\Release\Canopy.Cli.Shared.$($env:BUILDVERSION).nupkg"
+    $packageTarget = "$env:BUILD_ARTIFACTSTAGINGDIRECTORY"
+    Write-Host "Copying $packageSource to $packageTarget"
+    copy "$packageSource" "$packageTarget"
+
+    Write-Host "Building Windows"
     dotnet restore -r win10-x64
     dotnet build -c Release -r win10-x64
     dotnet publish -c Release -r win10-x64
+
+    Write-Host "Building OSX"
     dotnet restore -r osx.10.12-x64
     dotnet build -c Release -r osx.10.12-x64
     dotnet publish -c Release -r osx.10.12-x64
-  displayName: 'dotnet build $(buildConfiguration)'
+  displayName: 'dotnet build'
 
 - task: ArchiveFiles@2
   inputs:
