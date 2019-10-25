@@ -3,18 +3,19 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0.26403.7
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Canopy.Api.Client", "Canopy.Api.Client\Canopy.Api.Client.csproj", "{DAC44429-4DB6-4D17-AC37-0424591E989C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Canopy.Api.Client", "Canopy.Api.Client\Canopy.Api.Client.csproj", "{DAC44429-4DB6-4D17-AC37-0424591E989C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Canopy.Cli.Executable", "Canopy.Cli.Executable\Canopy.Cli.Executable.csproj", "{45106155-B13E-4E6A-99F1-43A5A037C1F4}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Canopy.Cli.Executable", "Canopy.Cli.Executable\Canopy.Cli.Executable.csproj", "{45106155-B13E-4E6A-99F1-43A5A037C1F4}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Files", "Files", "{BFCF08C2-AF07-4F40-912C-A778077BFE26}"
 	ProjectSection(SolutionItems) = preProject
 		appveyor.yml = appveyor.yml
+		azure-pipelines.yml = azure-pipelines.yml
 		canopy-cli.nuspec = canopy-cli.nuspec
 		README.md = README.md
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Canopy.Cli.Shared", "Canopy.Cli.Shared\Canopy.Cli.Shared.csproj", "{B2F1EF93-6F77-4A60-BF01-D7F8EDFA73DD}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Canopy.Cli.Shared", "Canopy.Cli.Shared\Canopy.Cli.Shared.csproj", "{B2F1EF93-6F77-4A60-BF01-D7F8EDFA73DD}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -37,5 +38,8 @@ Global
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {86F998F2-618B-4914-BBEA-C4666403482D}
 	EndGlobalSection
 EndGlobal

@@ -61,4 +61,3 @@ For information on a specific command, for example the `get-schemas` command, ty
 ```
 canopy get-schemas --help
 ```
-git 

@@ -29,6 +29,7 @@ steps:
     (Get-Content '.\Canopy.Cli.Shared\Canopy.Cli.Shared.csproj' -Raw).Replace("<Version>0.0.0</Version>", "<Version>$($env:BUILDVERSION)</Version>") | Out-File '.\Canopy.Cli.Shared\Canopy.Cli.Shared.csproj'
     (Get-Content '.\Canopy.Cli.Shared\Canopy.Cli.Shared.csproj' -Raw).Replace("<AssemblyVersion>0.0.0.0</AssemblyVersion>", "<AssemblyVersion>$($env:BUILDVERSION)</AssemblyVersion>") | Out-File '.\Canopy.Cli.Shared\Canopy.Cli.Shared.csproj'
     (Get-Content '.\Canopy.Cli.Shared\Canopy.Cli.Shared.csproj' -Raw).Replace("<FileVersion>0.0.0.0</FileVersion>", "<FileVersion>$($env:BUILDVERSION)</FileVersion>") | Out-File '.\Canopy.Cli.Shared\Canopy.Cli.Shared.csproj'
+  displayName: 'Update release version in files'
 
 - script: |
     dotnet restore ".\Canopy.Cli.Shared\Canopy.Cli.Shared.csproj"
