@@ -10,25 +10,31 @@ pool:
   vmImage: 'windows-latest'
 
 variables:
-  major: 1
+  major: 0
   # Define a counter to continue on from AppVeyor.
-  minor: $[counter('temp', 0)]
-  version: $[format('{0}.{1}', variables.major, variables.minor)]
+  minor: $[counter(variables.major, 87)]
+  buildVersion: $[format('{0}.{1}', variables.major, variables.minor)]
 
 steps:
-- script: |
-    echo Version is $(version)
+- powershell: |
+    $tags = git tag --sort=-creatordate
+    $releaseBuildVersion = $tags[0].TrimStart("v")
+
+    echo "##vso[task.setvariable variable=buildVersion]$releaseBuildVersion"
+  condition: startsWith(variables['Build.SourceBranch'], 'refs/tags/')
+  displayName: 'Set release version'
 
 - powershell: |
-    (Get-Content '.\Canopy.Cli.Shared\Canopy.Cli.Shared.csproj' -Raw).Replace("<Version>0.0.0</Version>", "<Version>$($env:VERSION)</Version>") | Out-File '.\Canopy.Cli.Shared\Canopy.Cli.Shared.csproj'
-    (Get-Content '.\Canopy.Cli.Shared\Canopy.Cli.Shared.csproj' -Raw).Replace("<AssemblyVersion>0.0.0.0</AssemblyVersion>", "<AssemblyVersion>$($env:VERSION)</AssemblyVersion>") | Out-File '.\Canopy.Cli.Shared\Canopy.Cli.Shared.csproj'
-    (Get-Content '.\Canopy.Cli.Shared\Canopy.Cli.Shared.csproj' -Raw).Replace("<FileVersion>0.0.0.0</FileVersion>", "<FileVersion>$($env:VERSION)</FileVersion>") | Out-File '.\Canopy.Cli.Shared\Canopy.Cli.Shared.csproj'
+    Write-Host "Release Version: $env:BUILDVERSION"
+    (Get-Content '.\Canopy.Cli.Shared\Canopy.Cli.Shared.csproj' -Raw).Replace("<Version>0.0.0</Version>", "<Version>$($env:BUILDVERSION)</Version>") | Out-File '.\Canopy.Cli.Shared\Canopy.Cli.Shared.csproj'
+    (Get-Content '.\Canopy.Cli.Shared\Canopy.Cli.Shared.csproj' -Raw).Replace("<AssemblyVersion>0.0.0.0</AssemblyVersion>", "<AssemblyVersion>$($env:BUILDVERSION)</AssemblyVersion>") | Out-File '.\Canopy.Cli.Shared\Canopy.Cli.Shared.csproj'
+    (Get-Content '.\Canopy.Cli.Shared\Canopy.Cli.Shared.csproj' -Raw).Replace("<FileVersion>0.0.0.0</FileVersion>", "<FileVersion>$($env:BUILDVERSION)</FileVersion>") | Out-File '.\Canopy.Cli.Shared\Canopy.Cli.Shared.csproj'
 
 - script: |
     dotnet restore ".\Canopy.Cli.Shared\Canopy.Cli.Shared.csproj"
     dotnet build -c Release .\Canopy.Cli.Shared\Canopy.Cli.Shared.csproj
     dotnet publish -c Release .\Canopy.Cli.Shared\Canopy.Cli.Shared.csproj
-    copy ".\Canopy.Cli.Shared\bin\Release\Canopy.Cli.Shared.%VERSION%.nupkg" .
+    copy ".\Canopy.Cli.Shared\bin\Release\Canopy.Cli.Shared.%BUILDVERSION%.nupkg" .
     dotnet restore -r win10-x64
     dotnet build -c Release -r win10-x64
     dotnet publish -c Release -r win10-x64
@@ -36,3 +42,31 @@ steps:
     dotnet build -c Release -r osx.10.12-x64
     dotnet publish -c Release -r osx.10.12-x64
   displayName: 'dotnet build $(buildConfiguration)'
+- task: ArchiveFiles@2
+  inputs:
+    rootFolderOrFile: '$(Build.SourcesDirectory)/Canopy.Cli.Executable\bin\Release\netcoreapp2.0\win10-x64\publish'
+    includeRootFolder: false
+    archiveType: 'zip'
+    archiveFile: '$(Build.ArtifactStagingDirectory)/canopy-cli-windows.zip'
+    replaceExistingArchive: true
+
+- task: ArchiveFiles@2
+  inputs:
+    rootFolderOrFile: '$(Build.SourcesDirectory)/Canopy.Cli.Executable\bin\Release\netcoreapp2.0\osx.10.12-x64\publish'
+    includeRootFolder: false
+    archiveType: 'zip'
+    archiveFile: '$(Build.ArtifactStagingDirectory)/canopy-cli-mac.zip'
+    replaceExistingArchive: true
+
+- task: GitHubRelease@1
+  condition: startsWith(variables['Build.SourceBranch'], 'refs/tags/')
+  inputs:
+    gitHubConnection: 'Git PAT'
+    repositoryName: '$(Build.Repository.Name)'
+    action: 'create'
+    target: '$(Build.SourceVersion)'
+    tagSource: 'gitTag'
+    tagPattern: 'v.*'
+    releaseNotesSource: 'inline'
+    releaseNotesInline: 'Canopy Simulations CLI release.'
+    addChangeLog: false
