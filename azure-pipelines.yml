@@ -20,6 +20,8 @@ variables:
   minor: $[counter(variables.major, 87)]
   buildVersion: $[format('{0}.{1}.0', variables.major, variables.minor)]
 
+name: $(buildVersion)
+
 steps:
 - powershell: |
     $tags = git tag --sort=-creatordate
