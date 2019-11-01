@@ -9,30 +9,25 @@ Note this is an early version and new functionality will be added as requested b
 ## Downloading Releases
 
 Specific releases are available from the [releases page](https://github.com/CanopySimulations/canopy-cli/releases). 
-You can download the binaries for either Windows or Mac with each release.
+You can download the binaries for either Windows or Mac with each release. For the best experience, once you have extracted
+the files to a folder you can add the folder to your system's path.
 
 ## Downloading Using a Package Manager
 
-Rather than downloading releases manually, you can use the [Chocolatey](https://chocolatey.org) package manager under windows to automate 
-installing and updating the Canopy CLI.
-
-After [installing Chocolatey](https://chocolatey.org/install) you should add a new source:
+We are no longer publishing the CLI via chocolatey. If you have previously installed it this way you 
+can remove the chocolatey source by running the following:
 
 ```
-choco source add -n=canopy -s="https://ci.appveyor.com/nuget/canopy-cli-uigbxj0rajyl"
+choco source remove -n=canopy
 ```
 
-This gives Chocolatey access to a feed containing the `canopy-cli` releases.  You can then install the latest Canopy CLI version by running:
+And you can uninstall the Canopy CLI by running the following:
 
 ```
-choco install canopy-cli
+choco uninstall canopy-cli
 ```
 
-This downloads the Canopy CLI and adds it to your path.  When a new version is released you can update your CLI with:
-
-```
-choco upgrade canopy-cli
-```
+You can then download the latest release from our [releases page](https://github.com/CanopySimulations/canopy-cli/releases).
 
 ## Getting Started
 
