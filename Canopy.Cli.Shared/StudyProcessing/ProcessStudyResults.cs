@@ -23,6 +23,7 @@ namespace Canopy.Cli.Shared.StudyProcessing
             var channelDataColumns = new ChannelDataColumns();
 
             var allFiles = await root.GetFilesAsync();
+            var filesToWrite = new List<IFile>();
             foreach (var file in allFiles)
             {
                 try
@@ -35,7 +36,7 @@ namespace Canopy.Cli.Shared.StudyProcessing
                     }
                     else
                     {
-                        await writer.WriteExistingFile(root, file);
+                        filesToWrite.Add(file);
                     }
                 }
                 catch (Exception t)
@@ -43,8 +44,18 @@ namespace Canopy.Cli.Shared.StudyProcessing
                     Console.WriteLine();
                     Console.WriteLine("Failed to process file: " + file);
                     Console.WriteLine(t);
+
+                    if (t is AbortProcessingException)
+                    {
+                        throw;
+                    }
                 }
             }
+
+            await filesToWrite.ForEachAsync(5, async file =>
+            {
+                await writer.WriteExistingFile(root, file);
+            });
 
             await WriteChannelDataAsCsv.ExecuteAsync(root, writer, deleteProcessedFiles, parallelism, channelDataColumns);
             await WriteCombinedStudyScalarData.ExecuteAsync(root, writer, studyScalarFiles);
