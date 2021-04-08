@@ -91,7 +91,7 @@ namespace Canopy.Cli.Executable.Commands
             var directories = this.GetAllStudyBlobDirectories(studyMetadata.AccessInformation);
 
             const int crossServerParallelism = 4;
-            const int perServerParallelism = 2;
+            const int perServerParallelism = 100;
             await directories.ForEachAsync(crossServerParallelism, async directory =>
             {
                 BlobContinuationToken continuationToken = null;
