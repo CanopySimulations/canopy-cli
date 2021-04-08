@@ -52,7 +52,7 @@ namespace Canopy.Cli.Shared.StudyProcessing
                 }
             }
 
-            await filesToWrite.ForEachAsync(5, async file =>
+            await filesToWrite.ForEachAsync(parallelism, async file =>
             {
                 await writer.WriteExistingFile(root, file);
             });
