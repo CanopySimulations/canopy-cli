@@ -24,7 +24,7 @@ name: $(buildVersion)
 
 steps:
 - task: UseDotNet@2
-    inputs:
+  inputs:
     packageType: 'sdk'
     version: '5.x'
 
