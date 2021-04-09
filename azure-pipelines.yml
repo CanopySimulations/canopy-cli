@@ -44,14 +44,14 @@ steps:
 - task: DotNetCoreCLI@2
   inputs:
     command: 'restore'
-    projects: 'Canopy.Cli.Shared/Canopy.Cli.Shared.csproj'
+    projects: 'Canopy.Cli.Shared'
     feedsToUse: 'select'
   displayName: 'restore Cli.Shared'
 
 - task: DotNetCoreCLI@2
   inputs:
     command: 'build'
-    projects: 'Canopy.Cli.Shared/Canopy.Cli.Shared.csproj'
+    projects: 'Canopy.Cli.Shared'
     arguments: '-c Release'
   displayName: 'build Cli.Shared'
 
@@ -59,7 +59,7 @@ steps:
   inputs:
     command: 'publish'
     publishWebProjects: false
-    projects: 'Canopy.Cli.Shared/Canopy.Cli.Shared.csproj'
+    projects: 'Canopy.Cli.Shared'
     arguments: '-c Release'
     zipAfterPublish: false
     modifyOutputPath: false
@@ -75,6 +75,7 @@ steps:
 - task: DotNetCoreCLI@2
   inputs:
     command: 'restore'
+    projects: 'Canopy.Cli.Executable'
     restoreArguments: '-r win10-x64'
     feedsToUse: 'select'
   displayName: 'Restore Win'
@@ -82,12 +83,14 @@ steps:
 - task: DotNetCoreCLI@2
   inputs:
     command: 'build'
+    projects: 'Canopy.Cli.Executable'
     arguments: '-c Release -r win10-x64'
   displayName: 'Build Win'
 
 - task: DotNetCoreCLI@2
   inputs:
     command: 'publish'
+    projects: 'Canopy.Cli.Executable'
     publishWebProjects: true
     arguments: '-c Release -r win10-x64'
     zipAfterPublish: false
@@ -97,6 +100,7 @@ steps:
 - task: DotNetCoreCLI@2
   inputs:
     command: 'restore'
+    projects: 'Canopy.Cli.Executable'
     restoreArguments: '-r osx.10.12-x64'
     feedsToUse: 'select'
   displayName: 'Restore OSX'
@@ -104,12 +108,14 @@ steps:
 - task: DotNetCoreCLI@2
   inputs:
     command: 'build'
+    projects: 'Canopy.Cli.Executable'
     arguments: '-c Release -r osx.10.12-x64'
   displayName: 'Build OSX'
 
 - task: DotNetCoreCLI@2
   inputs:
     command: 'publish'
+    projects: 'Canopy.Cli.Executable'
     publishWebProjects: true
     arguments: '-c Release -r osx.10.12-x64'
     zipAfterPublish: false
