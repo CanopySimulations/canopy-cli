@@ -41,27 +41,80 @@ steps:
     (Get-Content '.\Canopy.Cli.Shared\Canopy.Cli.Shared.csproj' -Raw).Replace("<AssemblyVersion>0.0.0.0</AssemblyVersion>", "<AssemblyVersion>$($env:BUILDVERSION)</AssemblyVersion>") | Out-File '.\Canopy.Cli.Shared\Canopy.Cli.Shared.csproj'
     (Get-Content '.\Canopy.Cli.Shared\Canopy.Cli.Shared.csproj' -Raw).Replace("<FileVersion>0.0.0.0</FileVersion>", "<FileVersion>$($env:BUILDVERSION)</FileVersion>") | Out-File '.\Canopy.Cli.Shared\Canopy.Cli.Shared.csproj'
   displayName: 'Update release version in files'
+- task: DotNetCoreCLI@2
+  inputs:
+    command: 'restore'
+    projects: 'Canopy.Cli.Shared/Canopy.Cli.Shared.csproj'
+    feedsToUse: 'select'
+  displayName: 'restore Cli.Shared'
+
+- task: DotNetCoreCLI@2
+  inputs:
+    command: 'build'
+    projects: 'Canopy.Cli.Shared/Canopy.Cli.Shared.csproj'
+    arguments: '-c Release'
+  displayName: 'build Cli.Shared'
+
+- task: DotNetCoreCLI@2
+  inputs:
+    command: 'publish'
+    publishWebProjects: false
+    projects: 'Canopy.Cli.Shared/Canopy.Cli.Shared.csproj'
+    arguments: '-c Release'
+    zipAfterPublish: false
+    modifyOutputPath: false
+  displayName: 'Publish Cli.Shared'
 
 - powershell: |
-    Write-Host "Building nupkg"
-    dotnet restore ".\Canopy.Cli.Shared\Canopy.Cli.Shared.csproj"
-    dotnet build -c Release .\Canopy.Cli.Shared\Canopy.Cli.Shared.csproj
-    dotnet publish -c Release .\Canopy.Cli.Shared\Canopy.Cli.Shared.csproj
     $packageSource = "$env:BUILD_SOURCESDIRECTORY\Canopy.Cli.Shared\bin\Release\Canopy.Cli.Shared.$($env:BUILDVERSION).nupkg"
     $packageTarget = "$env:BUILD_ARTIFACTSTAGINGDIRECTORY"
     Write-Host "Copying $packageSource to $packageTarget"
     copy "$packageSource" "$packageTarget"
+  displayName: 'Copy Cli.Shared'
 
-    Write-Host "Building Windows"
-    dotnet restore -r win10-x64
-    dotnet build -c Release -r win10-x64
-    dotnet publish -c Release -r win10-x64
+- task: DotNetCoreCLI@2
+  inputs:
+    command: 'restore'
+    restoreArguments: '-r win10-x64'
+    feedsToUse: 'select'
+  displayName: 'Restore Win'
 
-    Write-Host "Building OSX"
-    dotnet restore -r osx.10.12-x64
-    dotnet build -c Release -r osx.10.12-x64
-    dotnet publish -c Release -r osx.10.12-x64
-  displayName: 'dotnet build'
+- task: DotNetCoreCLI@2
+  inputs:
+    command: 'build'
+    arguments: '-c Release -r win10-x64'
+  displayName: 'Build Win'
+
+- task: DotNetCoreCLI@2
+  inputs:
+    command: 'publish'
+    publishWebProjects: true
+    arguments: '-c Release -r win10-x64'
+    zipAfterPublish: false
+    modifyOutputPath: false
+  displayName: 'Publish Win'
+    
+- task: DotNetCoreCLI@2
+  inputs:
+    command: 'restore'
+    restoreArguments: '-r osx.10.12-x64'
+    feedsToUse: 'select'
+  displayName: 'Restore OSX'
+
+- task: DotNetCoreCLI@2
+  inputs:
+    command: 'build'
+    arguments: '-c Release -r osx.10.12-x64'
+  displayName: 'Build OSX'
+
+- task: DotNetCoreCLI@2
+  inputs:
+    command: 'publish'
+    publishWebProjects: true
+    arguments: '-c Release -r osx.10.12-x64'
+    zipAfterPublish: false
+    modifyOutputPath: false
+  displayName: 'Publsh OSX'
 
 - task: ArchiveFiles@2
   inputs:
