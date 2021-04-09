@@ -23,6 +23,11 @@ variables:
 name: $(buildVersion)
 
 steps:
+- task: UseDotNet@2
+    inputs:
+    packageType: 'sdk'
+    version: '5.x'
+
 - powershell: |
     $tags = git tag --sort=-creatordate
     $releaseBuildVersion = $tags[0].TrimStart("v")
@@ -60,7 +65,7 @@ steps:
 
 - task: ArchiveFiles@2
   inputs:
-    rootFolderOrFile: '$(Build.SourcesDirectory)/Canopy.Cli.Executable\bin\Release\netcoreapp2.0\win10-x64\publish'
+    rootFolderOrFile: '$(Build.SourcesDirectory)/Canopy.Cli.Executable\bin\Release\net5.0\win10-x64\publish'
     includeRootFolder: false
     archiveType: 'zip'
     archiveFile: '$(Build.ArtifactStagingDirectory)/canopy-cli-windows.zip'
@@ -68,7 +73,7 @@ steps:
 
 - task: ArchiveFiles@2
   inputs:
-    rootFolderOrFile: '$(Build.SourcesDirectory)/Canopy.Cli.Executable\bin\Release\netcoreapp2.0\osx.10.12-x64\publish'
+    rootFolderOrFile: '$(Build.SourcesDirectory)/Canopy.Cli.Executable\bin\Release\net5.0\osx.10.12-x64\publish'
     includeRootFolder: false
     archiveType: 'zip'
     archiveFile: '$(Build.ArtifactStagingDirectory)/canopy-cli-mac.zip'

@@ -1,19 +1,16 @@
 ﻿using Canopy.Api.Client;
 using Microsoft.Extensions.CommandLineUtils;
-using Microsoft.WindowsAzure.Storage.Blob;
 using System;
 using System.Collections.Generic;
-using System.Text;
 using System.Threading.Tasks;
+using Microsoft.Azure.Storage.Blob;
+using Microsoft.Azure.Storage.DataMovement;
+using System.Linq;
+using System.Text.RegularExpressions;
+using Canopy.Cli.Executable.Helpers;
 
 namespace Canopy.Cli.Executable.Commands
 {
-    using System.IO;
-    using System.Linq;
-    using System.Text.RegularExpressions;
-    using System.Web;
-    using Canopy.Cli.Executable.Helpers;
-    using Canopy.Cli.Shared;
 
     public class GetStudyCommand : CanopyCommandBase
     {
@@ -21,11 +18,9 @@ namespace Canopy.Cli.Executable.Commands
 
         private readonly CommandOption outputFolderOption;
         private readonly CommandOption studyIdOption;
-        //private readonly CommandOption jobIndexOption;
-        //private readonly CommandOption jobIdOption;
-        //private readonly CommandOption channelOption;
 
-        private readonly CommandOption keepOriginalFilesOption;
+        private readonly CommandOption generateCsvFilesOption;
+        private readonly CommandOption keepBinaryFilesOption;
 
         public GetStudyCommand()
         {
@@ -41,26 +36,42 @@ namespace Canopy.Cli.Executable.Commands
                 "-s | --study-id",
                 $"The study to download.",
                 CommandOptionType.SingleValue);
-            /*
-            this.jobIndexOption = this.Option(
-                "-i | --job-index",
-                $"The study job index to download (if omitted the entire study is downloaded).",
-                CommandOptionType.MultipleValue);
 
-            this.jobIdOption = this.Option(
-                "-j | --job-id",
-                $"The job id to download (study ID is not required if the job ID is given).",
-                CommandOptionType.MultipleValue);
-
-            this.channelOption = this.Option(
-                "-c | --channel",
-                $"The channel or channels to download (if omitted all channels are downloaded).",
-                CommandOptionType.MultipleValue);
-            */
-            this.keepOriginalFilesOption = this.Option(
-                "-ko | --keep-original",
-                $"Do not delete files which have been processed (faster).",
+            this.generateCsvFilesOption = this.Option(
+                "-csv | --generate-csv",
+                $"Generate CSV files from binary files.",
                 CommandOptionType.NoValue);
+
+            this.keepBinaryFilesOption = this.Option(
+                "-bin | --keep-binary",
+                $"Do not delete binary files which have been processed into CSV files (faster).",
+                CommandOptionType.NoValue);
+        }
+
+        public class RateLimitedProgress<T> : IProgress<T>
+        {
+            private readonly IProgress<T> inner;
+            private readonly TimeSpan rate;
+
+            private DateTimeOffset lastReport = DateTimeOffset.MinValue;
+
+            public RateLimitedProgress(TimeSpan rate, IProgress<T> inner)
+            {
+                this.inner = inner;
+                this.rate = rate;
+            }
+
+            public void Report(T value)
+            {
+                var now = DateTimeOffset.UtcNow;
+                if((now - this.lastReport) < this.rate)
+                {
+                    return;
+                }
+
+                this.lastReport = now;
+                this.inner.Report(value);
+            }
         }
 
         protected override async Task<int> ExecuteAsync()
@@ -69,20 +80,8 @@ namespace Canopy.Cli.Executable.Commands
             
             var studyId = this.studyIdOption.ValueOrPrompt("Study ID: ", "Study ID is required.");
 
-            /*
-            var jobIndex = this.jobIndexOption.Value();
-            if (string.IsNullOrWhiteSpace(jobIndex))
-            {
-                jobIndex = null;
-            }
-
-            if(jobIndex != null && !uint.TryParse(jobIndex, out uint _))
-            {
-                throw new RecoverableException("Job index must be a valid non-negative integer.");
-            }
-            */
-
-            var deleteProcessedFiles = !this.keepOriginalFilesOption.HasValue();
+            var deleteProcessedFiles = !this.keepBinaryFilesOption.HasValue();
+            var genarateCsvFiles = this.generateCsvFilesOption.HasValue();
 
             var studyClient = new StudyClient(this.configuration);
             var studyMetadata = await studyClient.GetStudyMetadataAsync(this.authenticatedUser.TenantId, studyId);
@@ -90,31 +89,39 @@ namespace Canopy.Cli.Executable.Commands
             // TODO: Handle expiration of access signatures.
             var directories = this.GetAllStudyBlobDirectories(studyMetadata.AccessInformation);
 
-            const int crossServerParallelism = 4;
-            const int perServerParallelism = 100;
-            await directories.ForEachAsync(crossServerParallelism, async directory =>
+            TransferManager.Configurations.ParallelOperations = System.Net.ServicePointManager.DefaultConnectionLimit;
+            TransferManager.Configurations.MaxListingConcurrency = 20;
+            Console.WriteLine($"Using {TransferManager.Configurations.ParallelOperations} parallel operations.");
+            Console.WriteLine($"Using {TransferManager.Configurations.MaxListingConcurrency} max listing concurrency.");
+            TransferManager.Configurations.BlockSize = 20971520;
+            var tasks = new List<Task>();
+            var progressRateLimit = TimeSpan.FromSeconds(1);
+            foreach (var directory in directories)
             {
-                BlobContinuationToken continuationToken = null;
-                do
-                {
-                    var segment = await directory.ListBlobsSegmentedAsync(true, BlobListingDetails.None, 1000, continuationToken, null, null);
+                Console.WriteLine($"Adding {directory.Uri.Host}");
+               
+                var context = new DirectoryTransferContext();
+                context.ProgressHandler = new RateLimitedProgress<TransferStatus>(
+                    progressRateLimit, 
+                    new Progress<TransferStatus>(progress =>
+                        {
+                            Console.WriteLine($"{directory.Uri.Host} Bytes Copied: {progress.BytesTransferred}");
+                            //Console.WriteLine($"{directory.Uri.Host} Files Copied: {progress.NumberOfFilesTransferred}");
+                        }));
 
-                    await segment.Results.OfType<CloudBlockBlob>().ForEachAsync(perServerParallelism, async blob =>
-                    {
-                        Console.Write(".");
-                        var relativeUri = directory.Uri.MakeRelativeUri(blob.Uri).ToString();
-                        relativeUri = HttpUtility.UrlDecode(relativeUri);
-                        var filePath = Path.Combine(outputFolder, relativeUri);
-                        Directory.CreateDirectory(Path.GetDirectoryName(filePath));
-                        await blob.DownloadToFileAsync(filePath, FileMode.Create);
-                    });
+                tasks.Add(TransferManager.DownloadDirectoryAsync(
+                    directory,
+                    outputFolder,
+                    new DownloadDirectoryOptions {Recursive = true},
+                    context));
+            }
 
-                    continuationToken = segment.ContinuationToken;
-                }
-                while (continuationToken != null);
-            });
+            await Task.WhenAll(tasks);
 
-            await this.processLocalStudyResults.ExecuteAsync(outputFolder, deleteProcessedFiles);
+            if (genarateCsvFiles)
+            {
+                await this.processLocalStudyResults.ExecuteAsync(outputFolder, deleteProcessedFiles);
+            }
 
             return 0;
         }
@@ -146,59 +153,6 @@ namespace Canopy.Cli.Executable.Commands
 
             var directory = container.GetDirectoryReference(studyPath);
             return directory;
-        }
-
-        private class StudyDownloadTask
-        {
-            public StudyDownloadTask(string studyId, bool downloadStudyData, IReadOnlyList<StudyJobDownloadTask> jobs)
-            {
-                this.StudyId = studyId;
-                this.DownloadStudyData = downloadStudyData;
-                this.Jobs = jobs;
-            }
-
-            public string StudyId { get; }
-
-            public bool DownloadStudyData { get; }
-
-            public IReadOnlyList<StudyJobDownloadTask> Jobs { get; }
-        }
-
-        private class StudyJobDownloadTask
-        {
-            public StudyJobDownloadTask(string jobId)
-            {
-                this.JobId = jobId;
-                var hyphenIndex = jobId.IndexOf('-');
-                if(hyphenIndex == -1)
-                {
-                    throw new RecoverableException("Invalid job ID: " + jobId);
-                }
-
-                this.StudyId = jobId.Substring(0, hyphenIndex);
-
-                var jobIndexString = jobId.Substring(hyphenIndex + 1);
-                int jobIndex;
-                if(!int.TryParse(jobIndexString, out jobIndex))
-                {
-                    throw new RecoverableException("Invalid job index: " + jobIndex);
-                }
-
-                this.JobIndex = jobIndex;
-            }
-
-            public StudyJobDownloadTask(string studyId, int jobIndex)
-            {
-                this.StudyId = studyId;
-                this.JobIndex = jobIndex;
-                this.JobId = $"{studyId}-{jobIndex}";
-            }
-
-            public string StudyId { get; }
-
-            public string JobId { get; }
-
-            public int JobIndex { get; }
         }
     }
 }
