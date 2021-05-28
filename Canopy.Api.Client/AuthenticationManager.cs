@@ -9,24 +9,29 @@
     using Newtonsoft.Json;
     using Newtonsoft.Json.Linq;
     using Canopy.Api.Client;
+    using Microsoft.Extensions.Logging;
 
-    public class AuthenticationManager
+    public class AuthenticationManager : IAuthenticationManager
     {
-        public static readonly AuthenticationManager Instance = new AuthenticationManager();
-
         private readonly string saveFolder;
-		private readonly string saveAuthenticatedUserFile;
+        private readonly string saveAuthenticatedUserFile;
+        private readonly IConnectionManager connectionManager;
 
         private string username;
         private string tenantName;
         private string password;
 
-		private AuthenticatedUser authenticatedUser;
+        private AuthenticatedUser authenticatedUser;
+        private readonly ILogger<AuthenticationManager> logger;
 
-        public AuthenticationManager()
+        public AuthenticationManager(
+            IConnectionManager connectionManager,
+            ILogger<AuthenticationManager> logger)
         {
+            this.logger = logger;
+            this.connectionManager = connectionManager;
             this.saveFolder = PlatformUtilities.AppDataFolder();
-			this.saveAuthenticatedUserFile = Path.Combine(this.saveFolder, "authenticated-user.json");
+            this.saveAuthenticatedUserFile = Path.Combine(this.saveFolder, "authenticated-user.json");
         }
 
         public void SetAuthenticationInformation(string username, string tenantName, string password)
@@ -38,9 +43,9 @@
 
         public void ClearAuthenticatedUser()
         {
-			this.username = null;
-			this.tenantName = null;
-			this.password = null;
+            this.username = null;
+            this.tenantName = null;
+            this.password = null;
             this.authenticatedUser = null;
             this.DeleteAuthenticatedUser();
         }
@@ -72,7 +77,7 @@
         {
             if (this.authenticatedUser == null)
             {
-                if(string.IsNullOrWhiteSpace(this.username) 
+                if (string.IsNullOrWhiteSpace(this.username)
                    || string.IsNullOrWhiteSpace(this.tenantName)
                    || string.IsNullOrWhiteSpace(this.password))
                 {
@@ -105,13 +110,13 @@
 
         private async Task Authenticate()
         {
-            Console.Write("Authenticating... ");
+            this.logger.LogInformation("Authenticating... ");
             try
             {
                 var now = DateTime.UtcNow;
                 var client = new HttpClient();
                 var request = new HttpRequestMessage();
-                var connection = ConnectionManager.Instance.Connection;
+                var connection = this.connectionManager.Connection;
                 request.Method = new HttpMethod("POST");
                 request.RequestUri = new Uri(connection.Endpoint + "/token");
                 request.Content = new StringContent(
@@ -123,25 +128,25 @@
                 var response = await client.SendAsync(request, HttpCompletionOption.ResponseContentRead);
                 await ProcessTokenResponse(response, now);
 
-                Console.WriteLine("done.");
+                this.logger.LogInformation("Authenticated.");
             }
             catch (Exception)
             {
-                Console.WriteLine("failed.");
+                this.logger.LogError("Failed to authenticate.");
                 throw;
             }
         }
 
         private async Task RefreshAccessToken()
         {
-            Console.Write("Refreshing access token... ");
+            this.logger.LogInformation("Refreshing access token... ");
             try
             {
                 var now = DateTime.UtcNow;
                 var client = new HttpClient();
                 var request = new HttpRequestMessage();
-				var connection = ConnectionManager.Instance.Connection;
-				request.Method = new HttpMethod("POST");
+                var connection = this.connectionManager.Connection;
+                request.Method = new HttpMethod("POST");
                 request.RequestUri = new Uri(connection.Endpoint + "/token");
                 request.Content = new StringContent(
                     $"grant_type=refresh_token&refresh_token={this.authenticatedUser.RefreshToken}&tenant={this.authenticatedUser.TenantId}" +
@@ -151,13 +156,13 @@
 
                 var response = await client.SendAsync(request, HttpCompletionOption.ResponseContentRead);
                 await ProcessTokenResponse(response, now);
-                Console.WriteLine("done.");
+                this.logger.LogInformation("Refreshed access token.");
             }
             catch (Exception)
             {
-                // This is a crappy way of handling an expired refresh token.
+                // This is a sub-optimal way of handling an expired refresh token.
                 // The application will quit and the user will be forced to log in again next time.
-                Console.WriteLine("failed.");
+                this.logger.LogError("Failed to refresh access token. Re-authentication required.");
                 this.DeleteAuthenticatedUser();
                 throw;
             }

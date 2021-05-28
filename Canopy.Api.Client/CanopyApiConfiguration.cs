@@ -1,7 +1,7 @@
 ﻿using System;
 namespace Canopy.Api.Client
 {
-    public class CanopyApiConfiguration
-    {
-    }
+    public record CanopyApiConfiguration(
+        IAuthenticationManager AuthenticationManager,
+        IConnectionManager ConnectionManager);
 }

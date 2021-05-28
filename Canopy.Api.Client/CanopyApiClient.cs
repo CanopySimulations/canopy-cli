@@ -25,12 +25,12 @@
         {
             var result = new HttpRequestMessage();
 
-            var authenticatedUser = await AuthenticationManager.Instance.GetAuthenticatedUser();
+            var authenticatedUser = await this.configuration.AuthenticationManager.GetAuthenticatedUser();
 
-            if(authenticatedUser != null)
+            if (authenticatedUser != null)
             {
-				result.Headers.Add("Authorization", "Bearer " + authenticatedUser.AccessToken);
-			}
+                result.Headers.Add("Authorization", "Bearer " + authenticatedUser.AccessToken);
+            }
 
             return result;
         }
@@ -38,13 +38,13 @@
         protected virtual void PrepareRequest(System.Net.Http.HttpClient client, System.Net.Http.HttpRequestMessage request, System.Text.StringBuilder urlBuilder)
         {
             // ASP.NET Web API doesn't like having trailing ampersands in URLs.
-			if (urlBuilder[urlBuilder.Length - 1] == '&')
+            if (urlBuilder[urlBuilder.Length - 1] == '&')
             {
                 urlBuilder.Remove(urlBuilder.Length - 1, 1);
             }
 
-			var connection = ConnectionManager.Instance.Connection;
-			urlBuilder.Insert(0, '/').Insert(0, connection.Endpoint);
+            var connection = this.configuration.ConnectionManager.Connection;
+            urlBuilder.Insert(0, '/').Insert(0, connection.Endpoint);
         }
     }
 }

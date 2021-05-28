@@ -1,58 +1,85 @@
-﻿using System;
-using System.Text;
+﻿using System.CommandLine;
+using System.CommandLine.Invocation;
 using System.Threading.Tasks;
 using Canopy.Api.Client;
-using Microsoft.Extensions.CommandLineUtils;
+using Canopy.Cli.Executable.Services;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 
 namespace Canopy.Cli.Executable.Commands
 {
     public class AuthenticateCommand : CanopyCommandBase
     {
-        private readonly CommandOption usernameOption;
-        private readonly CommandOption companyOption;
-        private readonly CommandOption passwordOption;
-		
-        public AuthenticateCommand()
+        public record Parameters(
+            string Username,
+            string Company,
+            string Password);
+
+        public override Command Create()
         {
-            this.RequiresAuthentication = false;
+            var command = new Command("authenticate", "Authenticates with the API.");
 
-			this.Name = "authenticate";
-			this.Description = "Authenticates with the API.";
+            command.AddOption(new Option<string>(
+                new[] { "--username", "-u" },
+                description: "Your username.",
+                getDefaultValue: () => string.Empty));
 
-            this.usernameOption = this.Option(
-                "-u | --username",
-                $"Your username.",
-                CommandOptionType.SingleValue);
+            command.AddOption(new Option<string>(
+                new[] { "--company", "-c" },
+                description: "Your company.",
+                getDefaultValue: () => string.Empty));
 
-			this.companyOption = this.Option(
-				"-c | --company",
-				$"Your company.",
-				CommandOptionType.SingleValue);
+            command.AddOption(new Option<string>(
+                new[] { "--password", "-p" },
+                description: "Your password.",
+                getDefaultValue: () => string.Empty));
 
-			this.passwordOption = this.Option(
-				"-p | --password",
-				$"Your password.",
-				CommandOptionType.SingleValue);
-		}
+            command.Handler = CommandHandler.Create((IHost host, Parameters parameters) =>
+                host.Services.GetRequiredService<CommandRunner>().ExecuteAsync(
+                    parameters with
+                    {
+                        Username = CommandUtilities.ValueOrPrompt(parameters.Username, "Username: ", "Username is required.", false),
+                        Company = CommandUtilities.ValueOrPrompt(parameters.Company, "Company: ", "Company is required.", false),
+                        Password = CommandUtilities.ValueOrPrompt(parameters.Password, "Password: ", "Password is required.", true),
+                    }));
 
-        protected override async Task<int> ExecuteAsync()
-        {
-            var username = this.usernameOption.ValueOrPrompt("Username: ", "Username is required.");
-            var company = this.companyOption.ValueOrPrompt("Company: ", "Company is required.");
-            var password = this.passwordOption.ValueOrPrompt("Password: ", "Password is required.", true);
-
-			AuthenticationManager.Instance.SetAuthenticationInformation(username, company, password);
-            this.authenticatedUser = await AuthenticationManager.Instance.GetAuthenticatedUser();
-
-            await this.TestAuthenticated();
-            return 0;
+            return command;
         }
 
-        private async Task TestAuthenticated()
+        public class CommandRunner
         {
-			var configClient = new ConfigClient(this.configuration);
-			var result = await configClient.GetConfigsAsync(this.authenticatedUser.TenantId, "car", null, null, null);
-		}
+            private readonly IEnsureConnected ensureConnected;
+            private readonly IAuthenticationManager authenticationManager;
+            private readonly IConfigClient configClient;
 
+            public CommandRunner(
+                IEnsureConnected ensureConnected,
+                IAuthenticationManager authenticationManager,
+                IConfigClient configClient)
+            {
+                this.authenticationManager = authenticationManager;
+                this.configClient = configClient;
+                this.ensureConnected = ensureConnected;
+            }
+
+            public async Task ExecuteAsync(Parameters parameters)
+            {
+                this.ensureConnected.Execute();
+
+                this.authenticationManager.SetAuthenticationInformation(
+                    parameters.Username,
+                    parameters.Company,
+                    parameters.Password);
+
+                var authenticatedUser = await this.authenticationManager.GetAuthenticatedUser();
+
+                await this.TestAuthenticated(authenticatedUser);
+            }
+
+            private async Task TestAuthenticated(AuthenticatedUser authenticatedUser)
+            {
+                var result = await this.configClient.GetConfigsAsync(authenticatedUser.TenantId, "car", null, null, null);
+            }
+        }
     }
 }

@@ -1,29 +1,33 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
+using System.CommandLine;
+using System.CommandLine.Invocation;
 using System.Threading.Tasks;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 
 namespace Canopy.Cli.Executable.Commands
 {
     class LastErrorCommand : CanopyCommandBase
     {
-        public LastErrorCommand()
+        public override Command Create()
         {
-            this.RequiresConnection = false;
-            this.RequiresAuthentication = false;
+            var command = new Command("last-error", "Shows the last logged error.");
 
-            this.Name = "last-error";
-            this.Description = "Shows the last logged error.";
+            command.Handler = CommandHandler.Create((IHost host) =>
+                host.Services.GetRequiredService<CommandRunner>().ExecuteAsync());
+
+            return command;
         }
 
-        protected override Task<int> ExecuteAsync()
+        public class CommandRunner
         {
-            Console.WriteLine("Last Error:");
-            Console.WriteLine();
-            Console.ForegroundColor = ConsoleColor.Yellow;
-            Console.WriteLine(Utilities.ReadError());
-            Console.ResetColor();
-            return Task.FromResult(0);
+            public Task ExecuteAsync()
+            {
+                Console.ForegroundColor = ConsoleColor.Yellow;
+                Console.WriteLine(Utilities.ReadError());
+                Console.ResetColor();
+                return Task.CompletedTask;
+            }
         }
     }
 }

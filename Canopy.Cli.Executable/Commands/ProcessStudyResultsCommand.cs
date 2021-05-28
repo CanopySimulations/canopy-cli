@@ -1,54 +1,64 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Threading.Tasks;
-using Canopy.Cli.Shared;
-using Canopy.Cli.Shared.StudyProcessing;
-using Microsoft.Extensions.CommandLineUtils;
-
-namespace Canopy.Cli.Executable.Commands
+﻿namespace Canopy.Cli.Executable.Commands
 {
-    using Canopy.Cli.Executable.Helpers;
+    using System.CommandLine;
+    using System.CommandLine.Invocation;
+    using Canopy.Api.Client;
+    using Canopy.Cli.Executable.Services;
+    using Microsoft.Extensions.DependencyInjection;
+    using Microsoft.Extensions.Hosting;
+    using System.IO;
+    using System.Threading.Tasks;
 
     public class ProcessStudyResultsCommand : CanopyCommandBase
     {
-        private readonly ProcessLocalStudyResults processLocalStudyResults = new ProcessLocalStudyResults();
+        public record Parameters(
+            DirectoryInfo Target,
+            bool KeepOriginal);
 
-        private readonly CommandOption targetOption;
-        private readonly CommandOption keepOriginalFilesOption;
-
-        public ProcessStudyResultsCommand()
+        public override Command Create()
         {
-            this.Name = "process-study-results";
-            this.Description = "Creates user friendly files from raw study results.";
+            var command = new Command("process-study-results", "Creates user friendly files from raw study results.");
 
-            this.targetOption = this.Option(
-                "-t | --target",
-                $"The folder to process. The current directory is used if omitted.",
-                CommandOptionType.SingleValue);
+            command.AddOption(new Option<DirectoryInfo>(
+                new[] { "--target", "-t" },
+                description: $"The folder to process. The current directory is used if omitted.",
+                getDefaultValue: () => new DirectoryInfo("./")));
 
-            this.keepOriginalFilesOption = this.Option(
-                "-ko | --keep-original",
-                $"Do not delete files which have been processed (faster).",
-                CommandOptionType.NoValue);
+            command.AddOption(new Option<bool>(
+                new[] { "--keep-original", "-ko" },
+                description: $"Do not delete files which have been processed (faster).",
+                getDefaultValue: () => false));
+
+            command.Handler = CommandHandler.Create((IHost host, Parameters parameters) =>
+                host.Services.GetRequiredService<CommandRunner>().ExecuteAsync(parameters));
+
+            return command;
         }
 
-        protected override async Task<int> ExecuteAsync()
+        public class CommandRunner
         {
-            var deleteProcessedFiles = !this.keepOriginalFilesOption.HasValue();
-            var targetFolder = this.targetOption.Value() ?? Directory.GetCurrentDirectory();
+            private readonly IEnsureAuthenticated ensureAuthenticated;
+            private readonly IProcessLocalStudyResults processLocalStudyResults;
 
-            if (!Directory.Exists(targetFolder))
+            public CommandRunner(
+                IEnsureAuthenticated ensureAuthenticated,
+                IProcessLocalStudyResults processLocalStudyResults)
             {
-                Console.WriteLine();
-                Console.WriteLine("Folder not found: " + targetFolder);
-                return 1;
+                this.ensureAuthenticated = ensureAuthenticated;
+                this.processLocalStudyResults = processLocalStudyResults;
             }
 
-            await this.processLocalStudyResults.ExecuteAsync(targetFolder, deleteProcessedFiles);
+            public async Task ExecuteAsync(Parameters parameters)
+            {
+                await this.ensureAuthenticated.ExecuteAsync();
 
-            return 0;
+                if (!parameters.Target.Exists)
+                {
+                    throw new RecoverableException("Folder not found: " + parameters.Target.FullName);
+                }
+
+                await this.processLocalStudyResults.ExecuteAsync(parameters.Target.FullName, !parameters.KeepOriginal);
+            }
         }
     }
 }

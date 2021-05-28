@@ -1,40 +1,60 @@
 ﻿using System;
+using System.CommandLine;
+using System.CommandLine.Invocation;
 using System.Security.Cryptography;
 using System.Threading.Tasks;
-using Canopy.Api.Client;
-using Microsoft.Extensions.CommandLineUtils;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 
 namespace Canopy.Cli.Executable.Commands
 {
     public class HashCommand : CanopyCommandBase
     {
-		private readonly CommandArgument inputArgument;
-		
-        public HashCommand()
+        public record Parameters(string Input);
+
+        public override Command Create()
         {
-            this.RequiresConnection = false;
-            this.RequiresAuthentication = false;
+            var command = new Command("hash", "Hashes a given string. Defaults to SHA256.");
 
-            this.Name = "hash";
-            this.Description = "Hashes a given string. Defaults to SHA256.";
+            command.AddArgument(new Argument<string>(
+                "input",
+                description: "The input string to hash.",
+                getDefaultValue: () => string.Empty));
 
-            this.inputArgument = this.Argument("<input>", "The input string to hash.");
+            command.Handler = CommandHandler.Create((IHost host, Parameters parameters) =>
+                host.Services.GetRequiredService<CommandRunner>().ExecuteAsync(
+                    parameters with
+                    {
+                        Input = CommandUtilities.ValueOrPrompt(parameters.Input, "Input string: ", "Input string is required.", false),
+                    }));
+
+            return command;
         }
 
-        protected override Task<int> ExecuteAsync()
+        public class CommandRunner
         {
-            var input = this.inputArgument.ValueOrPrompt("Input string: ", "Input string is required.");
+            private readonly ILogger<CommandRunner> logger;
 
-            Console.WriteLine(GetHash(input));
-            return Task.FromResult(0);
+            public CommandRunner(
+                ILogger<CommandRunner> logger)
+            {
+                this.logger = logger;
+            }
+
+            public Task ExecuteAsync(Parameters parameters)
+            {
+                this.logger.LogInformation(GetHash(parameters.Input));
+                return Task.CompletedTask;
+            }
+
+            public static string GetHash(string input)
+            {
+                var hashAlgorithm = SHA256.Create();
+                byte[] byteValue = System.Text.Encoding.UTF8.GetBytes(input);
+                byte[] byteHash = hashAlgorithm.ComputeHash(byteValue);
+                return Convert.ToBase64String(byteHash);
+            }
         }
-
-		public static string GetHash(string input)
-		{
-            var hashAlgorithm = SHA256.Create();
-			byte[] byteValue = System.Text.Encoding.UTF8.GetBytes(input);
-			byte[] byteHash = hashAlgorithm.ComputeHash(byteValue);
-			return Convert.ToBase64String(byteHash);
-		}
     }
 }

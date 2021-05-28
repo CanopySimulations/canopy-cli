@@ -1,164 +1,70 @@
-﻿﻿using System;
-using System.Threading.Tasks;
-using Canopy.Api.Client;
-using System.Collections.Generic;
-using System.Text;
-using System.Linq;
-using Microsoft.Extensions.CommandLineUtils;
-using Canopy.Cli.Executable.Helpers;
-using Newtonsoft.Json.Linq;
-using Newtonsoft.Json;
+﻿﻿using Canopy.Cli.Executable.Services;
 using System.IO;
+using System.CommandLine;
+using System.CommandLine.Invocation;
+using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Canopy.Cli.Executable.Commands
 {
     public class GetConfigsCommand : CanopyCommandBase
     {
-        private readonly CommandOption configTypeOption;
-        private readonly CommandOption userIdOption;
-        private readonly CommandOption usernameOption;
-        private readonly CommandOption outputFolderOption;
-        private readonly CommandOption simVersionOption;
-        private readonly CommandOption unwrapOption;
-        private readonly CommandOption formatOption;
+        public record Parameters(
+            string ConfigType,
+            string UserId,
+            string Username,
+            DirectoryInfo? OutputFolder,
+            string SimVersion,
+            bool Unwrap,
+            bool Format);
 
-        public GetConfigsCommand()
+        public override Command Create()
         {
-			this.Name = "get-configs";
-			this.Description = "Lists or downloads configs of the specified type.";
+            var command = new Command("get-configs", "Lists or downloads configs of the specified type.");
 
-            this.configTypeOption = this.Option(
-                "-t | --config-type",
-                $"The config type to request (e.g. car).",
-                CommandOptionType.SingleValue);
+            command.AddOption(new Option<string>(
+                new[] { "--config-type", "-t" },
+                description: $"The config type to request (e.g. car).",
+                getDefaultValue: () => string.Empty));
 
-            this.userIdOption = this.Option(
-                "-uid | --user-id",
-                $"Filter by user ID.",
-                CommandOptionType.SingleValue);
+            command.AddOption(new Option<string>(
+                new[] { "--user-id", "-uid" },
+                description: $"Filter by user ID.",
+                getDefaultValue: () => string.Empty));
 
-            this.usernameOption = this.Option(
-                "-u | --username",
-                $"Filter by username.",
-                CommandOptionType.SingleValue);
+            command.AddOption(new Option<string>(
+                new[] { "--username", "-u" },
+                description: $"Filter by username.",
+                getDefaultValue: () => string.Empty));
 
-            this.outputFolderOption = this.Option(
-                "-o | --output-folder",
-                $"The output folder in which to save the files (optional).",
-                CommandOptionType.SingleValue);
+            command.AddOption(new Option<DirectoryInfo?>(
+                new[] { "--output-folder", "-o" },
+                description: $"The output folder in which to save the files (optional).",
+                getDefaultValue: () => null));
 
-            this.simVersionOption = this.Option(
-                "-v | --sim-version",
-                $"Get config for specific schema version (optional).",
-                CommandOptionType.SingleValue);
+            command.AddOption(new Option<string>(
+                new[] { "--sim-version", "-v" },
+                description: $"Get config for specific schema version (optional).",
+                getDefaultValue: () => string.Empty));
 
-            this.unwrapOption = this.Option(
-                "--unwrap",
-                $"Unwrap the config (removes metadata such as sim version required for importing).",
-                CommandOptionType.NoValue);
+            command.AddOption(new Option<bool>(
+                new[] { "--unwrap" },
+                description: $"Unwrap the config (removes metadata such as sim version required for importing).",
+                getDefaultValue: () => false));
 
-            this.formatOption = this.Option(
-                "-f | --format",
-                $"Format the config JSON.",
-                CommandOptionType.NoValue);
-        }
+            command.AddOption(new Option<bool>(
+                new[] { "--format", "-f" },
+                description: $"Format the config JSON.",
+                getDefaultValue: () => false));
 
-        protected override async Task<int> ExecuteAsync()
-        {
-            var configType = this.configTypeOption.ValueOrPrompt("Config Type: ", "Config type is required.");
-
-            string userId = null;
-            if (this.usernameOption.HasValue())
-            {
-                var username = this.usernameOption.Value();
-                userId = await GetUserIdFromUsername.Instance.ExecuteAsync(
-                    this.configuration, this.authenticatedUser.TenantId, username);
-            }
-            else
-            {
-                userId = this.userIdOption.Value();
-            }
-
-            var filter = new JObject(
-                new JProperty("continuationToken", null));
-
-            if (!string.IsNullOrWhiteSpace(userId))
-            {
-                filter.Add(
-                    new JProperty("filterUserId", userId));
-            }
-
-            Console.WriteLine("Requesting configs...");
-			var configClient = new ConfigClient(this.configuration);
-			GetConfigsQueryResult result = null;
-            do
-            {
-                if (result != null)
-                {
-                    filter["continuationToken"] = result.QueryResults.ContinuationToken;
-                }
-
-                result = await configClient.GetConfigsAsync(
-                    this.authenticatedUser.TenantId,
-                    configType,
-                    filter.ToString(Formatting.None),
-                    null,
-                    null);
-
-                if (this.outputFolderOption.HasValue())
-                {
-                    var format = this.formatOption.HasValue();
-                    var unwrap = this.unwrapOption.HasValue();
-                    var outputFolder = Utilities.GetCreatedOutputFolder(this.outputFolderOption);
-                    var simVersion = this.simVersionOption.Value();
-
-                    var sizes = new List<int>();
-
-                    foreach (var configMetadata in result.QueryResults.Documents)
+            command.Handler = CommandHandler.Create(async (IHost host, Parameters parameters) =>
+                await host.Services.GetRequiredService<IGetConfigs>().ExecuteAsync(
+                    parameters with 
                     {
-                        Console.WriteLine($"Downloading {configMetadata.Name}...");
+                        ConfigType = CommandUtilities.ValueOrPrompt(parameters.ConfigType, "Config Type: ", "Config type is required.", false),
+                    }));
 
-                        var config = await configClient.GetConfigAsync(
-                            configMetadata.TenantId,
-                            configMetadata.DocumentId,
-                            null,
-                            simVersion,
-                            null);
-
-                        var content = JObject.FromObject(config.Config.Data);
-                        if (!unwrap)
-                        {
-                            content = new JObject(
-                                new JProperty("simVersion", config.ConvertedSimVersion),
-                                new JProperty("config", content));
-                        }
-
-                        var formatting = format ? Formatting.Indented : Formatting.None;
-
-                        var contentString = content.ToString(formatting);
-
-                        File.WriteAllText(
-                            Path.Combine(outputFolder, FileNameUtilities.Sanitize(config.Config.Name) + ".json"),
-                            contentString);
-
-                        sizes.Add(contentString.Length);
-                    }
-
-                    Utilities.WriteTable(
-                        new[] { "Name", "Id", "UserId", "Size" },
-                        result.QueryResults.Documents
-                            .Zip(sizes, (d, s) => new { d, s }).Select(v => new string[] { v.d.Name, v.d.DocumentId, v.d.UserId, v.s.ToString() }));
-                }
-                else
-                {
-                    Utilities.WriteTable(
-                        new[] { "Name", "Id", "UserId" },
-                        result.QueryResults.Documents.Select(v => new string[] { v.Name, v.DocumentId, v.UserId }));
-                }
-            }
-            while(result.QueryResults.HasMoreResults == true);
-
-            return 0;
+            return command;
         }
     }
 }

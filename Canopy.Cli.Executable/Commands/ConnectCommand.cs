@@ -1,57 +1,70 @@
-﻿using System;
+﻿using System.CommandLine;
+using System.CommandLine.Invocation;
 using System.Threading.Tasks;
 using Canopy.Api.Client;
-using Microsoft.Extensions.CommandLineUtils;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 
 namespace Canopy.Cli.Executable.Commands
 {
     public class ConnectCommand : CanopyCommandBase
     {
-        private readonly CommandOption endpointOption;
-        private readonly CommandOption clientIdOption;
-        private readonly CommandOption clientSecretOption;
+        public record Parameters(
+            string Endpoint,
+            string ClientId,
+            string ClientSecret);
 
-        public ConnectCommand()
+        public override Command Create()
         {
-			this.RequiresConnection = false;
-			this.RequiresAuthentication = false;
+            var command = new Command("connect", "Connects to an API endpoint.");
 
-            this.Name = "connect";
-            this.Description = "Connects to an API endpoint.";
+            command.AddOption(new Option<string>(
+                new[] { "--endpoint", "-e" },
+                description: $"The API endpoint to connect to (defaults to {ConnectionManager.DefaultApiEndpoint}).",
+                getDefaultValue: () => ConnectionManager.DefaultApiEndpoint));
 
-            this.endpointOption = this.Option(
-                "-e | --endpoint",
-                $"The API endpoint to connect to (defaults to {ConnectionManager.DefaultApiEndpoint}).", 
-                CommandOptionType.SingleValue);
+            command.AddOption(new Option<string>(
+                new[] { "--client-id", "-c" },
+                description: $"Your client ID, as provided by Canopy Simulations.",
+                getDefaultValue: () => string.Empty));
 
-			this.clientIdOption = this.Option(
-				"-c | --client-id",
-                $"Your client ID, as provided by Canopy Simulations.",
-				CommandOptionType.SingleValue);
-            
-			this.clientSecretOption = this.Option(
-				"-s | --client-secret",
-				$"Your client secret, as provided by Canopy Simulations.",
-				CommandOptionType.SingleValue);
-		}
+            command.AddOption(new Option<string>(
+                new[] { "--client-secret", "-s" },
+                description: $"Your client secret, as provided by Canopy Simulations.",
+                getDefaultValue: () => string.Empty));
 
-        protected override async Task<int> ExecuteAsync()
+            command.Handler = CommandHandler.Create((IHost host, Parameters parameters) =>
+                host.Services.GetRequiredService<CommandRunner>().ExecuteAsync(
+                    parameters with
+                    {
+                        ClientId = CommandUtilities.ValueOrPrompt(parameters.ClientId, "Client ID: ", "Client ID is required.", false),
+                        ClientSecret = CommandUtilities.ValueOrPrompt(parameters.ClientSecret, "Client Secret: ", "Client Secret is required.", true),
+                    }));
+
+            return command;
+        }
+
+        public class CommandRunner
         {
-			var endpoint = this.endpointOption.Value();
-            if(string.IsNullOrWhiteSpace(endpoint))
+            private readonly IConnectionManager connectionManager;
+            private readonly IAvailabilityClient availabilityClient;
+
+            public CommandRunner(
+                IConnectionManager connectionManager,
+                IAvailabilityClient availabilityClient)
             {
-                endpoint = ConnectionManager.DefaultApiEndpoint;
+                this.availabilityClient = availabilityClient;
+                this.connectionManager = connectionManager;
             }
 
-			var clientId = this.clientIdOption.ValueOrPrompt("Client ID: ", "Client ID is required.");
-			var clientSecret = this.clientSecretOption.ValueOrPrompt("Client Secret: ", "Client Secret is required.", true);
+            public async Task ExecuteAsync(Parameters parameters)
+            {
+                this.connectionManager.SetConnectionInformation(
+                    new ConnectionInformation(parameters.Endpoint, parameters.ClientId, parameters.ClientSecret));
 
-            ConnectionManager.Instance.SetConnectionInformation(
-                new ConnectionInformation(endpoint, clientId, clientSecret));
-
-            var availabilityClient = new AvailabilityClient(this.configuration);
-            await availabilityClient.GetAsync(false);
-            return 0;
-		}
+                // Do a check to ensure we're connected.
+                await this.availabilityClient.GetAsync(false);
+            }
+        }
     }
 }

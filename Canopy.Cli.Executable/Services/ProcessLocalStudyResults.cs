@@ -1,17 +1,26 @@
-﻿namespace Canopy.Cli.Executable.Helpers
+﻿namespace Canopy.Cli.Executable.Services
 {
     using System;
     using System.Collections.Generic;
     using System.IO;
     using System.Linq;
     using System.Threading.Tasks;
-    using Canopy.Cli.Executable.Commands;
     using Canopy.Cli.Shared;
     using Canopy.Cli.Shared.StudyProcessing;
+    using Microsoft.Extensions.Logging;
 
-    public class ProcessLocalStudyResults
+    public class ProcessLocalStudyResults : IProcessLocalStudyResults
     {
-        private readonly ProcessStudyResults processStudyResults = new ProcessStudyResults();
+        private readonly IProcessStudyResults processStudyResults;
+        private readonly ILogger<ProcessLocalStudyResults> logger;
+
+        public ProcessLocalStudyResults(
+            IProcessStudyResults processStudyResults,
+            ILogger<ProcessLocalStudyResults> logger)
+        {
+            this.logger = logger;
+            this.processStudyResults = processStudyResults;
+        }
 
         public async Task ExecuteAsync(string targetFolder, bool deleteProcessedFiles)
         {
@@ -19,8 +28,7 @@
             {
                 try
                 {
-                    Console.WriteLine();
-                    Console.WriteLine("Processing: " + folder);
+                    this.logger.LogInformation("Processing {0}", folder);
                     var root = new LocalFolder(folder);
                     var fileWriter = new FileWriter();
                     await this.processStudyResults.ExecuteAsync(
@@ -32,9 +40,7 @@
                 }
                 catch (Exception t)
                 {
-                    Console.WriteLine();
-                    Console.WriteLine("Failed to process folder: " + folder);
-                    Console.WriteLine(t);
+                    this.logger.LogError(t, "Failed to process folder: {0}", folder);
                 }
             }
         }

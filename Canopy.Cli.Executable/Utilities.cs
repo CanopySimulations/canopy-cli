@@ -1,84 +1,56 @@
 ﻿using Canopy.Api.Client;
-using Microsoft.Extensions.CommandLineUtils;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
-using System.Text;
 
 namespace Canopy.Cli.Executable
 {
     public static class Utilities
     {
+        private static readonly Serilog.Core.Logger Log = StandardLogging.CreateStandardSerilogConfiguration().CreateLogger();
+
         public const string ErrorLogFileName = "error.txt";
 
-        public static string GetCreatedOutputFolder(CommandOption option)
+        public static string GetCreatedOutputFolder(DirectoryInfo folder)
         {
-            var outputFolder = option.Value();
-            if (string.IsNullOrWhiteSpace(outputFolder))
-            {
-                outputFolder = "./";
-            }
-            else
-            {
-                try
-                {
-                    if (!Directory.Exists(outputFolder))
-                    {
-                        Directory.CreateDirectory(outputFolder);
-                    }
-                }
-                catch (Exception t)
-                {
-                    throw new RecoverableException("Failed to create output folder.", t);
-                }
-            }
-
-            return outputFolder;
+            return GetCreatedOutputFolder(folder.FullName);
         }
 
-        public static void WriteTable(IEnumerable<string> headers, IEnumerable<IEnumerable<string>> values, int padding = 1)
+        public static string GetCreatedOutputFolder(string path)
         {
-            var lines = new List<List<string>>
+            try
             {
-                headers.ToList(),
-                headers.Select(v => string.Concat(Enumerable.Repeat("-", v?.Length ?? 0))).ToList()
-            }
-            .Concat(values.Select(v => v.ToList())).ToList();
-
-            // Calculate maximum numbers for each element accross all lines
-            var numElements = lines[0].Count;
-            var maxValues = new int[numElements];
-            for (int i = 0; i < numElements; i++)
-            {
-                maxValues[i] = lines.Max(x => (x.Count > i + 1 && x[i] != null ? x[i].Length : 0)) + padding;
-            }
-
-            var sb = new StringBuilder();
-            foreach (var line in lines)
-            {
-                sb.AppendLine();
-                sb.Append(" ");
-                for (int i = 0; i < line.Count; i++)
+                if (!Directory.Exists(path))
                 {
-                    var value = line[i];
-                    // Append the value with padding of the maximum length of any value for this element
-                    if (value != null)
-                    {
-                        sb.Append(value.PadRight(maxValues[i]));
-                    }
+                    Directory.CreateDirectory(path);
                 }
             }
+            catch (Exception t)
+            {
+                throw new RecoverableException("Failed to create output folder.", t);
+            }
 
-            Console.WriteLine(sb.ToString());
+            return path;
+        }
+
+        public static void WriteTable(IEnumerable<string> headers, IEnumerable<IEnumerable<string>> values)
+        {
+            var table = new ConsoleTables.ConsoleTable(headers.ToArray());
+
+            foreach (var row in values)
+            {
+                table.AddRow(row.ToArray());
+            }
+
+            Log.Information(Environment.NewLine + table.ToString());
         }
 
         public static void HandleError(Exception t)
         {
             if (t is RecoverableException
                 || t is HttpRequestException
-                || t is CommandParsingException
                 || t is CanopyApiException)
             {
                 DisplayErrorMessage(t);
@@ -91,29 +63,23 @@ namespace Canopy.Cli.Executable
 
         private static void DisplayUnexpectedErrorMessage(Exception t)
         {
-            Console.ForegroundColor = ConsoleColor.Red;
-            Console.WriteLine();
-            Console.WriteLine($"An error occurred. Run \"canopy last-error\" for more details.");
-            Console.ResetColor();
+            Log.Error($"An error occurred. Run \"canopy last-error\" for more details.");
             WriteError(t);
         }
 
         private static void DisplayErrorMessage(Exception error)
         {
-            Console.ForegroundColor = ConsoleColor.Red;
-            Console.WriteLine();
-            Console.WriteLine(error.Message);
+            Log.Error(error.Message);
             if (error.InnerException != null)
             {
-                Console.WriteLine(error.InnerException.Message);
+                Log.Error(error.InnerException.Message);
             }
 
             if (error is CanopyApiException apiError)
             {
-                Console.WriteLine(apiError.Response);
+                Log.Error(apiError.Response);
             }
 
-            Console.ResetColor();
             WriteError(error);
         }
 
@@ -127,19 +93,12 @@ namespace Canopy.Cli.Executable
             }
             catch (Exception t)
             {
-                Console.ForegroundColor = ConsoleColor.DarkYellow;
-                Console.WriteLine();
-                Console.WriteLine("Failed to log error:");
-                Console.WriteLine(t);
-                Console.ForegroundColor = ConsoleColor.White;
-                Console.WriteLine();
-                Console.WriteLine("Original error:");
-                Console.WriteLine(error);
-                Console.ResetColor();
+                Log.Warning(t, "Failed to log error.");
+                Log.Error(error, "Original error.");
             }
         }
 
-        public static string ReadError()
+        public static string? ReadError()
         {
             var saveFolder = PlatformUtilities.AppDataFolder();
             var saveFile = Path.Combine(saveFolder, ErrorLogFileName);
