@@ -2,7 +2,6 @@ using System;
 using System.IO;
 using System.Threading.Tasks;
 using Canopy.Api.Client;
-using Canopy.Cli.Executable.IntegrationTestsRunner;
 using Canopy.Cli.Executable.Services;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json.Linq;

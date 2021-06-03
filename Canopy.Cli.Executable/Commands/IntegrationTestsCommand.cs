@@ -10,7 +10,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
-namespace Canopy.Cli.Executable.IntegrationTestsRunner
+namespace Canopy.Cli.Executable.Commands
 {
     public class IntegrationTestsCommand : CanopyCommandBase
     {
@@ -22,52 +22,10 @@ namespace Canopy.Cli.Executable.IntegrationTestsRunner
         public record Parameters(
             string Name
         );
-            // string Endpoint,
-            // string ClientId,
-            // string ClientSecret,
-            // string Username,
-            // string Company,
-            // string Password,
-            // string CredentialsKey);
 
         public override Command Create()
         {
             var command = new Command(Name, "Runs the CLI integration tests.");
-
-            // command.AddOption(new Option<string>(
-            //     new[] { "--endpoint", "-e" },
-            //     description: $"The API endpoint to connect to (defaults to {ConnectionManager.DefaultApiEndpoint}).",
-            //     getDefaultValue: () => ConnectionManager.DefaultApiEndpoint));
-
-            // command.AddOption(new Option<string>(
-            //     new[] { "--client-id", "-cid" },
-            //     description: $"Your client ID, as provided by Canopy Simulations.",
-            //     getDefaultValue: () => string.Empty));
-
-            // command.AddOption(new Option<string>(
-            //     new[] { "--client-secret", "-s" },
-            //     description: $"Your client secret, as provided by Canopy Simulations.",
-            //     getDefaultValue: () => string.Empty));
-
-            // command.AddOption(new Option<string>(
-            //     new[] { "--username", "-u" },
-            //     description: "Your username.",
-            //     getDefaultValue: () => string.Empty));
-
-            // command.AddOption(new Option<string>(
-            //     new[] { "--company", "-c" },
-            //     description: "Your company.",
-            //     getDefaultValue: () => string.Empty));
-
-            // command.AddOption(new Option<string>(
-            //     new[] { "--password", "-p" },
-            //     description: "Your password.",
-            //     getDefaultValue: () => string.Empty));
-
-            // command.AddOption(new Option<string>(
-            //     new[] { "--credentials-key", "-k" },
-            //     description: "The environment variable key that contains your credentials (see the canopy-python integration tests for the format).",
-            //     getDefaultValue: () => string.Empty));
 
             command.AddOption(new Option<string>(
                 new[] { "--name", "-n" },
@@ -95,22 +53,6 @@ namespace Canopy.Cli.Executable.IntegrationTestsRunner
 
             public async Task ExecuteAsync(IHost host, Parameters parameters)
             {
-                // if (!string.IsNullOrWhiteSpace(parameters.CredentialsKey))
-                // {
-                //     parameters = this.getCredentialsFromEnvironmentVariable.Execute(parameters.CredentialsKey);
-                // }
-                // else
-                // {
-                //     parameters = parameters with
-                //     {
-                //         ClientId = CommandUtilities.ValueOrPrompt(parameters.ClientId, "Client ID: ", "Client ID is required.", false),
-                //         ClientSecret = CommandUtilities.ValueOrPrompt(parameters.ClientSecret, "Client Secret: ", "Client Secret is required.", true),
-                //         Username = CommandUtilities.ValueOrPrompt(parameters.Username, "Username: ", "Username is required.", false),
-                //         Company = CommandUtilities.ValueOrPrompt(parameters.Company, "Company: ", "Company is required.", false),
-                //         Password = CommandUtilities.ValueOrPrompt(parameters.Password, "Password: ", "Password is required.", true),
-                //     };
-                // }
-
                 var integrationTests = GetIntegrationTestClasses(parameters.Name);
 
                 this.logger.LogInformation("Found {0} integration test classes.", integrationTests.Count);

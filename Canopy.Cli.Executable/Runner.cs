@@ -14,7 +14,6 @@ using Canopy.Cli.Shared.StudyProcessing;
 using Canopy.Cli.Executable.Services;
 using Canopy.Api.Client;
 using Canopy.Cli.Executable.Commands;
-using Canopy.Cli.Executable.IntegrationTestsRunner;
 
 namespace Canopy.Cli.Executable
 {
