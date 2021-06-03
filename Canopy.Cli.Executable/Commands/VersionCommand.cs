@@ -1,9 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.CommandLine;
+﻿using System.CommandLine;
 using System.CommandLine.Invocation;
 using System.Reflection;
-using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -16,17 +13,11 @@ namespace Canopy.Cli.Executable.Commands
         public override Command Create()
         {
             var command = new Command("version", "Displays the current canopy-cli version.");
-            command.Handler = CommandHandler.Create((IHost host) => this.ExecuteAsync(host));
+            command.Handler = CommandHandler.Create((IHost host) => 
+                host.Services.GetRequiredService<CommandRunner>().Execute());
             return command;
         }
         
-        private Task ExecuteAsync(IHost host)
-        {
-            host.Services.GetRequiredService<CommandRunner>().Execute();
-            
-            return Task.CompletedTask;
-        }
-
         public class CommandRunner
         {
             private readonly ILogger<CommandRunner> logger;

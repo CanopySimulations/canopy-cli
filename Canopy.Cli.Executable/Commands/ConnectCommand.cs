@@ -63,7 +63,7 @@ namespace Canopy.Cli.Executable.Commands
                     new ConnectionInformation(parameters.Endpoint, parameters.ClientId, parameters.ClientSecret));
 
                 // Do a check to ensure we're connected.
-                await this.availabilityClient.GetAsync(false);
+                await this.availabilityClient.GetAsync(false, true);
             }
         }
     }

@@ -16,17 +16,23 @@ namespace Canopy.Cli.Executable.Services
         private readonly IEnsureAuthenticated ensureAuthenticated;
         private readonly IProcessLocalStudyResults processLocalStudyResults;
         private readonly IStudyClient studyClient;
+        private readonly IGetCreatedOutputFolder getCreatedOutputFolder;
+        private readonly IDownloadBlobDirectory downloadBlobDirectory;
         private readonly ILogger<GetStudy> logger;
 
         public GetStudy(
             IEnsureAuthenticated ensureAuthenticated,
             IProcessLocalStudyResults processLocalStudyResults,
             IStudyClient studyClient,
+            IGetCreatedOutputFolder getCreatedOutputFolder,
+            IDownloadBlobDirectory downloadBlobDirectory,
             ILogger<GetStudy> logger)
         {
             this.ensureAuthenticated = ensureAuthenticated;
             this.processLocalStudyResults = processLocalStudyResults;
             this.studyClient = studyClient;
+            this.getCreatedOutputFolder = getCreatedOutputFolder;
+            this.downloadBlobDirectory = downloadBlobDirectory;
             this.logger = logger;
         }
 
@@ -34,7 +40,7 @@ namespace Canopy.Cli.Executable.Services
         {
             var authenticatedUser = await this.ensureAuthenticated.ExecuteAsync();
 
-            var outputFolder = Utilities.GetCreatedOutputFolder(parameters.OutputFolder);
+            var outputFolder = this.getCreatedOutputFolder.Execute(parameters.OutputFolder);
 
             var studyId = parameters.StudyId;
 
@@ -63,7 +69,7 @@ namespace Canopy.Cli.Executable.Services
                             //this.logger.LogInformation($"{0} Files Copied: {1}", directory.Uri.Host, progress.NumberOfFilesTransferred);
                         }));
 
-                tasks.Add(TransferManager.DownloadDirectoryAsync(
+                tasks.Add(this.downloadBlobDirectory.ExecuteAsync(
                     directory,
                     outputFolder,
                     new DownloadDirectoryOptions { Recursive = true },

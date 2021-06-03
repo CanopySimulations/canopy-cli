@@ -13,28 +13,6 @@ namespace Canopy.Cli.Executable
 
         public const string ErrorLogFileName = "error.txt";
 
-        public static string GetCreatedOutputFolder(DirectoryInfo folder)
-        {
-            return GetCreatedOutputFolder(folder.FullName);
-        }
-
-        public static string GetCreatedOutputFolder(string path)
-        {
-            try
-            {
-                if (!Directory.Exists(path))
-                {
-                    Directory.CreateDirectory(path);
-                }
-            }
-            catch (Exception t)
-            {
-                throw new RecoverableException("Failed to create output folder.", t);
-            }
-
-            return path;
-        }
-
         public static void WriteTable(IEnumerable<string> headers, IEnumerable<IEnumerable<string>> values)
         {
             var table = new ConsoleTables.ConsoleTable(headers.ToArray());

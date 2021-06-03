@@ -14,6 +14,7 @@ using Canopy.Cli.Shared.StudyProcessing;
 using Canopy.Cli.Executable.Services;
 using Canopy.Api.Client;
 using Canopy.Cli.Executable.Commands;
+using Canopy.Cli.Executable.IntegrationTestsRunner;
 
 namespace Canopy.Cli.Executable
 {
@@ -31,6 +32,10 @@ namespace Canopy.Cli.Executable
                 throw new RecoverableException("Failed to configure commands.", t);
             }
 
+
+            var initialParse = rootCommand.Parse(args);
+            var isIntegrationTests = initialParse.CommandResult.Command.Name == IntegrationTestsCommand.Name;
+
             var parser = new CommandLineBuilder(rootCommand)
                 .UseDefaults()
                 .UseExceptionHandler((t, c) => Utilities.HandleError(t))
@@ -43,7 +48,7 @@ namespace Canopy.Cli.Executable
                             {
                                 StandardLogging.CreateStandardSerilogConfiguration(loggerConfiguration);
                             })
-                        .ConfigureServices(ConfigureServices);
+                        .ConfigureServices((c, s) => ConfigureServices(c, s, isIntegrationTests));
                 })
                 .Build();
 
@@ -73,12 +78,14 @@ namespace Canopy.Cli.Executable
             return rootCommand;
         }
 
-        private static void ConfigureServices(HostBuilderContext context, IServiceCollection services)
+        private static void ConfigureServices(HostBuilderContext context, IServiceCollection services, bool isIntegrationTests)
         {
             services.AddSingleton<IConfiguration>(context.Configuration);
             services.AddSingleton<IConnectionManager, ConnectionManager>();
             services.AddSingleton<IAuthenticationManager, AuthenticationManager>();
             services.AddSingleton<CanopyApiConfiguration>();
+            services.AddSingleton<ISimVersionCache, SimVersionCache>();
+            services.AddSingleton<IStudyTypesCache, StudyTypesCache>();
 
             AddApiClientServices(services);
             AddCommandRunnerServices(services);
@@ -94,6 +101,21 @@ namespace Canopy.Cli.Executable
             services.AddTransient<IMonitorDownloads, MonitorDownloads>();
             services.AddTransient<IRunDownloader, RunDownloader>();
             services.AddTransient<IProcessStudyResults, ProcessStudyResults>();
+            services.AddTransient<IGetDefaultConfigPath, GetDefaultConfigPath>();
+            services.AddTransient<IGetDefaultConfig, GetDefaultConfig>();
+            services.AddTransient<IWaitForStudy, WaitForStudy>();
+
+            if (isIntegrationTests)
+            {
+                AddIntegrationTestServices(services);
+            }
+            else
+            {
+                services.AddTransient<IWriteFile, WriteFile>();
+                services.AddTransient<IGetCreatedOutputFolder, GetCreatedOutputFolder>();
+                services.AddTransient<IDownloadBlobDirectory, DownloadBlobDirectory>();
+            }
+
         }
 
         private static void AddCommandRunnerServices(IServiceCollection services)
@@ -119,6 +141,26 @@ namespace Canopy.Cli.Executable
             foreach (var client in apiClients)
             {
                 services.AddTransient(client.Interface, client.Class);
+            }
+        }
+
+        private static void AddIntegrationTestServices(IServiceCollection services)
+        {
+            // services.AddTransient<IGetCredentialsFromEnvironmentVariable, GetCredentialsFromEnvironmentVariable>();
+
+            var writeFileMock = new WriteFileMock();
+            services.AddSingleton<IWriteFile>(writeFileMock);
+            services.AddSingleton<IWriteFileMock>(writeFileMock);
+
+            services.AddTransient<IGetCreatedOutputFolder, GetCreatedOutputFolderMock>();
+
+            var downloadBlobDirectoryMock = new DownloadBlobDirectoryMock();
+            services.AddSingleton<IDownloadBlobDirectory>(downloadBlobDirectoryMock);
+            services.AddSingleton<IDownloadBlobDirectoryMock>(downloadBlobDirectoryMock);
+
+            foreach (var integrationTest in IntegrationTestsCommand.CommandRunner.GetIntegrationTestClasses(string.Empty))
+            {
+                services.AddTransient(integrationTest);
             }
         }
     }

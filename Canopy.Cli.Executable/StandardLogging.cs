@@ -18,6 +18,5 @@ namespace Canopy.Cli.Executable
                     outputTemplate: "<{ThreadId}>[{Timestamp:HH:mm:ss} {Level}] {Message:lj}{NewLine}{Exception}",
                     theme: AnsiConsoleTheme.Literate);
         }
-
     }
 }

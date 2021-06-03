@@ -11,16 +11,25 @@ namespace Canopy.Cli.Executable.Services
     public class GetSchemas : IGetSchemas
     {
         private readonly IEnsureAuthenticated ensureAuthenticated;
+        private readonly ISimVersionCache simVersionCache;
         private readonly ISimVersionClient simVersionClient;
+        private readonly IWriteFile writeFile;
+        private readonly IGetCreatedOutputFolder getCreatedOutputFolder;
         private readonly ILogger<GetSchemas> logger;
 
         public GetSchemas(
             IEnsureAuthenticated ensureAuthenticated,
+            ISimVersionCache simVersionCache,
             ISimVersionClient simVersionClient,
+            IWriteFile writeFile,
+            IGetCreatedOutputFolder getCreatedOutputFolder,
             ILogger<GetSchemas> logger)
         {
             this.ensureAuthenticated = ensureAuthenticated;
+            this.simVersionCache = simVersionCache;
             this.simVersionClient = simVersionClient;
+            this.writeFile = writeFile;
+            this.getCreatedOutputFolder = getCreatedOutputFolder;
             this.logger = logger;
         }
 
@@ -28,7 +37,7 @@ namespace Canopy.Cli.Executable.Services
         {
             var authenticatedUser = await this.ensureAuthenticated.ExecuteAsync();
 
-            var outputFolder = Utilities.GetCreatedOutputFolder(parameters.OutputFolder);
+            var outputFolder = this.getCreatedOutputFolder.Execute(parameters.OutputFolder);
 
             var tenantId = parameters.TenantId;
             if (string.IsNullOrWhiteSpace(tenantId))
@@ -36,7 +45,7 @@ namespace Canopy.Cli.Executable.Services
                 tenantId = authenticatedUser.TenantId;
             }
 
-            var simVersion = parameters.SimVersion;
+            var simVersion = await this.simVersionCache.GetOrSet(parameters.SimVersion);
 
             this.logger.LogInformation("Requesting schemas...");
             var result = await this.simVersionClient.GetDocumentsAsync(simVersion, tenantId);
@@ -55,7 +64,7 @@ namespace Canopy.Cli.Executable.Services
                     continue;
                 }
 
-                File.WriteAllText(Path.Combine(outputFolder, document.Name), document.Content);
+                await this.writeFile.ExecuteAsync(Path.Combine(outputFolder, document.Name), document.Content);
                 writtenFiles.Add(document);
             }
 

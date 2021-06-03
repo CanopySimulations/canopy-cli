@@ -7,11 +7,14 @@ namespace Canopy.Cli.Executable.Services
     {
         private readonly IEnsureAuthenticated ensureAuthenticated;
         private readonly IMonitorDownloads monitorDownloads;
+        private readonly IGetCreatedOutputFolder getCreatedOutputFolder;
 
         public RunDownloader(
             IEnsureAuthenticated ensureAuthenticated,
+            IGetCreatedOutputFolder getCreatedOutputFolder,
             IMonitorDownloads monitorDownloads)
         {
+            this.getCreatedOutputFolder = getCreatedOutputFolder;
             this.ensureAuthenticated = ensureAuthenticated;
             this.monitorDownloads = monitorDownloads;
         }
@@ -20,8 +23,8 @@ namespace Canopy.Cli.Executable.Services
         {
             await this.ensureAuthenticated.ExecuteAsync();
 
-            var inputFolder = Utilities.GetCreatedOutputFolder(parameters.InputFolder);
-            var outputFolder = Utilities.GetCreatedOutputFolder(parameters.OutputFolder);
+            var inputFolder = this.getCreatedOutputFolder.Execute(parameters.InputFolder);
+            var outputFolder = this.getCreatedOutputFolder.Execute(parameters.OutputFolder);
 
             using var cts = CommandUtilities.CreateCommandCancellationTokenSource();
 

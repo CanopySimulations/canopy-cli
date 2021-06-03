@@ -13,19 +13,28 @@ namespace Canopy.Cli.Executable.Services
     public class GetConfigs : IGetConfigs
     {
         private readonly IEnsureAuthenticated ensureAuthenticated;
+        private readonly ISimVersionCache simVersionCache;
         private readonly IGetUserIdFromUsername getUserIdFromUsername;
         private readonly IConfigClient configClient;
+        private readonly IWriteFile writeFile;
+        private readonly IGetCreatedOutputFolder getCreatedOutputFolder;
         private readonly ILogger<GetConfigs> logger;
 
         public GetConfigs(
             IEnsureAuthenticated ensureAuthenticated,
+            ISimVersionCache simVersionCache,
             IGetUserIdFromUsername getUserIdFromUsername,
             IConfigClient configClient,
+            IWriteFile writeFile,
+            IGetCreatedOutputFolder getCreatedOutputFolder,
             ILogger<GetConfigs> logger)
         {
             this.ensureAuthenticated = ensureAuthenticated;
+            this.simVersionCache = simVersionCache;
             this.getUserIdFromUsername = getUserIdFromUsername;
             this.configClient = configClient;
+            this.writeFile = writeFile;
+            this.getCreatedOutputFolder = getCreatedOutputFolder;
             this.logger = logger;
         }
 
@@ -38,7 +47,8 @@ namespace Canopy.Cli.Executable.Services
             var outputFolder = parameters.OutputFolder;
             var format = parameters.Format;
             var unwrap = parameters.Unwrap;
-            var simVersion = parameters.SimVersion;
+            
+            var simVersion = await this.simVersionCache.GetOrSet(parameters.SimVersion);
 
             var authenticatedUser = await this.ensureAuthenticated.ExecuteAsync();
 
@@ -74,7 +84,7 @@ namespace Canopy.Cli.Executable.Services
 
                 if (outputFolder != null)
                 {
-                    var outputFolderPath = Utilities.GetCreatedOutputFolder(outputFolder);
+                    var outputFolderPath = this.getCreatedOutputFolder.Execute(outputFolder);
 
                     var sizes = new List<int>();
 
@@ -101,7 +111,7 @@ namespace Canopy.Cli.Executable.Services
 
                         var contentString = content.ToString(formatting);
 
-                        File.WriteAllText(
+                        await this.writeFile.ExecuteAsync(
                             Path.Combine(outputFolderPath, FileNameUtilities.Sanitize(config.Config.Name) + ".json"),
                             contentString);
 
