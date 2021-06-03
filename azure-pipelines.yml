@@ -48,18 +48,27 @@ steps:
   displayName: 'Unit tests'
 
 - powershell: |
+    function Invoke-Cli {
+    <#
+    https://stackoverflow.com/a/48877892/37725
+    #>
+      $ErrorActionPreference = 'Continue'
+      try { & dotnet run --project Canopy.Cli.Executable -- $Args } catch { Throw } # catch is triggered ONLY if $exe can't be found, never for errors reported by $exe itself
+      if ($LASTEXITCODE) { Throw "$exe indicated failure (exit code $LASTEXITCODE; full command: $Args)." }
+    }
     $guid = New-Guid
     $guidString = $guid.ToString("n")
     $testUserId = "u-" + $guidString.Substring(0, 18)
     $guid = New-Guid
     $testUserPassword = $guid.ToString("n")
-    dotnet run --project Canopy.Cli.Executable -- connect --client-id "canopy.web.1" --client-secret ""
-    dotnet run --project Canopy.Cli.Executable -- authenticate --username master --company test --password "$($env:CANOPY_TEST_ACCOUNT_MASTER_PASSWORD)"
-    dotnet run --project Canopy.Cli.Executable -- create-user --username "$testUserId" --email "$testUserId@testing.canopysimulations.com" --password "$testUserPassword"
-    dotnet run --project Canopy.Cli.Executable -- authenticate --username "$testUserId" --company test --password "$testUserPassword"
-    dotnet run --project Canopy.Cli.Executable -- integration-tests
+    Invoke-Cli connect --client-id "canopy" --client-secret "$($env:CANOPY_CLIENT_SECRET)"
+    Invoke-Cli authenticate --username master --company test --password "$($env:CANOPY_TEST_ACCOUNT_MASTER_PASSWORD)"
+    Invoke-Cli create-user --username "$testUserId" --email "$testUserId@testing.canopysimulations.com" --password "$testUserPassword"
+    Invoke-Cli authenticate --username "$testUserId" --company test --password "$testUserPassword"
+    Invoke-Cli integration-tests
   env:
     CANOPY_TEST_ACCOUNT_MASTER_PASSWORD: $(s_CanopyTestAccountMasterPassword)
+    CANOPY_CLIENT_SECRET: $(s_CanopyClientSecret)
   displayName: 'Integration tests'
 
 - task: DotNetCoreCLI@2
