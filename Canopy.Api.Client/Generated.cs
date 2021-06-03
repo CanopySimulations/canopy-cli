@@ -3424,50 +3424,50 @@ namespace Canopy.Api.Client
         /// <exception cref="CanopyApiException">A server side error occurred.</exception>
         System.Threading.Tasks.Task PostInitializeAsync(System.Threading.CancellationToken cancellationToken);
     
-        /// <returns>OK</returns>
+        /// <returns>No Content</returns>
         /// <exception cref="CanopyApiException">A server side error occurred.</exception>
-        System.Threading.Tasks.Task<object> PostRegistrationAsync(RegistrationData registrationData);
+        System.Threading.Tasks.Task PostRegistrationAsync(RegistrationData registrationData);
     
         /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
-        /// <returns>OK</returns>
+        /// <returns>No Content</returns>
         /// <exception cref="CanopyApiException">A server side error occurred.</exception>
-        System.Threading.Tasks.Task<object> PostRegistrationAsync(RegistrationData registrationData, System.Threading.CancellationToken cancellationToken);
+        System.Threading.Tasks.Task PostRegistrationAsync(RegistrationData registrationData, System.Threading.CancellationToken cancellationToken);
     
-        /// <returns>OK</returns>
+        /// <returns>No Content</returns>
         /// <exception cref="CanopyApiException">A server side error occurred.</exception>
-        System.Threading.Tasks.Task<object> PostPasswordResetRequestAsync(PasswordResetRequestData passwordResetRequestData);
-    
-        /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
-        /// <returns>OK</returns>
-        /// <exception cref="CanopyApiException">A server side error occurred.</exception>
-        System.Threading.Tasks.Task<object> PostPasswordResetRequestAsync(PasswordResetRequestData passwordResetRequestData, System.Threading.CancellationToken cancellationToken);
-    
-        /// <returns>OK</returns>
-        /// <exception cref="CanopyApiException">A server side error occurred.</exception>
-        System.Threading.Tasks.Task<object> PostPasswordResetConfirmationAsync(PasswordResetConfirmationData passwordResetConfirmationData);
+        System.Threading.Tasks.Task PostPasswordResetRequestAsync(PasswordResetRequestData passwordResetRequestData);
     
         /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
-        /// <returns>OK</returns>
+        /// <returns>No Content</returns>
         /// <exception cref="CanopyApiException">A server side error occurred.</exception>
-        System.Threading.Tasks.Task<object> PostPasswordResetConfirmationAsync(PasswordResetConfirmationData passwordResetConfirmationData, System.Threading.CancellationToken cancellationToken);
+        System.Threading.Tasks.Task PostPasswordResetRequestAsync(PasswordResetRequestData passwordResetRequestData, System.Threading.CancellationToken cancellationToken);
     
-        /// <returns>OK</returns>
+        /// <returns>No Content</returns>
         /// <exception cref="CanopyApiException">A server side error occurred.</exception>
-        System.Threading.Tasks.Task<object> GetPasswordResetTokenValidityAsync(string userId, string token);
-    
-        /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
-        /// <returns>OK</returns>
-        /// <exception cref="CanopyApiException">A server side error occurred.</exception>
-        System.Threading.Tasks.Task<object> GetPasswordResetTokenValidityAsync(string userId, string token, System.Threading.CancellationToken cancellationToken);
-    
-        /// <returns>OK</returns>
-        /// <exception cref="CanopyApiException">A server side error occurred.</exception>
-        System.Threading.Tasks.Task<object> PostIdentifiedUserAsync(IdentifiedUserData identifiedUserData);
+        System.Threading.Tasks.Task PostPasswordResetConfirmationAsync(PasswordResetConfirmationData passwordResetConfirmationData);
     
         /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
-        /// <returns>OK</returns>
+        /// <returns>No Content</returns>
         /// <exception cref="CanopyApiException">A server side error occurred.</exception>
-        System.Threading.Tasks.Task<object> PostIdentifiedUserAsync(IdentifiedUserData identifiedUserData, System.Threading.CancellationToken cancellationToken);
+        System.Threading.Tasks.Task PostPasswordResetConfirmationAsync(PasswordResetConfirmationData passwordResetConfirmationData, System.Threading.CancellationToken cancellationToken);
+    
+        /// <returns>No Content</returns>
+        /// <exception cref="CanopyApiException">A server side error occurred.</exception>
+        System.Threading.Tasks.Task GetPasswordResetTokenValidityAsync(string userId, string token);
+    
+        /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
+        /// <returns>No Content</returns>
+        /// <exception cref="CanopyApiException">A server side error occurred.</exception>
+        System.Threading.Tasks.Task GetPasswordResetTokenValidityAsync(string userId, string token, System.Threading.CancellationToken cancellationToken);
+    
+        /// <returns>No Content</returns>
+        /// <exception cref="CanopyApiException">A server side error occurred.</exception>
+        System.Threading.Tasks.Task PostIdentifiedUserAsync(IdentifiedUserData identifiedUserData);
+    
+        /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
+        /// <returns>No Content</returns>
+        /// <exception cref="CanopyApiException">A server side error occurred.</exception>
+        System.Threading.Tasks.Task PostIdentifiedUserAsync(IdentifiedUserData identifiedUserData, System.Threading.CancellationToken cancellationToken);
     
         /// <returns>No Content</returns>
         /// <exception cref="CanopyApiException">A server side error occurred.</exception>
@@ -3601,17 +3601,17 @@ namespace Canopy.Api.Client
             }
         }
     
-        /// <returns>OK</returns>
+        /// <returns>No Content</returns>
         /// <exception cref="CanopyApiException">A server side error occurred.</exception>
-        public System.Threading.Tasks.Task<object> PostRegistrationAsync(RegistrationData registrationData)
+        public System.Threading.Tasks.Task PostRegistrationAsync(RegistrationData registrationData)
         {
             return PostRegistrationAsync(registrationData, System.Threading.CancellationToken.None);
         }
     
         /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
-        /// <returns>OK</returns>
+        /// <returns>No Content</returns>
         /// <exception cref="CanopyApiException">A server side error occurred.</exception>
-        public async System.Threading.Tasks.Task<object> PostRegistrationAsync(RegistrationData registrationData, System.Threading.CancellationToken cancellationToken)
+        public async System.Threading.Tasks.Task PostRegistrationAsync(RegistrationData registrationData, System.Threading.CancellationToken cancellationToken)
         {
             if (registrationData == null)
                 throw new System.ArgumentNullException("registrationData");
@@ -3629,7 +3629,6 @@ namespace Canopy.Api.Client
                     content_.Headers.ContentType = System.Net.Http.Headers.MediaTypeHeaderValue.Parse("application/json");
                     request_.Content = content_;
                     request_.Method = new System.Net.Http.HttpMethod("POST");
-                    request_.Headers.Accept.Add(System.Net.Http.Headers.MediaTypeWithQualityHeaderValue.Parse("application/json"));
     
                     base.PrepareRequest(client_, request_, urlBuilder_);
     
@@ -3652,14 +3651,9 @@ namespace Canopy.Api.Client
                         ProcessResponse(client_, response_);
     
                         var status_ = (int)response_.StatusCode;
-                        if (status_ == 200)
+                        if (status_ == 204)
                         {
-                            var objectResponse_ = await ReadObjectResponseAsync<object>(response_, headers_, cancellationToken).ConfigureAwait(false);
-                            if (objectResponse_.Object == null)
-                            {
-                                throw new CanopyApiException("Response was null which was not expected.", status_, objectResponse_.Text, headers_, null);
-                            }
-                            return objectResponse_.Object;
+                            return;
                         }
                         else
                         {
@@ -3681,17 +3675,17 @@ namespace Canopy.Api.Client
             }
         }
     
-        /// <returns>OK</returns>
+        /// <returns>No Content</returns>
         /// <exception cref="CanopyApiException">A server side error occurred.</exception>
-        public System.Threading.Tasks.Task<object> PostPasswordResetRequestAsync(PasswordResetRequestData passwordResetRequestData)
+        public System.Threading.Tasks.Task PostPasswordResetRequestAsync(PasswordResetRequestData passwordResetRequestData)
         {
             return PostPasswordResetRequestAsync(passwordResetRequestData, System.Threading.CancellationToken.None);
         }
     
         /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
-        /// <returns>OK</returns>
+        /// <returns>No Content</returns>
         /// <exception cref="CanopyApiException">A server side error occurred.</exception>
-        public async System.Threading.Tasks.Task<object> PostPasswordResetRequestAsync(PasswordResetRequestData passwordResetRequestData, System.Threading.CancellationToken cancellationToken)
+        public async System.Threading.Tasks.Task PostPasswordResetRequestAsync(PasswordResetRequestData passwordResetRequestData, System.Threading.CancellationToken cancellationToken)
         {
             if (passwordResetRequestData == null)
                 throw new System.ArgumentNullException("passwordResetRequestData");
@@ -3709,7 +3703,6 @@ namespace Canopy.Api.Client
                     content_.Headers.ContentType = System.Net.Http.Headers.MediaTypeHeaderValue.Parse("application/json");
                     request_.Content = content_;
                     request_.Method = new System.Net.Http.HttpMethod("POST");
-                    request_.Headers.Accept.Add(System.Net.Http.Headers.MediaTypeWithQualityHeaderValue.Parse("application/json"));
     
                     base.PrepareRequest(client_, request_, urlBuilder_);
     
@@ -3732,14 +3725,9 @@ namespace Canopy.Api.Client
                         ProcessResponse(client_, response_);
     
                         var status_ = (int)response_.StatusCode;
-                        if (status_ == 200)
+                        if (status_ == 204)
                         {
-                            var objectResponse_ = await ReadObjectResponseAsync<object>(response_, headers_, cancellationToken).ConfigureAwait(false);
-                            if (objectResponse_.Object == null)
-                            {
-                                throw new CanopyApiException("Response was null which was not expected.", status_, objectResponse_.Text, headers_, null);
-                            }
-                            return objectResponse_.Object;
+                            return;
                         }
                         else
                         {
@@ -3761,17 +3749,17 @@ namespace Canopy.Api.Client
             }
         }
     
-        /// <returns>OK</returns>
+        /// <returns>No Content</returns>
         /// <exception cref="CanopyApiException">A server side error occurred.</exception>
-        public System.Threading.Tasks.Task<object> PostPasswordResetConfirmationAsync(PasswordResetConfirmationData passwordResetConfirmationData)
+        public System.Threading.Tasks.Task PostPasswordResetConfirmationAsync(PasswordResetConfirmationData passwordResetConfirmationData)
         {
             return PostPasswordResetConfirmationAsync(passwordResetConfirmationData, System.Threading.CancellationToken.None);
         }
     
         /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
-        /// <returns>OK</returns>
+        /// <returns>No Content</returns>
         /// <exception cref="CanopyApiException">A server side error occurred.</exception>
-        public async System.Threading.Tasks.Task<object> PostPasswordResetConfirmationAsync(PasswordResetConfirmationData passwordResetConfirmationData, System.Threading.CancellationToken cancellationToken)
+        public async System.Threading.Tasks.Task PostPasswordResetConfirmationAsync(PasswordResetConfirmationData passwordResetConfirmationData, System.Threading.CancellationToken cancellationToken)
         {
             if (passwordResetConfirmationData == null)
                 throw new System.ArgumentNullException("passwordResetConfirmationData");
@@ -3789,7 +3777,6 @@ namespace Canopy.Api.Client
                     content_.Headers.ContentType = System.Net.Http.Headers.MediaTypeHeaderValue.Parse("application/json");
                     request_.Content = content_;
                     request_.Method = new System.Net.Http.HttpMethod("POST");
-                    request_.Headers.Accept.Add(System.Net.Http.Headers.MediaTypeWithQualityHeaderValue.Parse("application/json"));
     
                     base.PrepareRequest(client_, request_, urlBuilder_);
     
@@ -3812,14 +3799,9 @@ namespace Canopy.Api.Client
                         ProcessResponse(client_, response_);
     
                         var status_ = (int)response_.StatusCode;
-                        if (status_ == 200)
+                        if (status_ == 204)
                         {
-                            var objectResponse_ = await ReadObjectResponseAsync<object>(response_, headers_, cancellationToken).ConfigureAwait(false);
-                            if (objectResponse_.Object == null)
-                            {
-                                throw new CanopyApiException("Response was null which was not expected.", status_, objectResponse_.Text, headers_, null);
-                            }
-                            return objectResponse_.Object;
+                            return;
                         }
                         else
                         {
@@ -3841,17 +3823,17 @@ namespace Canopy.Api.Client
             }
         }
     
-        /// <returns>OK</returns>
+        /// <returns>No Content</returns>
         /// <exception cref="CanopyApiException">A server side error occurred.</exception>
-        public System.Threading.Tasks.Task<object> GetPasswordResetTokenValidityAsync(string userId, string token)
+        public System.Threading.Tasks.Task GetPasswordResetTokenValidityAsync(string userId, string token)
         {
             return GetPasswordResetTokenValidityAsync(userId, token, System.Threading.CancellationToken.None);
         }
     
         /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
-        /// <returns>OK</returns>
+        /// <returns>No Content</returns>
         /// <exception cref="CanopyApiException">A server side error occurred.</exception>
-        public async System.Threading.Tasks.Task<object> GetPasswordResetTokenValidityAsync(string userId, string token, System.Threading.CancellationToken cancellationToken)
+        public async System.Threading.Tasks.Task GetPasswordResetTokenValidityAsync(string userId, string token, System.Threading.CancellationToken cancellationToken)
         {
             if (userId == null)
                 throw new System.ArgumentNullException("userId");
@@ -3872,7 +3854,6 @@ namespace Canopy.Api.Client
                 using (var request_ = await CreateHttpRequestMessageAsync(cancellationToken).ConfigureAwait(false))
                 {
                     request_.Method = new System.Net.Http.HttpMethod("GET");
-                    request_.Headers.Accept.Add(System.Net.Http.Headers.MediaTypeWithQualityHeaderValue.Parse("application/json"));
     
                     base.PrepareRequest(client_, request_, urlBuilder_);
     
@@ -3895,14 +3876,9 @@ namespace Canopy.Api.Client
                         ProcessResponse(client_, response_);
     
                         var status_ = (int)response_.StatusCode;
-                        if (status_ == 200)
+                        if (status_ == 204)
                         {
-                            var objectResponse_ = await ReadObjectResponseAsync<object>(response_, headers_, cancellationToken).ConfigureAwait(false);
-                            if (objectResponse_.Object == null)
-                            {
-                                throw new CanopyApiException("Response was null which was not expected.", status_, objectResponse_.Text, headers_, null);
-                            }
-                            return objectResponse_.Object;
+                            return;
                         }
                         else
                         {
@@ -3924,17 +3900,17 @@ namespace Canopy.Api.Client
             }
         }
     
-        /// <returns>OK</returns>
+        /// <returns>No Content</returns>
         /// <exception cref="CanopyApiException">A server side error occurred.</exception>
-        public System.Threading.Tasks.Task<object> PostIdentifiedUserAsync(IdentifiedUserData identifiedUserData)
+        public System.Threading.Tasks.Task PostIdentifiedUserAsync(IdentifiedUserData identifiedUserData)
         {
             return PostIdentifiedUserAsync(identifiedUserData, System.Threading.CancellationToken.None);
         }
     
         /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
-        /// <returns>OK</returns>
+        /// <returns>No Content</returns>
         /// <exception cref="CanopyApiException">A server side error occurred.</exception>
-        public async System.Threading.Tasks.Task<object> PostIdentifiedUserAsync(IdentifiedUserData identifiedUserData, System.Threading.CancellationToken cancellationToken)
+        public async System.Threading.Tasks.Task PostIdentifiedUserAsync(IdentifiedUserData identifiedUserData, System.Threading.CancellationToken cancellationToken)
         {
             if (identifiedUserData == null)
                 throw new System.ArgumentNullException("identifiedUserData");
@@ -3952,7 +3928,6 @@ namespace Canopy.Api.Client
                     content_.Headers.ContentType = System.Net.Http.Headers.MediaTypeHeaderValue.Parse("application/json");
                     request_.Content = content_;
                     request_.Method = new System.Net.Http.HttpMethod("POST");
-                    request_.Headers.Accept.Add(System.Net.Http.Headers.MediaTypeWithQualityHeaderValue.Parse("application/json"));
     
                     base.PrepareRequest(client_, request_, urlBuilder_);
     
@@ -3975,14 +3950,9 @@ namespace Canopy.Api.Client
                         ProcessResponse(client_, response_);
     
                         var status_ = (int)response_.StatusCode;
-                        if (status_ == 200)
+                        if (status_ == 204)
                         {
-                            var objectResponse_ = await ReadObjectResponseAsync<object>(response_, headers_, cancellationToken).ConfigureAwait(false);
-                            if (objectResponse_.Object == null)
-                            {
-                                throw new CanopyApiException("Response was null which was not expected.", status_, objectResponse_.Text, headers_, null);
-                            }
-                            return objectResponse_.Object;
+                            return;
                         }
                         else
                         {
