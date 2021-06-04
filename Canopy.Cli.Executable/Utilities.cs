@@ -27,9 +27,7 @@ namespace Canopy.Cli.Executable
 
         public static void HandleError(Exception t)
         {
-            if (t is RecoverableException
-                || t is HttpRequestException
-                || t is CanopyApiException)
+            if (IsExpectedError(t) && !IsRunningOnBuildServer())
             {
                 DisplayErrorMessage(t);
             }
@@ -37,6 +35,13 @@ namespace Canopy.Cli.Executable
             {
                 DisplayUnexpectedErrorMessage(t);
             }
+        }
+
+        private static bool IsExpectedError(Exception t)
+        {
+            return t is RecoverableException
+                || t is HttpRequestException
+                || t is CanopyApiException;
         }
 
         private static void DisplayUnexpectedErrorMessage(Exception t)
@@ -86,6 +91,11 @@ namespace Canopy.Cli.Executable
             }
 
             return File.ReadAllText(saveFile);
+        }
+
+        public static bool IsRunningOnBuildServer()
+        {
+            return Environment.GetEnvironmentVariable("BUILD_BUILDID") != null;
         }
     }
 }
