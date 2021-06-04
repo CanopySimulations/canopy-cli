@@ -1,5 +1,5 @@
 function Invoke-Cli {
-    & dotnet run --project Canopy.Cli.Executable -- $Args
+    dotnet run --project Canopy.Cli.Executable -- $Args
     Write-Output "Exit code: $LASTEXITCODE" 
     if ($LASTEXITCODE) { Throw "$exe indicated failure (exit code $LASTEXITCODE; full command: $Args)." }
 }

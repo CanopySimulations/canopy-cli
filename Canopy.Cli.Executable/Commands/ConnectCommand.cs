@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using Canopy.Api.Client;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 
 namespace Canopy.Cli.Executable.Commands
 {
@@ -48,12 +49,15 @@ namespace Canopy.Cli.Executable.Commands
         {
             private readonly IConnectionManager connectionManager;
             private readonly IAvailabilityClient availabilityClient;
+            private readonly ILogger<CommandRunner> logger;
 
             public CommandRunner(
                 IConnectionManager connectionManager,
-                IAvailabilityClient availabilityClient)
+                IAvailabilityClient availabilityClient,
+                ILogger<CommandRunner> logger)
             {
                 this.availabilityClient = availabilityClient;
+                this.logger = logger;
                 this.connectionManager = connectionManager;
             }
 
@@ -64,6 +68,8 @@ namespace Canopy.Cli.Executable.Commands
 
                 // Do a check to ensure we're connected.
                 await this.availabilityClient.GetAsync(false, true);
+
+                this.logger.LogInformation("Connected.");
             }
         }
     }

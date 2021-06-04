@@ -37,7 +37,11 @@ namespace Canopy.Cli.Executable
 
             var parser = new CommandLineBuilder(rootCommand)
                 .UseDefaults()
-                .UseExceptionHandler((t, c) => Utilities.HandleError(t))
+                .UseExceptionHandler((t, c) =>
+                {
+                    Utilities.HandleError(t);
+                    c.ExitCode = 1;
+                })
                 .UseHost(Host.CreateDefaultBuilder, host =>
                 {
                     host
