@@ -1,9 +1,6 @@
 function Invoke-Cli {
-    <#
-    https://stackoverflow.com/a/48877892/37725
-    #>
-    $ErrorActionPreference = 'Continue'
-    try { & dotnet run --project Canopy.Cli.Executable -- $Args } catch { Throw } # catch is triggered ONLY if $exe can't be found, never for errors reported by $exe itself
+    & dotnet run --project Canopy.Cli.Executable -- $Args
+    Write-Output "Exit code: $LASTEXITCODE" 
     if ($LASTEXITCODE) { Throw "$exe indicated failure (exit code $LASTEXITCODE; full command: $Args)." }
 }
 $guid = New-Guid
