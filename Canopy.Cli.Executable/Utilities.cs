@@ -27,7 +27,12 @@ namespace Canopy.Cli.Executable
 
         public static void HandleError(Exception t)
         {
-            if (IsExpectedError(t) && !IsRunningOnBuildServer())
+            if (IsRunningOnBuildServer())
+            {
+                Log.Error(t, "Full error information:");
+            }
+
+            if (IsExpectedError(t))
             {
                 DisplayErrorMessage(t);
             }
