@@ -12,6 +12,7 @@ using System.IO;
 using Microsoft.Extensions.Hosting;
 using System.CommandLine.Invocation;
 using Microsoft.Extensions.DependencyInjection;
+using Canopy.Cli.Shared;
 
 namespace Canopy.Cli.Executable.Commands
 {
@@ -19,32 +20,49 @@ namespace Canopy.Cli.Executable.Commands
     public class GetStudyCommand : CanopyCommandBase
     {
         public record Parameters(
-            DirectoryInfo OutputFolder,
+            string OutputFolder,
+            string TenantId,
             string StudyId,
             bool GenerateCsv,
-            bool KeepBinary);
+            bool KeepBinary)
+        {
+            public static Parameters Random()
+            {
+                return new Parameters(
+                    "./" + SingletonRandom.Instance.NextString(),
+                    SingletonRandom.Instance.NextString(),
+                    SingletonRandom.Instance.NextString(),
+                    SingletonRandom.Instance.NextBoolean(),
+                    SingletonRandom.Instance.NextBoolean());
+            }
+        };
 
         public override Command Create()
         {
             var command = new Command("get-study", "Downloads the specified study or study job.");
 
-            command.AddOption(new Option<DirectoryInfo>(
-                new [] { "--output-folder", "-o" },
+            command.AddOption(new Option<string>(
+                new[] { "--output-folder", "-o" },
                 description: $"The output folder in which to save the files (defaults to the current directory).",
-                getDefaultValue: () => new DirectoryInfo("./")));
+                getDefaultValue: () => "./"));
 
             command.AddOption(new Option<string>(
-                new [] { "--study-id", "-s" },
+                new[] { "--tenant-id", "-t" },
+                description: $"The tenancy from which download.",
+                getDefaultValue: () => string.Empty));
+
+            command.AddOption(new Option<string>(
+                new[] { "--study-id", "-s" },
                 description: $"The study to download.",
                 getDefaultValue: () => string.Empty));
 
             command.AddOption(new Option<bool>(
-                new [] { "--generate-csv", "-csv" },
+                new[] { "--generate-csv", "-csv" },
                 description: $"Generate CSV files from binary files.",
                 getDefaultValue: () => false));
 
             command.AddOption(new Option<bool>(
-                new [] { "--keep-binary", "-bin" },
+                new[] { "--keep-binary", "-bin" },
                 description: $"Do not delete binary files which have been processed into CSV files (faster).",
                 getDefaultValue: () => true));
 

@@ -1,7 +1,7 @@
 using System.Threading.Tasks;
 using Canopy.Cli.Executable.Commands;
 
-namespace Canopy.Cli.Executable.Services
+namespace Canopy.Cli.Executable.Services.DownloadMonitoring
 {
     public interface IRunDownloader
     {

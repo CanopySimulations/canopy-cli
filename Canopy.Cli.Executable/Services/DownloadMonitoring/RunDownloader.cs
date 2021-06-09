@@ -1,22 +1,26 @@
+using System.Threading.Channels;
 using System.Threading.Tasks;
 using Canopy.Cli.Executable.Commands;
 
-namespace Canopy.Cli.Executable.Services
+namespace Canopy.Cli.Executable.Services.DownloadMonitoring
 {
     public class RunDownloader : IRunDownloader
     {
         private readonly IEnsureAuthenticated ensureAuthenticated;
         private readonly IMonitorDownloads monitorDownloads;
+        private readonly IProcessDownloads processDownloads;
         private readonly IGetCreatedOutputFolder getCreatedOutputFolder;
 
         public RunDownloader(
             IEnsureAuthenticated ensureAuthenticated,
             IGetCreatedOutputFolder getCreatedOutputFolder,
-            IMonitorDownloads monitorDownloads)
+            IMonitorDownloads monitorDownloads,
+            IProcessDownloads processDownloads)
         {
             this.getCreatedOutputFolder = getCreatedOutputFolder;
             this.ensureAuthenticated = ensureAuthenticated;
             this.monitorDownloads = monitorDownloads;
+            this.processDownloads = processDownloads;
         }
 
         public async Task ExecuteAsync(DownloaderCommand.Parameters parameters)
@@ -28,11 +32,21 @@ namespace Canopy.Cli.Executable.Services
 
             using var cts = CommandUtilities.CreateCommandCancellationTokenSource();
 
-            await this.monitorDownloads.ExecuteAsync(
+            var channel = Channel.CreateUnbounded<QueuedDownloadToken>();
+
+            var monitorDownloadsTask = this.monitorDownloads.ExecuteAsync(
+                channel.Writer,
                 inputFolder,
+                cts.Token);
+
+            await this.processDownloads.ExecuteAsync(
+                channel.Reader,
                 outputFolder,
-                parameters.KeepBinary,
-                parameters.GenerateCsv);
+                generateCsv: parameters.GenerateCsv,
+                keepBinary: parameters.KeepBinary,
+                cts.Token);
+
+            await monitorDownloadsTask;
         }
     }
 }

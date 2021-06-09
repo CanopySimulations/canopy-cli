@@ -2,6 +2,8 @@ using System.CommandLine;
 using System.CommandLine.Invocation;
 using System.IO;
 using Canopy.Cli.Executable.Services;
+using Canopy.Cli.Executable.Services.DownloadMonitoring;
+using Canopy.Cli.Shared;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 
@@ -10,23 +12,33 @@ namespace Canopy.Cli.Executable.Commands
     public class DownloaderCommand : CanopyCommandBase
     {
         public record Parameters(
-            DirectoryInfo InputFolder,
-            DirectoryInfo OutputFolder,
+            string InputFolder,
+            string OutputFolder,
             bool GenerateCsv,
-            bool KeepBinary);
+            bool KeepBinary)
+        {
+            public static Parameters Random()
+            {
+                return new Parameters(
+                    SingletonRandom.Instance.NextString(),
+                    SingletonRandom.Instance.NextString(),
+                    SingletonRandom.Instance.NextBoolean(),
+                    SingletonRandom.Instance.NextBoolean());
+            }
+        };
 
         public override Command Create()
         {
             var command = new Command("downloader", "Downloads the specified study or study job.");
 
-            command.AddOption(new Option<DirectoryInfo>(
+            command.AddOption(new Option<string>(
                 new [] { "--input-folder", "-i" }, 
-                getDefaultValue: () => new DirectoryInfo("./"), 
+                getDefaultValue: () => "./", 
                 description: "The input folder to monitor (defaults to the user's download directory)."));
 
-            command.AddOption(new Option<DirectoryInfo>(
+            command.AddOption(new Option<string>(
                 new [] { "--output-folder", "-o" }, 
-                getDefaultValue: () => new DirectoryInfo("./"), 
+                getDefaultValue: () => "./", 
                 description: "The output folder in which to save the files (defaults to the current directory)."));
 
             command.AddOption(new Option<bool>(

@@ -1,22 +1,23 @@
 ﻿using System;
+using Canopy.Cli.Shared;
+
 namespace Canopy.Api.Client
 {
-	public class AuthenticatedUser
+	public record AuthenticatedUser(
+		string AccessToken,
+		DateTime AccessTokenExpiry,
+		string RefreshToken,
+		string UserId,
+		string TenantId)
 	{
-		public AuthenticatedUser(string accessToken, DateTime accessTokenExpiry, string refreshToken, string userId, string tenantId)
+		public static AuthenticatedUser Random()
 		{
-			AccessToken = accessToken;
-			AccessTokenExpiry = accessTokenExpiry;
-			RefreshToken = refreshToken;
-			UserId = userId;
-			TenantId = tenantId;
+			return new AuthenticatedUser(
+				Guid.NewGuid().ToString(),
+				DateTime.UtcNow.AddMinutes(SingletonRandom.Instance.NextDouble() * 30),
+				Guid.NewGuid().ToString(),
+				Guid.NewGuid().ToString(),
+				Guid.NewGuid().ToString());
 		}
-
-		public string AccessToken { get; private set; }
-		public DateTime AccessTokenExpiry { get; private set; }
-		public string RefreshToken { get; private set; }
-
-		public string UserId { get; private set; }
-		public string TenantId { get; private set; }
 	}
 }

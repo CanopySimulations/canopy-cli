@@ -14,6 +14,7 @@ using Canopy.Cli.Shared.StudyProcessing;
 using Canopy.Cli.Executable.Services;
 using Canopy.Api.Client;
 using Canopy.Cli.Executable.Commands;
+using Canopy.Cli.Executable.Services.DownloadMonitoring;
 
 namespace Canopy.Cli.Executable
 {
@@ -101,12 +102,24 @@ namespace Canopy.Cli.Executable
             services.AddTransient<IGetStudy, GetStudy>();
             services.AddTransient<IGetSchemas, GetSchemas>();
             services.AddTransient<IGetConfigs, GetConfigs>();
-            services.AddTransient<IMonitorDownloads, MonitorDownloads>();
-            services.AddTransient<IRunDownloader, RunDownloader>();
             services.AddTransient<IProcessStudyResults, ProcessStudyResults>();
             services.AddTransient<IGetDefaultConfigPath, GetDefaultConfigPath>();
             services.AddTransient<IGetDefaultConfig, GetDefaultConfig>();
             services.AddTransient<IWaitForStudy, WaitForStudy>();
+
+            services.AddTransient<IMonitorDownloads, MonitorDownloads>();
+            services.AddTransient<IRunDownloader, RunDownloader>();
+            services.AddTransient<IWatchForNewDownloadTokens, WatchForNewDownloadTokens>();
+            services.AddTransient<IAddExistingDownloadTokens, AddExistingDownloadTokens>();
+            services.AddTransient<ITryAddDownloadToken, TryAddDownloadToken>();
+            services.AddTransient<IReadDownloadToken, ReadDownloadToken>();
+            services.AddTransient<IPerformAutomaticStudyDownload, PerformAutomaticStudyDownload>();
+            services.AddTransient<IGetAvailableOutputFolder, GetAvailableOutputFolder>();
+            services.AddTransient<IProcessDownloads, ProcessDownloads>();
+            services.AddTransient<IMoveCompletedDownloadToken, MoveCompletedDownloadToken>();
+            services.AddTransient<IGetDownloadTokenFolderName, GetDownloadTokenFolderName>();
+            services.AddTransient<IGetDownloadTokens, GetDownloadTokens>();
+            services.AddTransient<IDirectoryExists, DirectoryExists>();
 
             if (isIntegrationTests)
             {
@@ -118,7 +131,6 @@ namespace Canopy.Cli.Executable
                 services.AddTransient<IGetCreatedOutputFolder, GetCreatedOutputFolder>();
                 services.AddTransient<IDownloadBlobDirectory, DownloadBlobDirectory>();
             }
-
         }
 
         private static void AddCommandRunnerServices(IServiceCollection services)

@@ -42,12 +42,13 @@ namespace Canopy.Cli.Executable.Services
 
             var outputFolder = this.getCreatedOutputFolder.Execute(parameters.OutputFolder);
 
+            var tenantId = string.IsNullOrWhiteSpace(parameters.TenantId) ? authenticatedUser.TenantId : parameters.TenantId;
             var studyId = parameters.StudyId;
 
             var deleteProcessedFiles = !parameters.KeepBinary;
             var generateCsvFiles = parameters.GenerateCsv;
 
-            var studyMetadata = await this.studyClient.GetStudyMetadataAsync(authenticatedUser.TenantId, studyId);
+            var studyMetadata = await this.studyClient.GetStudyMetadataAsync(tenantId, studyId);
 
             // TODO: Handle expiration of access signatures.
             var directories = this.GetAllStudyBlobDirectories(studyMetadata.AccessInformation);

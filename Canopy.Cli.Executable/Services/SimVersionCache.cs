@@ -25,14 +25,21 @@ namespace Canopy.Cli.Executable.Services
 
         public async Task<string> Get()
         {
-            var authenticatedUser = await this.ensureAuthenticated.ExecuteAsync();
+            string? tenantId = null;
+            if (this.simVersionTask == null)
+            {
+                var authenticatedUser = await this.ensureAuthenticated.ExecuteAsync();
+                tenantId = authenticatedUser.TenantId;
+            }
 
             lock (this.syncLock)
             {
                 if (this.simVersionTask == null)
                 {
+                    Guard.Operation(tenantId != null, "Tenant ID was not populated.");
+                    
                     this.logger.LogInformation("Requesting tenant sim version.");
-                    this.simVersionTask = this.simVersionClient.GetSimVersionAsync(authenticatedUser.TenantId);
+                    this.simVersionTask = this.simVersionClient.GetSimVersionAsync(tenantId);
                 }
             }
 
@@ -41,7 +48,7 @@ namespace Canopy.Cli.Executable.Services
 
         public Task<string> GetOrSet(string? requestedSimVersion)
         {
-            if(requestedSimVersion == null)
+            if (requestedSimVersion == null)
             {
                 return this.Get();
             }
