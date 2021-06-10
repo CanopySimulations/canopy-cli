@@ -2,6 +2,7 @@ using System.IO;
 using System.Threading;
 using System.Threading.Channels;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
 
 namespace Canopy.Cli.Executable.Services.DownloadMonitoring
 {
@@ -9,13 +10,16 @@ namespace Canopy.Cli.Executable.Services.DownloadMonitoring
     {
         private readonly IGetDownloadTokens getDownloadTokens;
         private readonly ITryAddDownloadToken tryAddDownloadToken;
+        private readonly ILogger<AddExistingDownloadTokens> logger;
 
         public AddExistingDownloadTokens(
             IGetDownloadTokens getDownloadTokens,
-            ITryAddDownloadToken tryAddDownloadToken)
+            ITryAddDownloadToken tryAddDownloadToken,
+            ILogger<AddExistingDownloadTokens> logger)
         {
             this.getDownloadTokens = getDownloadTokens;
             this.tryAddDownloadToken = tryAddDownloadToken;
+            this.logger = logger;
         }
 
         public async Task ExecuteAsync(
@@ -23,6 +27,7 @@ namespace Canopy.Cli.Executable.Services.DownloadMonitoring
             string folderPath,
             CancellationToken cancellationToken)
         {
+            this.logger.LogInformation("Finding existing download tokens in {0}", folderPath);
             foreach (var filePath in this.getDownloadTokens.Execute(folderPath))
             {
                 if (cancellationToken.IsCancellationRequested)

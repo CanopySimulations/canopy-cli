@@ -23,5 +23,15 @@ namespace Canopy.Cli.Executable.Services.DownloadMonitoring
             Assert.False(resultA3);
             Assert.False(resultB2);
         }
+
+        [Fact]
+        public void ItShouldAllowRemovingOfFiles()
+        {
+            var addResult = this.target.TryAdd("./tokens/a.token");
+            var removeResult = this.target.TryRemove("./tokens/a.token");
+
+            Assert.True(addResult);
+            Assert.True(removeResult);
+        }
     }
 }

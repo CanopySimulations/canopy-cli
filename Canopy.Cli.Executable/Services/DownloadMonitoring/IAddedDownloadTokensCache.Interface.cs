@@ -5,5 +5,6 @@ namespace Canopy.Cli.Executable.Services.DownloadMonitoring
     public interface IAddedDownloadTokensCache
     {
         bool TryAdd(string filePath);
+        bool TryRemove(string filePath);
     }
 }

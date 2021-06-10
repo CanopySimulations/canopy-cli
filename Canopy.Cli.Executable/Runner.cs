@@ -120,6 +120,8 @@ namespace Canopy.Cli.Executable
             services.AddTransient<IGetDownloadTokenFolderName, GetDownloadTokenFolderName>();
             services.AddTransient<IGetDownloadTokens, GetDownloadTokens>();
             services.AddTransient<IDirectoryExists, DirectoryExists>();
+            services.AddSingleton<IAddedDownloadTokensCache, AddedDownloadTokensCache>();
+            services.AddSingleton<IRetryPolicies, RetryPolicies>();            
 
             if (isIntegrationTests)
             {

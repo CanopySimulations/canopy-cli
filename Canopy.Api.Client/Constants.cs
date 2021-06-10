@@ -10,5 +10,9 @@ namespace Canopy.Api.Client
         
         public const string CarConfigType = "car";
         public const string WeatherConfigType = "weather";
+
+
+        public const string JobCountKey = "jobCount";
+        public const string CompletedJobCountKey = "completedJobCount";
     }
 }

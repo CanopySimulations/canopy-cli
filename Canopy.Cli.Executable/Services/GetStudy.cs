@@ -8,6 +8,7 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using Canopy.Cli.Executable.Commands;
 using Microsoft.Extensions.Logging;
+using Newtonsoft.Json.Linq;
 
 namespace Canopy.Cli.Executable.Services
 {
@@ -38,6 +39,7 @@ namespace Canopy.Cli.Executable.Services
 
         public async Task ExecuteAsync(GetStudyCommand.Parameters parameters)
         {
+            this.logger.LogInformation("TenantId: @{0}", parameters.TenantId);
             var authenticatedUser = await this.ensureAuthenticated.ExecuteAsync();
 
             var outputFolder = this.getCreatedOutputFolder.Execute(parameters.OutputFolder);
@@ -51,7 +53,7 @@ namespace Canopy.Cli.Executable.Services
             var studyMetadata = await this.studyClient.GetStudyMetadataAsync(tenantId, studyId);
 
             // TODO: Handle expiration of access signatures.
-            var directories = this.GetAllStudyBlobDirectories(studyMetadata.AccessInformation);
+            var directories = this.GetAllStudyBlobDirectories(studyMetadata);
 
             this.logger.LogInformation("Using {0} parallel operations.", TransferManager.Configurations.ParallelOperations);
             this.logger.LogInformation("Using {0} max listing concurrency.", TransferManager.Configurations.MaxListingConcurrency);
@@ -85,11 +87,18 @@ namespace Canopy.Cli.Executable.Services
             }
         }
 
-        private IReadOnlyList<CloudBlobDirectory> GetAllStudyBlobDirectories(StudyBlobAccessInformation accessInformation)
+        private IReadOnlyList<CloudBlobDirectory> GetAllStudyBlobDirectories(GetStudyQueryResult studyMetadata)        
         {
+            var accessInformation = studyMetadata.AccessInformation;
+
             var mainDirectory = this.GetStudyBlobDirectory(accessInformation.Url, accessInformation.AccessSignature);
 
-            var jobDirectories = accessInformation.Jobs.Select(v => this.GetStudyBlobDirectory(v.Url, v.AccessSignature));
+            var studyData = studyMetadata.Study.Data as JObject;
+            Guard.Operation(studyData != null, "Study data was not found in study metadata result.");
+
+            var jobCount = studyData.Value<int>(Api.Client.Constants.JobCountKey);
+            var jobDirectoryCount = Math.Min(jobCount, accessInformation.Jobs.Count);
+            var jobDirectories = accessInformation.Jobs.Take(jobDirectoryCount).Select(v => this.GetStudyBlobDirectory(v.Url, v.AccessSignature));
 
             return new List<CloudBlobDirectory> { mainDirectory }
                 .Concat(jobDirectories).ToList();

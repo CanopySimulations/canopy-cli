@@ -63,7 +63,7 @@ namespace Canopy.Cli.Executable.Services.DownloadMonitoring
             await this.tryAddDownloadToken.Received(0).ExecuteAsync(channel.Writer, file1, cts.Token);
             await this.tryAddDownloadToken.Received(1).ExecuteAsync(channel.Writer, file2, cts.Token);
             await this.tryAddDownloadToken.Received(0).ExecuteAsync(channel.Writer, file3, cts.Token);
-            await this.tryAddDownloadToken.Received(0).ExecuteAsync(channel.Writer, file4, cts.Token);
+            await this.tryAddDownloadToken.Received(1).ExecuteAsync(channel.Writer, file4, cts.Token);
             await this.tryAddDownloadToken.Received(1).ExecuteAsync(channel.Writer, file5, cts.Token);
         }
 

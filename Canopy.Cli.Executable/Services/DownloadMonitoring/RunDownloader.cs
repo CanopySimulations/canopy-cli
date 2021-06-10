@@ -1,6 +1,8 @@
+using System;
 using System.Threading.Channels;
 using System.Threading.Tasks;
 using Canopy.Cli.Executable.Commands;
+using Microsoft.Extensions.Logging;
 
 namespace Canopy.Cli.Executable.Services.DownloadMonitoring
 {
@@ -10,17 +12,20 @@ namespace Canopy.Cli.Executable.Services.DownloadMonitoring
         private readonly IMonitorDownloads monitorDownloads;
         private readonly IProcessDownloads processDownloads;
         private readonly IGetCreatedOutputFolder getCreatedOutputFolder;
+        private readonly ILogger<RunDownloader> logger;
 
         public RunDownloader(
             IEnsureAuthenticated ensureAuthenticated,
             IGetCreatedOutputFolder getCreatedOutputFolder,
             IMonitorDownloads monitorDownloads,
-            IProcessDownloads processDownloads)
+            IProcessDownloads processDownloads,
+            ILogger<RunDownloader> logger)
         {
             this.getCreatedOutputFolder = getCreatedOutputFolder;
             this.ensureAuthenticated = ensureAuthenticated;
             this.monitorDownloads = monitorDownloads;
             this.processDownloads = processDownloads;
+            this.logger = logger;
         }
 
         public async Task ExecuteAsync(DownloaderCommand.Parameters parameters)
@@ -34,19 +39,27 @@ namespace Canopy.Cli.Executable.Services.DownloadMonitoring
 
             var channel = Channel.CreateUnbounded<QueuedDownloadToken>();
 
-            var monitorDownloadsTask = this.monitorDownloads.ExecuteAsync(
-                channel.Writer,
-                inputFolder,
-                cts.Token);
+            try
+            {
+                var monitorDownloadsTask = this.monitorDownloads.ExecuteAsync(
+                    channel.Writer,
+                    inputFolder,
+                    cts.Token);
 
-            await this.processDownloads.ExecuteAsync(
-                channel.Reader,
-                outputFolder,
-                generateCsv: parameters.GenerateCsv,
-                keepBinary: parameters.KeepBinary,
-                cts.Token);
+                await this.processDownloads.ExecuteAsync(
+                    channel.Reader,
+                    outputFolder,
+                    generateCsv: parameters.GenerateCsv,
+                    keepBinary: parameters.KeepBinary,
+                    cts.Token);
 
-            await monitorDownloadsTask;
+                await monitorDownloadsTask;
+            }
+            catch(Exception t) 
+                when (t is TaskCanceledException || t is OperationCanceledException)
+            {
+                //this.logger.LogInformation("Download monitoring was cancelled.");
+            }
         }
     }
 }

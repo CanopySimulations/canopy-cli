@@ -43,7 +43,11 @@ namespace Canopy.Cli.Executable.Services.DownloadMonitoring
 
             watcher.Filter = $"*{DownloaderConstants.DownloadTokenExtensionWithPeriod}";
 
-            watcher.IncludeSubdirectories = true;
+            // Including subdirectories causes issues with the watcher when downloading large studies under the folder being monitored.
+            watcher.IncludeSubdirectories = false;
+
+            this.logger.LogInformation("Monitoring for download tokens in {0}", folderPath);
+
             watcher.EnableRaisingEvents = true;
 
             return tcs.Task;
@@ -54,11 +58,6 @@ namespace Canopy.Cli.Executable.Services.DownloadMonitoring
             try
             {
                 if (Path.GetExtension(fullPath) != DownloaderConstants.DownloadTokenExtensionWithPeriod)
-                {
-                    return;
-                }
-
-                if (Path.GetFileName(fullPath) == DownloaderConstants.CompletedDownloadTokenFileName)
                 {
                     return;
                 }

@@ -4,6 +4,7 @@ using System.Threading;
 using System.Threading.Channels;
 using System.Threading.Tasks;
 using Canopy.Cli.Shared;
+using Microsoft.Extensions.Logging;
 using NSubstitute;
 using Xunit;
 
@@ -13,6 +14,7 @@ namespace Canopy.Cli.Executable.Services.DownloadMonitoring
     {
         private readonly IAddedDownloadTokensCache addedDownloadTokensCache;
         private readonly IReadDownloadToken readDownloadToken;
+        private readonly ILogger<TryAddDownloadToken> logger;
 
         private readonly TryAddDownloadToken target;
 
@@ -20,10 +22,12 @@ namespace Canopy.Cli.Executable.Services.DownloadMonitoring
         {
             this.addedDownloadTokensCache = Substitute.For<IAddedDownloadTokensCache>();
             this.readDownloadToken = Substitute.For<IReadDownloadToken>();
+            this.logger = Substitute.For<ILogger<TryAddDownloadToken>>();
 
             this.target = new(
                 this.addedDownloadTokensCache,
-                this.readDownloadToken);
+                this.readDownloadToken,
+                this.logger);
         }
 
         [Fact]

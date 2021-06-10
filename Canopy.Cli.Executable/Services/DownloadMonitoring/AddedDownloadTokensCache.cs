@@ -11,5 +11,10 @@ namespace Canopy.Cli.Executable.Services.DownloadMonitoring
         {
             return this.cache.TryAdd(new FileInfo(filePath).FullName, true);
         }
+
+        public bool TryRemove(string filePath)
+        {
+            return this.cache.TryRemove(new FileInfo(filePath).FullName, out var value);
+        }
     }
 }

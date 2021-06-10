@@ -7,12 +7,15 @@ namespace Canopy.Cli.Executable.Services.DownloadMonitoring
     {
         private readonly IGetStudy getStudy;
         private readonly IMoveCompletedDownloadToken moveCompletedDownloadToken;
+        private readonly IAddedDownloadTokensCache addedDownloadTokensCache;
 
         public PerformAutomaticStudyDownload(
             IGetStudy getStudy,
-            IMoveCompletedDownloadToken moveCompletedDownloadToken)
+            IMoveCompletedDownloadToken moveCompletedDownloadToken,
+            IAddedDownloadTokensCache addedDownloadTokensCache)
         {
             this.moveCompletedDownloadToken = moveCompletedDownloadToken;
+            this.addedDownloadTokensCache = addedDownloadTokensCache;
             this.getStudy = getStudy;
         }
 
@@ -33,6 +36,8 @@ namespace Canopy.Cli.Executable.Services.DownloadMonitoring
                     keepBinary));
 
             this.moveCompletedDownloadToken.Execute(tokenPath, outputFolder);
+
+            this.addedDownloadTokensCache.TryRemove(tokenPath);
         }
     }
 }

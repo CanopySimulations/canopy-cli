@@ -29,7 +29,7 @@ namespace Canopy.Cli.Executable.Commands
 
         public override Command Create()
         {
-            var command = new Command("downloader", "Downloads the specified study or study job.");
+            var command = new Command("download-monitor", "Monitor a folder for study download requests.");
 
             command.AddOption(new Option<string>(
                 new [] { "--input-folder", "-i" }, 

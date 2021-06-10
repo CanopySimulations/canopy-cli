@@ -37,8 +37,8 @@ namespace Canopy.Cli.Executable.Services
 
                 Guard.Operation(studyData != null, "Study data was not found or not in expected format.");
 
-                var jobCount = studyData.Value<int>("jobCount");
-                var completedJobCount = studyData.Value<int>("completedJobCount");
+                var jobCount = studyData.Value<int>(Constants.JobCountKey);
+                var completedJobCount = studyData.Value<int>(Constants.CompletedJobCountKey);
                 if (jobCount > 0 && jobCount == completedJobCount)
                 {
                     break;

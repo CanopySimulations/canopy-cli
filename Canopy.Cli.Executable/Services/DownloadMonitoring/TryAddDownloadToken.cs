@@ -2,6 +2,7 @@ using System.IO;
 using System.Threading;
 using System.Threading.Channels;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
 
 namespace Canopy.Cli.Executable.Services.DownloadMonitoring
 {
@@ -9,12 +10,15 @@ namespace Canopy.Cli.Executable.Services.DownloadMonitoring
     {
         private readonly IAddedDownloadTokensCache addedDownloadTokensCache;
         private readonly IReadDownloadToken readDownloadToken;
+        private readonly ILogger<TryAddDownloadToken> logger;
 
         public TryAddDownloadToken(
             IAddedDownloadTokensCache addedDownloadTokensCache,
-            IReadDownloadToken readDownloadToken)
+            IReadDownloadToken readDownloadToken,
+            ILogger<TryAddDownloadToken> logger)
         {
             this.readDownloadToken = readDownloadToken;
+            this.logger = logger;
             this.addedDownloadTokensCache = addedDownloadTokensCache;
         }
 
@@ -25,6 +29,7 @@ namespace Canopy.Cli.Executable.Services.DownloadMonitoring
                 if (this.addedDownloadTokensCache.TryAdd(filePath))
                 {
                     var token = await this.readDownloadToken.ExecuteAsync(filePath, cancellationToken);
+                    this.logger.LogInformation("Enqueing {0}", Path.GetFileName(filePath));
                     await channelWriter.WriteAsync(new QueuedDownloadToken(filePath, token), cancellationToken);
                 }
             }

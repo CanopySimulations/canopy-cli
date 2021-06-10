@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using Canopy.Api.Client;
 using Canopy.Cli.Executable.Commands;
 using Canopy.Cli.Shared;
+using Microsoft.Extensions.Logging;
 using NSubstitute;
 using Xunit;
 
@@ -15,6 +16,7 @@ namespace Canopy.Cli.Executable.Services.DownloadMonitoring
         private readonly IGetCreatedOutputFolder getCreatedOutputFolder;
         private readonly IMonitorDownloads monitorDownloads;
         private readonly IProcessDownloads processDownloads;
+        private readonly ILogger<RunDownloader> logger;
 
         private RunDownloader target;
 
@@ -24,12 +26,14 @@ namespace Canopy.Cli.Executable.Services.DownloadMonitoring
             this.getCreatedOutputFolder = Substitute.For<IGetCreatedOutputFolder>();
             this.monitorDownloads = Substitute.For<IMonitorDownloads>();
             this.processDownloads = Substitute.For<IProcessDownloads>();
+            this.logger = Substitute.For<ILogger<RunDownloader>>();
 
             this.target = new (
                 this.ensureAuthenticated,
                 this.getCreatedOutputFolder,
                 this.monitorDownloads,
-                this.processDownloads);
+                this.processDownloads,
+                this.logger);
         }
 
         [Fact]

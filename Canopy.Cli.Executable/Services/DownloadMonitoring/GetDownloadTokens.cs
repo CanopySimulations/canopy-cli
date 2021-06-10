@@ -7,7 +7,13 @@ namespace Canopy.Cli.Executable.Services.DownloadMonitoring
     {
         public IEnumerable<string> Execute(string folderPath)
         {
-            return Directory.EnumerateFiles(folderPath, $"*{DownloaderConstants.DownloadTokenExtensionWithPeriod}");
+            // Recursive is false because:
+            //  - Often completed downloads are under the folder being monitored.
+            //  - The file watcher isn't monitoring recursively or large downloads cause it problems.
+            return Directory.EnumerateFiles(
+                folderPath, 
+                $"*{DownloaderConstants.DownloadTokenExtensionWithPeriod}", 
+                new EnumerationOptions { RecurseSubdirectories = false });
         }
     }
 }
