@@ -57,7 +57,9 @@
                     throw new RecoverableException("Folder not found: " + parameters.Target.FullName);
                 }
 
-                await this.processLocalStudyResults.ExecuteAsync(parameters.Target.FullName, !parameters.KeepOriginal);
+                var cts = CommandUtilities.CreateCommandCancellationTokenSource();
+
+                await this.processLocalStudyResults.ExecuteAsync(parameters.Target.FullName, !parameters.KeepOriginal, cts.Token);
             }
         }
     }

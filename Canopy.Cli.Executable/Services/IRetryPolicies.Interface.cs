@@ -6,5 +6,6 @@ namespace Canopy.Cli.Executable.Services
     public interface IRetryPolicies
     {
         AsyncRetryPolicy FilePolicy { get; }
+        AsyncRetryPolicy DownloadPolicy { get; init; }
     }
 }

@@ -1,4 +1,5 @@
-﻿namespace Canopy.Cli.Executable.Services
+﻿using System.Threading;
+namespace Canopy.Cli.Executable.Services
 {
     using System;
     using System.Collections.Generic;
@@ -22,10 +23,15 @@
             this.processStudyResults = processStudyResults;
         }
 
-        public async Task ExecuteAsync(string targetFolder, bool deleteProcessedFiles)
+        public async Task ExecuteAsync(string targetFolder, bool deleteProcessedFiles, CancellationToken cancellationToken)
         {
             foreach (var folder in Directory.EnumerateDirectories(targetFolder, "*", SearchOption.AllDirectories).Concat(new[] { targetFolder }))
             {
+                if(cancellationToken.IsCancellationRequested)
+                {
+                    break;
+                }
+                
                 try
                 {
                     this.logger.LogInformation("Processing {0}", folder);

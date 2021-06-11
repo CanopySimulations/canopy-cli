@@ -16,22 +16,31 @@ namespace Canopy.Cli.Executable.Services
 
             this.FilePolicy = Policy
                 .Handle<IOException>()
-                .WaitAndRetryAsync(new[]
-                {
-                    TimeSpan.FromSeconds(1),
-                    TimeSpan.FromSeconds(2),
-                    TimeSpan.FromSeconds(3)
-                },
-                (exception, timeSpan, context) =>
-                {
-                    this.logger.LogInformation("Retrying file IO operation.");
-                });
+                .WaitAndRetryAsync(
+                    new[]
+                    {
+                        TimeSpan.FromSeconds(1),
+                        TimeSpan.FromSeconds(2),
+                        TimeSpan.FromSeconds(3)
+                    },
+                    (exception, timeSpan, context) =>
+                    {
+                        this.logger.LogInformation("Retrying file IO operation.");
+                    });
+
+            this.DownloadPolicy = Policy
+                .Handle<Exception>(v => !ExceptionUtilities.IsFromCancellation(v))
+                .WaitAndRetryAsync(
+                    3,
+                    retryAttempt => TimeSpan.FromSeconds(Math.Pow(2, retryAttempt)),
+                    (exception, timeSpan, context) =>
+                    {
+                        this.logger.LogWarning(exception, "Retrying download.");
+                    });
         }
 
         public AsyncRetryPolicy FilePolicy { get; init; }
 
-        // public Policy DownloadPolicy { get; } = Policy
-        //     .Handle<HttpRequestException>()
-        //     .WaitAndRetry(3, retryAttempt => TimeSpan.FromSeconds(Math.Pow(2, retryAttempt));
+        public AsyncRetryPolicy DownloadPolicy { get; init; }
     }
 }

@@ -55,8 +55,7 @@ namespace Canopy.Cli.Executable.Services.DownloadMonitoring
 
                 await monitorDownloadsTask;
             }
-            catch(Exception t) 
-                when (t is TaskCanceledException || t is OperationCanceledException)
+            catch (Exception t) when (ExceptionUtilities.IsFromCancellation(t))
             {
                 //this.logger.LogInformation("Download monitoring was cancelled.");
             }

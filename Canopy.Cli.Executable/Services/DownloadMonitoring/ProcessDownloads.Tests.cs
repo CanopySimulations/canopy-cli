@@ -60,7 +60,8 @@ namespace Canopy.Cli.Executable.Services.DownloadMonitoring
                 Arg.Any<string>(),
                 Arg.Any<string>(),
                 Arg.Any<bool>(),
-                Arg.Any<bool>()).Returns(Task.CompletedTask);
+                Arg.Any<bool>(),
+                Arg.Any<CancellationToken>()).Returns(Task.CompletedTask);
 
             await this.target.ExecuteAsync(
                 channelReader,
@@ -75,7 +76,8 @@ namespace Canopy.Cli.Executable.Services.DownloadMonitoring
                 token1.Token.TenantId,
                 token1.Token.StudyId,
                 generateCsv,
-                keepBinary);
+                keepBinary,
+                cancellationToken);
 
             await this.performAutomaticStudyDownload.Received(1).ExecuteAsync(
                 token2.TokenPath,
@@ -83,7 +85,8 @@ namespace Canopy.Cli.Executable.Services.DownloadMonitoring
                 token2.Token.TenantId,
                 token2.Token.StudyId,
                 generateCsv,
-                keepBinary);
+                keepBinary,
+                cancellationToken);
         }
     }
 }

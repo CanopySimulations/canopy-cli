@@ -6,6 +6,13 @@ namespace Canopy.Cli.Executable.Services
 {
     public class GetCreatedOutputFolder : IGetCreatedOutputFolder
     {
+        private readonly IGetPathWithSanitizedFolderName getPathWithSanitizedFolderName;
+        
+        public GetCreatedOutputFolder(IGetPathWithSanitizedFolderName getPathWithSanitizedFolderName)
+        {
+            this.getPathWithSanitizedFolderName = getPathWithSanitizedFolderName;
+        }
+
         public string Execute(DirectoryInfo folder)
         {
             return this.Execute(folder.FullName);
@@ -13,6 +20,8 @@ namespace Canopy.Cli.Executable.Services
 
         public string Execute(string path)
         {
+            path = this.getPathWithSanitizedFolderName.Execute(path);
+
             try
             {
                 if (!Directory.Exists(path))
@@ -28,5 +37,4 @@ namespace Canopy.Cli.Executable.Services
             return path;
         }
     }
-
 }

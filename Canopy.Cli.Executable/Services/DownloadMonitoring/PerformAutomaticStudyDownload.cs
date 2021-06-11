@@ -1,3 +1,4 @@
+using System.Threading;
 using System.IO;
 using System.Threading.Tasks;
 
@@ -25,7 +26,8 @@ namespace Canopy.Cli.Executable.Services.DownloadMonitoring
             string tenantId,
             string studyId,
             bool generateCsv,
-            bool keepBinary)
+            bool keepBinary,
+            CancellationToken cancellationToken)
         {
             await this.getStudy.ExecuteAsync(
                 new Commands.GetStudyCommand.Parameters(
@@ -33,10 +35,10 @@ namespace Canopy.Cli.Executable.Services.DownloadMonitoring
                     tenantId,
                     studyId,
                     generateCsv,
-                    keepBinary));
+                    keepBinary),
+                cancellationToken);
 
             this.moveCompletedDownloadToken.Execute(tokenPath, outputFolder);
-
             this.addedDownloadTokensCache.TryRemove(tokenPath);
         }
     }

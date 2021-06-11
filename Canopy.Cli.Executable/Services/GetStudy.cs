@@ -9,16 +9,21 @@ using System.Text.RegularExpressions;
 using Canopy.Cli.Executable.Commands;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json.Linq;
+using Humanizer;
+using System.Threading;
 
 namespace Canopy.Cli.Executable.Services
 {
     public class GetStudy : IGetStudy
     {
+        private const string FileQuantityWord = "file";
+
         private readonly IEnsureAuthenticated ensureAuthenticated;
         private readonly IProcessLocalStudyResults processLocalStudyResults;
         private readonly IStudyClient studyClient;
         private readonly IGetCreatedOutputFolder getCreatedOutputFolder;
         private readonly IDownloadBlobDirectory downloadBlobDirectory;
+        private readonly IRetryPolicies retryPolicies;
         private readonly ILogger<GetStudy> logger;
 
         public GetStudy(
@@ -27,6 +32,7 @@ namespace Canopy.Cli.Executable.Services
             IStudyClient studyClient,
             IGetCreatedOutputFolder getCreatedOutputFolder,
             IDownloadBlobDirectory downloadBlobDirectory,
+            IRetryPolicies retryPolicies,
             ILogger<GetStudy> logger)
         {
             this.ensureAuthenticated = ensureAuthenticated;
@@ -34,60 +40,114 @@ namespace Canopy.Cli.Executable.Services
             this.studyClient = studyClient;
             this.getCreatedOutputFolder = getCreatedOutputFolder;
             this.downloadBlobDirectory = downloadBlobDirectory;
+            this.retryPolicies = retryPolicies;
             this.logger = logger;
         }
 
-        public async Task ExecuteAsync(GetStudyCommand.Parameters parameters)
+        public async Task ExecuteAsync(GetStudyCommand.Parameters parameters, CancellationToken cancellationToken)
         {
-            this.logger.LogInformation("TenantId: @{0}", parameters.TenantId);
-            var authenticatedUser = await this.ensureAuthenticated.ExecuteAsync();
+            try
+            {
+                var authenticatedUser = await this.ensureAuthenticated.ExecuteAsync();
 
-            var outputFolder = this.getCreatedOutputFolder.Execute(parameters.OutputFolder);
+                var outputFolder = this.getCreatedOutputFolder.Execute(parameters.OutputFolder);
 
-            var tenantId = string.IsNullOrWhiteSpace(parameters.TenantId) ? authenticatedUser.TenantId : parameters.TenantId;
-            var studyId = parameters.StudyId;
+                var tenantId = string.IsNullOrWhiteSpace(parameters.TenantId) ? authenticatedUser.TenantId : parameters.TenantId;
+                var studyId = parameters.StudyId;
 
-            var deleteProcessedFiles = !parameters.KeepBinary;
-            var generateCsvFiles = parameters.GenerateCsv;
+                await this.DownloadStudyAsync(outputFolder, tenantId, studyId, cancellationToken);
 
+                var generateCsvFiles = parameters.GenerateCsv;
+
+                if (generateCsvFiles && !cancellationToken.IsCancellationRequested)
+                {
+                    var deleteProcessedFiles = !parameters.KeepBinary;
+                    await this.processLocalStudyResults.ExecuteAsync(outputFolder, deleteProcessedFiles, cancellationToken);
+                }
+            }
+            catch (Exception t) when (ExceptionUtilities.IsFromCancellation(t))
+            {
+                // Just return if the task was cancelled.
+            }
+        }
+
+        private async Task DownloadStudyAsync(string outputFolder, string tenantId, string studyId, CancellationToken cancellationToken)
+        {
             var studyMetadata = await this.studyClient.GetStudyMetadataAsync(tenantId, studyId);
 
-            // TODO: Handle expiration of access signatures.
             var directories = this.GetAllStudyBlobDirectories(studyMetadata);
 
             this.logger.LogInformation("Using {0} parallel operations.", TransferManager.Configurations.ParallelOperations);
             this.logger.LogInformation("Using {0} max listing concurrency.", TransferManager.Configurations.MaxListingConcurrency);
-            var tasks = new List<Task>();
-            var progressRateLimit = TimeSpan.FromSeconds(1);
-            foreach (var directory in directories)
+
+            DirectoryTransferContext? context = null;
+            await this.retryPolicies.DownloadPolicy.ExecuteAsync(async () =>
             {
-                this.logger.LogInformation("Adding {0}", directory.Uri.Host);
+                context = context == null ? new DirectoryTransferContext() : new DirectoryTransferContext(context.LastCheckpoint);
+                ConfigureContext(context);
 
-                var context = new DirectoryTransferContext();
-                context.ProgressHandler = new RateLimitedProgress<TransferStatus>(
-                    progressRateLimit,
-                    new Progress<TransferStatus>(progress =>
-                        {
-                            this.logger.LogInformation("{0} Bytes Copied: {1}", directory.Uri.Host, progress.BytesTransferred);
-                            //this.logger.LogInformation($"{0} Files Copied: {1}", directory.Uri.Host, progress.NumberOfFilesTransferred);
-                        }));
+                var tasks = new List<Task<TransferStatus?>>();
+                foreach (var directory in directories)
+                {
+                    this.logger.LogInformation("Adding {0}", directory.Uri.Host);
 
-                tasks.Add(this.downloadBlobDirectory.ExecuteAsync(
-                    directory,
-                    outputFolder,
-                    new DownloadDirectoryOptions { Recursive = true },
-                    context));
-            }
+                    tasks.Add(this.downloadBlobDirectory.ExecuteAsync(
+                        directory,
+                        outputFolder,
+                        new DownloadDirectoryOptions { Recursive = true },
+                        context,
+                        cancellationToken));
+                }
 
-            await Task.WhenAll(tasks);
+                this.logger.LogInformation("Processing added storage servers...");
 
-            if (generateCsvFiles)
-            {
-                await this.processLocalStudyResults.ExecuteAsync(outputFolder, deleteProcessedFiles);
-            }
+                var results = await Task.WhenAll(tasks);
+
+                var filesTransferred = results.Sum(v => v?.NumberOfFilesTransferred ?? 0);
+                var filesFailed = results.Sum(v => v?.NumberOfFilesFailed ?? 0);
+                var filesSkipped = results.Sum(v => v?.NumberOfFilesSkipped ?? 0);
+                var bytesTransferred = results.Sum(v => v?.BytesTransferred ?? 0);
+
+                if (!cancellationToken.IsCancellationRequested)
+                {
+                    LogTransferProgress(bytesTransferred, filesTransferred);
+
+                    if (filesFailed > 0)
+                    {
+                        this.logger.LogWarning("Failed downloading {0}", FileQuantityWord.ToQuantity(filesFailed, "N0"));
+                    }
+
+                    if (filesSkipped > 0)
+                    {
+                        this.logger.LogWarning("Skipped downloading {0}", FileQuantityWord.ToQuantity(filesSkipped, "N0"));
+                    }
+                }
+            });
         }
 
-        private IReadOnlyList<CloudBlobDirectory> GetAllStudyBlobDirectories(GetStudyQueryResult studyMetadata)        
+        private void ConfigureContext(DirectoryTransferContext context)
+        {
+            var progressRateLimit = TimeSpan.FromSeconds(5);
+            context.ProgressHandler = new RateLimitedProgress<TransferStatus>(
+                progressRateLimit,
+                new Progress<TransferStatus>(progress =>
+                {
+                    var bytesTransferred = progress.BytesTransferred;
+                    var filesTransferred = progress.NumberOfFilesTransferred;
+                    LogTransferProgress(bytesTransferred, filesTransferred);
+                }));
+
+            context.FileFailed += (s, e) => this.logger.LogWarning("Failed to download {0}", e.Destination);
+
+            context.ShouldOverwriteCallbackAsync = TransferContext.ForceOverwrite;
+        }
+
+        private void LogTransferProgress(long bytesTransferred, long filesTransferred)
+        {
+            this.logger.LogInformation("Copied: {0}, {1}", bytesTransferred.Bytes().Humanize("0.0"), FileQuantityWord.ToQuantity(filesTransferred, "N0"));
+        }
+
+        private IReadOnlyList<CloudBlobDirectory> GetAllStudyBlobDirectories(GetStudyQueryResult studyMetadata)
         {
             var accessInformation = studyMetadata.AccessInformation;
 

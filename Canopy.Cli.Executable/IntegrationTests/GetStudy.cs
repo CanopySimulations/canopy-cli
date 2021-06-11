@@ -1,3 +1,4 @@
+using System.Threading;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -96,6 +97,7 @@ namespace Canopy.Cli.Executable.IntegrationTests
             var authenticationUser = await this.ensureAuthenticated.ExecuteAsync();
             var simVersion = await this.simVersionCache.Get();
             var outputFolder = new DirectoryInfo("./out");
+            var cancellationToken = new CancellationTokenSource().Token;
 
             Guard.Operation(this.studyId != null, "Study ID was not populated.");
 
@@ -106,7 +108,8 @@ namespace Canopy.Cli.Executable.IntegrationTests
                     authenticationUser.TenantId,
                     this.studyId,
                     GenerateCsv: false,
-                    KeepBinary: false));
+                    KeepBinary: false),
+                cancellationToken);
 
                 Assert.True(this.downloadBlobDirectoryMock.Count > 0, "No blob folders were downloaded.");
                 Assert.True(this.downloadBlobDirectoryMock.Count >= 2, "Not enough blob folders were downloaded.");

@@ -48,7 +48,8 @@ namespace Canopy.Cli.Executable.Services.DownloadMonitoring
                     tenantId: item.Token.TenantId,
                     studyId: item.Token.StudyId,
                     generateCsv: generateCsv,
-                    keepBinary: keepBinary);
+                    keepBinary: keepBinary,
+                    cancellationToken: cancellationToken);
 
                 this.logger.LogInformation("Completed downloaded of {0} to {1}.", folderName, outputFolder);
             }

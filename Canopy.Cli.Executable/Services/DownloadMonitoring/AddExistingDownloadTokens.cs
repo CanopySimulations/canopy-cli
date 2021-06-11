@@ -27,7 +27,7 @@ namespace Canopy.Cli.Executable.Services.DownloadMonitoring
             string folderPath,
             CancellationToken cancellationToken)
         {
-            this.logger.LogInformation("Finding existing download tokens in {0}", folderPath);
+            this.logger.LogInformation("Looking for existing download tokens in {0}", folderPath);
             foreach (var filePath in this.getDownloadTokens.Execute(folderPath))
             {
                 if (cancellationToken.IsCancellationRequested)

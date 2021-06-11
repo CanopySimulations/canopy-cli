@@ -1,3 +1,4 @@
+using System.Threading;
 using System;
 using System.Collections.Concurrent;
 using System.Threading.Tasks;
@@ -14,11 +15,12 @@ namespace Canopy.Cli.Executable.Services
 
         private readonly ConcurrentBag<Request> requests = new();
 
-        public Task ExecuteAsync(
+        public Task<TransferStatus?> ExecuteAsync(
             CloudBlobDirectory blobDirectory,
             string outputDirectoryPath,
             DownloadDirectoryOptions options,
-            DirectoryTransferContext context)
+            DirectoryTransferContext context,
+            CancellationToken cancellationToken)
         {
             if (!this.isRecording)
             {
@@ -27,7 +29,7 @@ namespace Canopy.Cli.Executable.Services
 
             this.requests.Add(new Request(blobDirectory, outputDirectoryPath));
 
-            return Task.CompletedTask;
+            return Task.FromResult<TransferStatus?>(null);
         }
 
         public IDisposable Record()

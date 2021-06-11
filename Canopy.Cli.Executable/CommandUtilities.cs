@@ -3,6 +3,8 @@ using System;
 using System.Text;
 using System.Threading;
 using Canopy.Api.Client;
+using System.Threading.Tasks;
+using Serilog;
 
 namespace Canopy.Cli.Executable
 {
@@ -13,13 +15,17 @@ namespace Canopy.Cli.Executable
         public static CancellationTokenSource CreateCommandCancellationTokenSource()
         {
             var cts = new CancellationTokenSource();
-            Console.CancelKeyPress += (s, e) => cts.Cancel();
+            Console.CancelKeyPress += (s, e) =>
+            {
+                Log.Warning("Cancellation requested.");
+                cts.Cancel();
+            };
             return cts;
         }
-        
+
         public static string ValueOrPrompt(string value, string promptMessage, string errorMessage, bool isSecret)
         {
-            if(!string.IsNullOrWhiteSpace(value))
+            if (!string.IsNullOrWhiteSpace(value))
             {
                 return value;
             }
@@ -48,34 +54,34 @@ namespace Canopy.Cli.Executable
 
             return result;
         }
-        
-		private static string GetSecret()
-		{
-            var result = new StringBuilder();
-			while (true)
-			{
-				ConsoleKeyInfo i = Console.ReadKey(true);
-				if (i.Key == ConsoleKey.Enter)
-				{
-                    Console.WriteLine();
-					break;
-				}
-				else if (i.Key == ConsoleKey.Backspace)
-				{
-					if (result.Length > 0)
-					{
-						result.Remove(result.Length - 1, 1);
-						Console.Write("\b \b");
-					}
-				}
-				else
-				{
-					result.Append(i.KeyChar);
-					Console.Write("*");
-				}
-			}
 
-			return result.ToString();
-		}
+        private static string GetSecret()
+        {
+            var result = new StringBuilder();
+            while (true)
+            {
+                ConsoleKeyInfo i = Console.ReadKey(true);
+                if (i.Key == ConsoleKey.Enter)
+                {
+                    Console.WriteLine();
+                    break;
+                }
+                else if (i.Key == ConsoleKey.Backspace)
+                {
+                    if (result.Length > 0)
+                    {
+                        result.Remove(result.Length - 1, 1);
+                        Console.Write("\b \b");
+                    }
+                }
+                else
+                {
+                    result.Append(i.KeyChar);
+                    Console.Write("*");
+                }
+            }
+
+            return result.ToString();
+        }
     }
 }

@@ -67,11 +67,15 @@ namespace Canopy.Cli.Executable.Commands
                 getDefaultValue: () => true));
 
             command.Handler = CommandHandler.Create((IHost host, Parameters parameters) =>
+            {
+                var cts = CommandUtilities.CreateCommandCancellationTokenSource();
                 host.Services.GetRequiredService<IGetStudy>().ExecuteAsync(
                     parameters with
                     {
                         StudyId = CommandUtilities.ValueOrPrompt(parameters.StudyId, "Study ID: ", "Study ID is required.", false),
-                    }));
+                    },
+                    cts.Token);
+            });
 
             return command;
         }

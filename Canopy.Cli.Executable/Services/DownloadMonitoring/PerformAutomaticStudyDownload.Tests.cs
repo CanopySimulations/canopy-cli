@@ -1,3 +1,4 @@
+using System.Threading;
 using System.Threading.Tasks;
 using Canopy.Cli.Shared;
 using NSubstitute;
@@ -30,8 +31,9 @@ namespace Canopy.Cli.Executable.Services.DownloadMonitoring
         {
             var parameters = Commands.GetStudyCommand.Parameters.Random();
             var tokenPath = SingletonRandom.Instance.NextString();
+            var cancellationToken = new CancellationTokenSource().Token;
 
-            this.getStudy.ExecuteAsync(Arg.Any<Commands.GetStudyCommand.Parameters>()).Returns(Task.CompletedTask);
+            this.getStudy.ExecuteAsync(Arg.Any<Commands.GetStudyCommand.Parameters>(), Arg.Any<CancellationToken>()).Returns(Task.CompletedTask);
 
             await this.target.ExecuteAsync(
                 tokenPath,
@@ -39,9 +41,10 @@ namespace Canopy.Cli.Executable.Services.DownloadMonitoring
                 parameters.TenantId,
                 parameters.StudyId,
                 parameters.GenerateCsv,
-                parameters.KeepBinary);
+                parameters.KeepBinary,
+                cancellationToken);
 
-            await this.getStudy.Received(1).ExecuteAsync(parameters);
+            await this.getStudy.Received(1).ExecuteAsync(parameters, cancellationToken);
 
             this.moveCompletedDownloadToken.Received(1).Execute(tokenPath, parameters.OutputFolder);
             this.addedDownloadTokensCache.Received(1).TryRemove(tokenPath);

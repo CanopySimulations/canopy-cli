@@ -121,7 +121,14 @@
 
                             var bytes = Encoding.UTF8.GetBytes(csv.ToString());
                             var fileName = simType + "_VectorResults" + fileSuffix + ".csv";
-                            Console.WriteLine($"Writing '{fileName}' to '{relativePathToFile}'.");
+                            if(string.IsNullOrWhiteSpace(relativePathToFile))
+                            {
+                                Console.WriteLine($"Writing '{fileName}'.");
+                            }
+                            else
+                            {
+                                Console.WriteLine($"Writing '{fileName}' to '{relativePathToFile}'.");
+                            }
                             await writer.WriteNewFile(root, relativePathToFile, simType + "_VectorResults" + fileSuffix +  ".csv", bytes);
 
                             if (deleteProcessedFiles)

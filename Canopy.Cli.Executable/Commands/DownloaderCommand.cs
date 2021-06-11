@@ -34,12 +34,12 @@ namespace Canopy.Cli.Executable.Commands
             command.AddOption(new Option<string>(
                 new [] { "--input-folder", "-i" }, 
                 getDefaultValue: () => "./", 
-                description: "The input folder to monitor (defaults to the user's download directory)."));
+                description: "The input folder to monitor."));
 
             command.AddOption(new Option<string>(
                 new [] { "--output-folder", "-o" }, 
                 getDefaultValue: () => "./", 
-                description: "The output folder in which to save the files (defaults to the current directory)."));
+                description: "The output folder in which to download studies."));
 
             command.AddOption(new Option<bool>(
                 new [] { "--generate-csv", "-csv" }, 
