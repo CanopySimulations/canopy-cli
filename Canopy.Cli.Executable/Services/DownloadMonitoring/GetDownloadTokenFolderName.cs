@@ -10,7 +10,7 @@ namespace Canopy.Cli.Executable.Services.DownloadMonitoring
                 folderName += " - " + item.Token.JobName;
             }
 
-            return folderName;
+            return FileNameUtilities.Sanitize(folderName);
         }
     }
 }
