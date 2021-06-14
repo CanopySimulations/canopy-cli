@@ -13,13 +13,13 @@ namespace Canopy.Cli.Executable.Services.DownloadMonitoring
         const string WindowsSuccessfulCommandArguments = "/c echo running& echo {0}";
 
         const string LinuxSuccessfulCommand = "bash";
-        const string LinuxSuccessfulCommandArguments = "-c echo running && echo {0}";
+        const string LinuxSuccessfulCommandArguments = "-c \"echo running && echo {0}\"";
 
         const string WindowsFailingCommand = "cmd";
         const string WindowsFailingCommandArguments = "/c echo running& exit 1";
 
         const string LinuxFailingCommand = "bash";
-        const string LinuxFailingCommandArguments = "-c echo running && exit 1";
+        const string LinuxFailingCommandArguments = "-c \"echo running && exit 1\"";
 
         const string TargetFolderString = "target_folder";
 
