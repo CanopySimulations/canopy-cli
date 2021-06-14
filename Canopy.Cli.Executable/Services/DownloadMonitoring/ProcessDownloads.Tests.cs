@@ -67,6 +67,7 @@ namespace Canopy.Cli.Executable.Services.DownloadMonitoring
                 Arg.Any<string>(),
                 Arg.Any<string>(),
                 Arg.Any<string>(),
+                Arg.Any<int?>(),
                 Arg.Any<bool>(),
                 Arg.Any<bool>(),
                 Arg.Any<CancellationToken>()).Returns(Task.CompletedTask);
@@ -90,6 +91,7 @@ namespace Canopy.Cli.Executable.Services.DownloadMonitoring
                 availableOutputFolder1,
                 token1.Token.TenantId,
                 token1.Token.StudyId,
+                token1.Token.Job?.JobIndex,
                 generateCsv,
                 keepBinary,
                 cancellationToken);
@@ -99,6 +101,7 @@ namespace Canopy.Cli.Executable.Services.DownloadMonitoring
                 availableOutputFolder2,
                 token2.Token.TenantId,
                 token2.Token.StudyId,
+                token2.Token.Job?.JobIndex,
                 generateCsv,
                 keepBinary,
                 cancellationToken);

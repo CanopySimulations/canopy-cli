@@ -10,6 +10,7 @@ namespace Canopy.Cli.Executable.Services.DownloadMonitoring
             string outputFolder,
             string tenantId,
             string studyId,
+            int? jobIndex,
             bool generateCsv,
             bool keepBinary,
             CancellationToken cancellationToken);

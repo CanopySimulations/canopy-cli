@@ -15,6 +15,7 @@ using Canopy.Cli.Executable.Services;
 using Canopy.Api.Client;
 using Canopy.Cli.Executable.Commands;
 using Canopy.Cli.Executable.Services.DownloadMonitoring;
+using Canopy.Cli.Executable.Services.GetStudies;
 
 namespace Canopy.Cli.Executable
 {
@@ -99,13 +100,17 @@ namespace Canopy.Cli.Executable
             services.AddTransient<IProcessStudyResults, ProcessStudyResults>();
             services.AddTransient<IProcessLocalStudyResults, ProcessLocalStudyResults>();
             services.AddTransient<IGetUserIdFromUsername, GetUserIdFromUsername>();
-            services.AddTransient<IGetStudy, GetStudy>();
             services.AddTransient<IGetSchemas, GetSchemas>();
             services.AddTransient<IGetConfigs, GetConfigs>();
             services.AddTransient<IProcessStudyResults, ProcessStudyResults>();
             services.AddTransient<IGetDefaultConfigPath, GetDefaultConfigPath>();
             services.AddTransient<IGetDefaultConfig, GetDefaultConfig>();
             services.AddTransient<IWaitForStudy, WaitForStudy>();
+            
+            services.AddTransient<IGetStudy, GetStudy>();
+            services.AddTransient<IDownloadStudy, DownloadStudy>();
+            services.AddTransient<IGetAllRequiredDirectoryMetadata, GetAllRequiredDirectoryMetadata>();
+            services.AddTransient<IGetStudyBlobDirectory, GetStudyBlobDirectory>();
 
             services.AddTransient<IMonitorDownloads, MonitorDownloads>();
             services.AddTransient<IRunDownloader, RunDownloader>();

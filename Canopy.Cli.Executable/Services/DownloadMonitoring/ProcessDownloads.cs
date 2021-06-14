@@ -52,6 +52,7 @@ namespace Canopy.Cli.Executable.Services.DownloadMonitoring
                     outputFolder: outputFolder,
                     tenantId: item.Token.TenantId,
                     studyId: item.Token.StudyId,
+                    jobIndex: item.Token.Job?.JobIndex,
                     generateCsv: generateCsv,
                     keepBinary: keepBinary,
                     cancellationToken: cancellationToken);

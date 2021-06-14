@@ -1,5 +1,6 @@
 using System.Threading;
 using System.Threading.Tasks;
+using Canopy.Cli.Executable.Services.GetStudies;
 using Canopy.Cli.Shared;
 using NSubstitute;
 using Xunit;
@@ -40,6 +41,7 @@ namespace Canopy.Cli.Executable.Services.DownloadMonitoring
                 parameters.OutputFolder,
                 parameters.TenantId,
                 parameters.StudyId,
+                parameters.JobIndex,
                 parameters.GenerateCsv,
                 parameters.KeepBinary,
                 cancellationToken);

@@ -2,80 +2,50 @@ using Canopy.Api.Client;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using Microsoft.Azure.Storage.Blob;
 using Microsoft.Azure.Storage.DataMovement;
 using System.Linq;
-using System.Text.RegularExpressions;
-using Canopy.Cli.Executable.Commands;
 using Microsoft.Extensions.Logging;
-using Newtonsoft.Json.Linq;
 using Humanizer;
 using System.Threading;
 
-namespace Canopy.Cli.Executable.Services
+namespace Canopy.Cli.Executable.Services.GetStudies
 {
-    public class GetStudy : IGetStudy
+    public class DownloadStudy : IDownloadStudy
     {
         private const string FileQuantityWord = "file";
 
-        private readonly IEnsureAuthenticated ensureAuthenticated;
-        private readonly IProcessLocalStudyResults processLocalStudyResults;
         private readonly IStudyClient studyClient;
-        private readonly IGetCreatedOutputFolder getCreatedOutputFolder;
         private readonly IDownloadBlobDirectory downloadBlobDirectory;
         private readonly IRetryPolicies retryPolicies;
-        private readonly ILogger<GetStudy> logger;
+        private readonly IGetAllRequiredDirectoryMetadata getAllRequiredDirectoryMetadata;
+        private readonly IGetStudyBlobDirectory getStudyBlobDirectory;
+        private readonly ILogger<DownloadStudy> logger;
 
-        public GetStudy(
-            IEnsureAuthenticated ensureAuthenticated,
-            IProcessLocalStudyResults processLocalStudyResults,
+        public DownloadStudy(
             IStudyClient studyClient,
-            IGetCreatedOutputFolder getCreatedOutputFolder,
             IDownloadBlobDirectory downloadBlobDirectory,
             IRetryPolicies retryPolicies,
-            ILogger<GetStudy> logger)
+            IGetAllRequiredDirectoryMetadata getAllRequiredDirectoryMetadata,
+            IGetStudyBlobDirectory getStudyBlobDirectory,
+            ILogger<DownloadStudy> logger)
         {
-            this.ensureAuthenticated = ensureAuthenticated;
-            this.processLocalStudyResults = processLocalStudyResults;
             this.studyClient = studyClient;
-            this.getCreatedOutputFolder = getCreatedOutputFolder;
             this.downloadBlobDirectory = downloadBlobDirectory;
             this.retryPolicies = retryPolicies;
+            this.getAllRequiredDirectoryMetadata = getAllRequiredDirectoryMetadata;
+            this.getStudyBlobDirectory = getStudyBlobDirectory;
             this.logger = logger;
         }
 
-        public async Task ExecuteAsync(GetStudyCommand.Parameters parameters, CancellationToken cancellationToken)
-        {
-            try
-            {
-                var authenticatedUser = await this.ensureAuthenticated.ExecuteAsync();
-
-                var outputFolder = this.getCreatedOutputFolder.Execute(parameters.OutputFolder);
-
-                var tenantId = string.IsNullOrWhiteSpace(parameters.TenantId) ? authenticatedUser.TenantId : parameters.TenantId;
-                var studyId = parameters.StudyId;
-
-                await this.DownloadStudyAsync(outputFolder, tenantId, studyId, cancellationToken);
-
-                var generateCsvFiles = parameters.GenerateCsv;
-
-                if (generateCsvFiles && !cancellationToken.IsCancellationRequested)
-                {
-                    var deleteProcessedFiles = !parameters.KeepBinary;
-                    await this.processLocalStudyResults.ExecuteAsync(outputFolder, deleteProcessedFiles, cancellationToken);
-                }
-            }
-            catch (Exception t) when (ExceptionUtilities.IsFromCancellation(t))
-            {
-                // Just return if the task was cancelled.
-            }
-        }
-
-        private async Task DownloadStudyAsync(string outputFolder, string tenantId, string studyId, CancellationToken cancellationToken)
+        public async Task ExecuteAsync(string outputFolder, string tenantId, string studyId, int? jobIndex, CancellationToken cancellationToken)
         {
             var studyMetadata = await this.studyClient.GetStudyMetadataAsync(tenantId, studyId);
 
-            var directories = this.GetAllStudyBlobDirectories(studyMetadata);
+            var directoriesMetadata = this.getAllRequiredDirectoryMetadata.Execute(studyMetadata, outputFolder, jobIndex);
+            
+            var directories = directoriesMetadata.Select(v => new BlobDirectoryAndOutputFolder(
+                this.getStudyBlobDirectory.Execute(v.AccessInformation),
+                v.OutputFolder)).ToList();
 
             this.logger.LogInformation("Using {0} parallel operations.", TransferManager.Configurations.ParallelOperations);
             this.logger.LogInformation("Using {0} max listing concurrency.", TransferManager.Configurations.MaxListingConcurrency);
@@ -87,13 +57,13 @@ namespace Canopy.Cli.Executable.Services
                 ConfigureContext(context);
 
                 var tasks = new List<Task<TransferStatus?>>();
-                foreach (var directory in directories)
+                foreach (var item in directories)
                 {
-                    this.logger.LogInformation("Adding {0}", directory.Uri.Host);
+                    this.logger.LogInformation("Adding {0}", item.Directory.Uri.Host);
 
                     tasks.Add(this.downloadBlobDirectory.ExecuteAsync(
-                        directory,
-                        outputFolder,
+                        item.Directory,
+                        item.OutputFolder,
                         new DownloadDirectoryOptions { Recursive = true },
                         context,
                         cancellationToken));
@@ -145,42 +115,6 @@ namespace Canopy.Cli.Executable.Services
         private void LogTransferProgress(long bytesTransferred, long filesTransferred)
         {
             this.logger.LogInformation("Copied: {0}, {1}", bytesTransferred.Bytes().Humanize("0.0"), FileQuantityWord.ToQuantity(filesTransferred, "N0"));
-        }
-
-        private IReadOnlyList<CloudBlobDirectory> GetAllStudyBlobDirectories(GetStudyQueryResult studyMetadata)
-        {
-            var accessInformation = studyMetadata.AccessInformation;
-
-            var mainDirectory = this.GetStudyBlobDirectory(accessInformation.Url, accessInformation.AccessSignature);
-
-            var studyData = studyMetadata.Study.Data as JObject;
-            Guard.Operation(studyData != null, "Study data was not found in study metadata result.");
-
-            var jobCount = studyData.Value<int>(Api.Client.Constants.JobCountKey);
-            var jobDirectoryCount = Math.Min(jobCount, accessInformation.Jobs.Count);
-            var jobDirectories = accessInformation.Jobs.Take(jobDirectoryCount).Select(v => this.GetStudyBlobDirectory(v.Url, v.AccessSignature));
-
-            return new List<CloudBlobDirectory> { mainDirectory }
-                .Concat(jobDirectories).ToList();
-        }
-
-        private CloudBlobDirectory GetStudyBlobDirectory(string url, string accessSignature)
-        {
-            const string containerUrlKey = "containerUrl";
-            const string studyPathKey = "studyPath";
-            var containerUrlMatch = Regex.Match(url, $@"^(?<{containerUrlKey}>https://[^/]*/[\w]*)/(?<{studyPathKey}>.*)$");
-            if (!containerUrlMatch.Success)
-            {
-                throw new RecoverableException("Unexpected study URL format: " + url);
-            }
-
-            var containerUrl = containerUrlMatch.Groups[containerUrlKey].Value;
-            var studyPath = containerUrlMatch.Groups[studyPathKey].Value;
-
-            var container = new CloudBlobContainer(new Uri(containerUrl + accessSignature));
-
-            var directory = container.GetDirectoryReference(studyPath);
-            return directory;
         }
 
         public class RateLimitedProgress<T> : IProgress<T>

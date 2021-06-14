@@ -1,6 +1,7 @@
 using System.Threading;
 using System.IO;
 using System.Threading.Tasks;
+using Canopy.Cli.Executable.Services.GetStudies;
 
 namespace Canopy.Cli.Executable.Services.DownloadMonitoring
 {
@@ -25,6 +26,7 @@ namespace Canopy.Cli.Executable.Services.DownloadMonitoring
             string outputFolder,
             string tenantId,
             string studyId,
+            int? jobIndex,
             bool generateCsv,
             bool keepBinary,
             CancellationToken cancellationToken)
@@ -34,6 +36,7 @@ namespace Canopy.Cli.Executable.Services.DownloadMonitoring
                     outputFolder,
                     tenantId,
                     studyId,
+                    jobIndex,
                     generateCsv,
                     keepBinary),
                 cancellationToken);

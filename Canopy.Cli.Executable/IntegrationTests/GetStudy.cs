@@ -8,6 +8,7 @@ using Canopy.Cli.Executable.Services;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json.Linq;
 using Xunit;
+using Canopy.Cli.Executable.Services.GetStudies;
 
 namespace Canopy.Cli.Executable.IntegrationTests
 {
@@ -107,6 +108,7 @@ namespace Canopy.Cli.Executable.IntegrationTests
                     outputFolder.FullName,
                     authenticationUser.TenantId,
                     this.studyId,
+                    null,
                     GenerateCsv: false,
                     KeepBinary: false),
                 cancellationToken);

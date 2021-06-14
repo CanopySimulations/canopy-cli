@@ -1,18 +1,9 @@
-﻿using Canopy.Api.Client;
-using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
-using Microsoft.Azure.Storage.Blob;
-using Microsoft.Azure.Storage.DataMovement;
-using System.Linq;
-using System.Text.RegularExpressions;
-using Canopy.Cli.Executable.Services;
-using System.CommandLine;
-using System.IO;
+﻿using System.CommandLine;
 using Microsoft.Extensions.Hosting;
 using System.CommandLine.Invocation;
 using Microsoft.Extensions.DependencyInjection;
 using Canopy.Cli.Shared;
+using Canopy.Cli.Executable.Services.GetStudies;
 
 namespace Canopy.Cli.Executable.Commands
 {
@@ -23,6 +14,7 @@ namespace Canopy.Cli.Executable.Commands
             string OutputFolder,
             string TenantId,
             string StudyId,
+            int? JobIndex,
             bool GenerateCsv,
             bool KeepBinary)
         {
@@ -32,6 +24,7 @@ namespace Canopy.Cli.Executable.Commands
                     "./" + SingletonRandom.Instance.NextString(),
                     SingletonRandom.Instance.NextString(),
                     SingletonRandom.Instance.NextString(),
+                    SingletonRandom.Instance.NextBoolean() ? SingletonRandom.Instance.NextInclusive(0, 1000) : null,
                     SingletonRandom.Instance.NextBoolean(),
                     SingletonRandom.Instance.NextBoolean());
             }
@@ -56,6 +49,11 @@ namespace Canopy.Cli.Executable.Commands
                 description: $"The study to download.",
                 getDefaultValue: () => string.Empty));
 
+            command.AddOption(new Option<int?>(
+                new[] { "--job-index", "-j" },
+                description: $"The job index download.",
+                getDefaultValue: () => null));
+
             command.AddOption(new Option<bool>(
                 new[] { "--generate-csv", "-csv" },
                 description: $"Generate CSV files from binary files.",
@@ -79,6 +77,5 @@ namespace Canopy.Cli.Executable.Commands
 
             return command;
         }
-
     }
 }
