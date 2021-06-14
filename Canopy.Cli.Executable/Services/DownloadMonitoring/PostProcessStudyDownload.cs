@@ -8,7 +8,8 @@ namespace Canopy.Cli.Executable.Services.DownloadMonitoring
 {
     public class PostProcessStudyDownload : IPostProcessStudyDownload
     {
-        public const string PostProcessorOutputFormat = "[{0}]: {1}";
+        public const string PostProcessorOutputPrefix = "[{0}]: ";
+        public const string PostProcessorOutputFormat = PostProcessorOutputPrefix + "{1}";
 
         private readonly ILogger<PostProcessStudyDownload> logger;
         private readonly ILogPostProcessorOutput logPostProcessorOutput;
@@ -77,7 +78,7 @@ namespace Canopy.Cli.Executable.Services.DownloadMonitoring
 
             if (process.ExitCode != 0)
             {
-                this.logPostProcessorOutput.Error("{0} exit code: {1} ({2})", postProcessorName, process.ExitCode, "0x" + process.ExitCode.ToString("X4"));
+                this.logPostProcessorOutput.Error(PostProcessorOutputPrefix + "Exit code {1} ({2})", postProcessorName, process.ExitCode, "0x" + process.ExitCode.ToString("X4"));
             }
         }
     }
