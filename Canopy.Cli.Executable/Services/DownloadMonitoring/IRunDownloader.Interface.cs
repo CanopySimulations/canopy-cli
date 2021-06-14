@@ -5,6 +5,6 @@ namespace Canopy.Cli.Executable.Services.DownloadMonitoring
 {
     public interface IRunDownloader
     {
-        Task ExecuteAsync(DownloaderCommand.Parameters parameters);
+        Task ExecuteAsync(DownloadMonitorCommand.Parameters parameters);
     }
 }

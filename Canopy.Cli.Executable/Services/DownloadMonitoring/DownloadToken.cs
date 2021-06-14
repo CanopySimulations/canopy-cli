@@ -2,7 +2,7 @@ using Canopy.Cli.Shared;
 
 namespace Canopy.Cli.Executable.Services.DownloadMonitoring
 {
-    public record DownloadToken(string TenantId, string StudyId, string StudyName, string? JobName)
+    public record DownloadToken(string TenantId, string StudyId, string StudyName, DownloadTokenJob? Job)
     {
         public static DownloadToken Random()
         {
@@ -10,7 +10,7 @@ namespace Canopy.Cli.Executable.Services.DownloadMonitoring
                 SingletonRandom.Instance.NextString(),
                 SingletonRandom.Instance.NextString(),
                 SingletonRandom.Instance.NextString(),
-                SingletonRandom.Instance.NextBoolean() ? SingletonRandom.Instance.NextString() : null);
+                SingletonRandom.Instance.NextBoolean() ? DownloadTokenJob.Random() : null);
         }
     }
 }

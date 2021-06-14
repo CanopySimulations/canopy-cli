@@ -123,6 +123,8 @@ namespace Canopy.Cli.Executable
             services.AddSingleton<IAddedDownloadTokensCache, AddedDownloadTokensCache>();
             services.AddSingleton<IRetryPolicies, RetryPolicies>();
             services.AddTransient<IGetPathWithSanitizedFolderName, GetPathWithSanitizedFolderName>();
+            services.AddTransient<IPostProcessStudyDownload, PostProcessStudyDownload>();
+            services.AddTransient<ILogPostProcessorOutput, LogPostProcessorOutput>();
 
             if (isIntegrationTests)
             {

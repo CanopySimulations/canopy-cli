@@ -9,13 +9,15 @@ using Microsoft.Extensions.Hosting;
 
 namespace Canopy.Cli.Executable.Commands
 {
-    public class DownloaderCommand : CanopyCommandBase
+    public class DownloadMonitorCommand : CanopyCommandBase
     {
         public record Parameters(
             string InputFolder,
             string OutputFolder,
             bool GenerateCsv,
-            bool KeepBinary)
+            bool KeepBinary,
+            string PostProcessor,
+            string PostProcessorArguments)
         {
             public static Parameters Random()
             {
@@ -23,7 +25,9 @@ namespace Canopy.Cli.Executable.Commands
                     SingletonRandom.Instance.NextString(),
                     SingletonRandom.Instance.NextString(),
                     SingletonRandom.Instance.NextBoolean(),
-                    SingletonRandom.Instance.NextBoolean());
+                    SingletonRandom.Instance.NextBoolean(),
+                    SingletonRandom.Instance.NextString(),
+                    SingletonRandom.Instance.NextString());
             }
         };
 
@@ -50,6 +54,16 @@ namespace Canopy.Cli.Executable.Commands
                 new [] { "--keep-binary", "-bin" }, 
                 getDefaultValue: () => true, 
                 description: "Do not delete binary files which have been processed into CSV files (faster)."));
+
+            command.AddOption(new Option<string>(
+                new [] { "--post-processor", "-pp" }, 
+                getDefaultValue: () => string.Empty, 
+                description: "The post processor to run on each downloaded study. The path to the study will be passed as the first argument."));
+
+            command.AddOption(new Option<string>(
+                new [] { "--post-processor-arguments", "-ppa" }, 
+                getDefaultValue: () => string.Empty, 
+                description: "The arguments to pass to the post-processor. Use the string '{0}' where the path to the study should be, surrounding it in quotes if necessary."));
 
             command.Handler = CommandHandler.Create((IHost host, Parameters parameters) =>
                 host.Services.GetRequiredService<IRunDownloader>().ExecuteAsync(parameters));

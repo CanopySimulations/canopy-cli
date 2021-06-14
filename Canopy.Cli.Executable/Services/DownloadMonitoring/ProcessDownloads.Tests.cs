@@ -15,6 +15,7 @@ namespace Canopy.Cli.Executable.Services.DownloadMonitoring
         private readonly IGetDownloadTokenFolderName getDownloadTokenFolderName;
         private readonly IPerformAutomaticStudyDownload performAutomaticStudyDownload;
         private readonly IGetAvailableOutputFolder getAvailableOutputFolder;
+        private readonly IPostProcessStudyDownload postProcessStudyDownload;
         private readonly ILogger<ProcessDownloads> logger;
 
         private ProcessDownloads target;
@@ -24,12 +25,14 @@ namespace Canopy.Cli.Executable.Services.DownloadMonitoring
             this.getDownloadTokenFolderName = Substitute.For<IGetDownloadTokenFolderName>();
             this.performAutomaticStudyDownload = Substitute.For<IPerformAutomaticStudyDownload>();
             this.getAvailableOutputFolder = Substitute.For<IGetAvailableOutputFolder>();
+            this.postProcessStudyDownload = Substitute.For<IPostProcessStudyDownload>();
             this.logger = Substitute.For<ILogger<ProcessDownloads>>();
 
             this.target = new(
                 this.getDownloadTokenFolderName,
                 this.performAutomaticStudyDownload,
                 this.getAvailableOutputFolder,
+                this.postProcessStudyDownload,
                 this.logger);
         }
 
@@ -47,12 +50,17 @@ namespace Canopy.Cli.Executable.Services.DownloadMonitoring
             var generateCsv = SingletonRandom.Instance.NextBoolean();
             var keepBinary = SingletonRandom.Instance.NextBoolean();
             var cancellationToken = new CancellationTokenSource().Token;
+            var postProcessorPath = SingletonRandom.Instance.NextString();
+            var postProcessorArguments = SingletonRandom.Instance.NextString();
 
             this.getDownloadTokenFolderName.Execute(token1).Returns("f1");
             this.getDownloadTokenFolderName.Execute(token2).Returns("f2");
 
-            this.getAvailableOutputFolder.Execute(Path.Combine(targetFolder, "f1")).Returns(Path.Combine(targetFolder, "f1.1"));
-            this.getAvailableOutputFolder.Execute(Path.Combine(targetFolder, "f2")).Returns(Path.Combine(targetFolder, "f2.1"));
+            var availableOutputFolder1 = Path.Combine(targetFolder, "f1.1");
+            var availableOutputFolder2 = Path.Combine(targetFolder, "f2.1");
+
+            this.getAvailableOutputFolder.Execute(Path.Combine(targetFolder, "f1")).Returns(availableOutputFolder1);
+            this.getAvailableOutputFolder.Execute(Path.Combine(targetFolder, "f2")).Returns(availableOutputFolder2);
 
             this.performAutomaticStudyDownload.ExecuteAsync(
                 Arg.Any<string>(),
@@ -63,16 +71,23 @@ namespace Canopy.Cli.Executable.Services.DownloadMonitoring
                 Arg.Any<bool>(),
                 Arg.Any<CancellationToken>()).Returns(Task.CompletedTask);
 
+            this.postProcessStudyDownload.ExecuteAsync(
+                Arg.Any<string>(),
+                Arg.Any<string>(),
+                Arg.Any<string>()).Returns(Task.CompletedTask);
+
             await this.target.ExecuteAsync(
                 channelReader,
                 targetFolder,
                 generateCsv,
                 keepBinary,
+                postProcessorPath,
+                postProcessorArguments,
                 cancellationToken);
 
             await this.performAutomaticStudyDownload.Received(1).ExecuteAsync(
                 token1.TokenPath,
-                Path.Combine(targetFolder, "f1.1"),
+                availableOutputFolder1,
                 token1.Token.TenantId,
                 token1.Token.StudyId,
                 generateCsv,
@@ -81,12 +96,22 @@ namespace Canopy.Cli.Executable.Services.DownloadMonitoring
 
             await this.performAutomaticStudyDownload.Received(1).ExecuteAsync(
                 token2.TokenPath,
-                Path.Combine(targetFolder, "f2.1"),
+                availableOutputFolder2,
                 token2.Token.TenantId,
                 token2.Token.StudyId,
                 generateCsv,
                 keepBinary,
                 cancellationToken);
+
+            await this.postProcessStudyDownload.Received(1).ExecuteAsync(
+                postProcessorPath,
+                postProcessorArguments,
+                availableOutputFolder1);
+
+            await this.postProcessStudyDownload.Received(1).ExecuteAsync(
+                postProcessorPath,
+                postProcessorArguments,
+                availableOutputFolder2);
         }
     }
 }

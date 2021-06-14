@@ -7,6 +7,13 @@ namespace Canopy.Cli.Executable.Services.DownloadMonitoring
 {
     public interface IProcessDownloads
     {
-        Task ExecuteAsync(ChannelReader<QueuedDownloadToken> channelReader, string targetFolder, bool generateCsv, bool keepBinary, CancellationToken cancellationToken);
+        Task ExecuteAsync(
+            ChannelReader<QueuedDownloadToken> channelReader,
+            string targetFolder,
+            bool generateCsv,
+            bool keepBinary,
+            string postProcessorPath,
+            string postProcessorArguments,
+            CancellationToken cancellationToken);
     }
 }

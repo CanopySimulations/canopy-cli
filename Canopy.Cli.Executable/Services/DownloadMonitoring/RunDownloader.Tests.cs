@@ -39,7 +39,7 @@ namespace Canopy.Cli.Executable.Services.DownloadMonitoring
         [Fact]
         public async Task ItShouldRunTheDownloader()
         {
-            var parameters = DownloaderCommand.Parameters.Random();
+            var parameters = DownloadMonitorCommand.Parameters.Random();
 
             this.ensureAuthenticated.ExecuteAsync().Returns(Task.FromResult(AuthenticatedUser.Random()));
 
@@ -59,6 +59,8 @@ namespace Canopy.Cli.Executable.Services.DownloadMonitoring
                 Arg.Any<string>(),
                 Arg.Any<bool>(),
                 Arg.Any<bool>(),
+                Arg.Any<string>(),
+                Arg.Any<string>(),
                 Arg.Any<CancellationToken>()).Returns(Task.CompletedTask);
 
             await this.target.ExecuteAsync(parameters);
@@ -73,6 +75,8 @@ namespace Canopy.Cli.Executable.Services.DownloadMonitoring
                 createdOutputFolder,
                 parameters.GenerateCsv,
                 parameters.KeepBinary,
+                parameters.PostProcessor,
+                parameters.PostProcessorArguments,
                 Arg.Any<CancellationToken>());
         }
     }

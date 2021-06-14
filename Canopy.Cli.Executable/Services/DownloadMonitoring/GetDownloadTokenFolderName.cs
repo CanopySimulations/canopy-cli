@@ -5,9 +5,9 @@ namespace Canopy.Cli.Executable.Services.DownloadMonitoring
         public string Execute(QueuedDownloadToken item)
         {
             var folderName = item.Token.StudyName;
-            if (!string.IsNullOrWhiteSpace(item.Token.JobName))
+            if (item.Token.Job != null)
             {
-                folderName += " - " + item.Token.JobName;
+                folderName += " - " + item.Token.Job.JobName;
             }
 
             return FileNameUtilities.Sanitize(folderName);

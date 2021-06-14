@@ -15,7 +15,7 @@ namespace Canopy.Cli.Executable.Services.DownloadMonitoring
                 Token = DownloadToken.Random() with
                 {
                     StudyName = "Study Name",
-                    JobName = null
+                    Job = null
                 }
             };
 
@@ -32,7 +32,10 @@ namespace Canopy.Cli.Executable.Services.DownloadMonitoring
                 Token = DownloadToken.Random() with
                 {
                     StudyName = "Study Name",
-                    JobName = "Job Name"
+                    Job = DownloadTokenJob.Random() with
+                    {
+                        JobName = "Job Name"
+                    }
                 }
             };
 

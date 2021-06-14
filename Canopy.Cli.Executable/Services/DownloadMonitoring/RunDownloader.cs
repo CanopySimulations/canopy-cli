@@ -28,7 +28,7 @@ namespace Canopy.Cli.Executable.Services.DownloadMonitoring
             this.logger = logger;
         }
 
-        public async Task ExecuteAsync(DownloaderCommand.Parameters parameters)
+        public async Task ExecuteAsync(DownloadMonitorCommand.Parameters parameters)
         {
             await this.ensureAuthenticated.ExecuteAsync();
 
@@ -48,16 +48,18 @@ namespace Canopy.Cli.Executable.Services.DownloadMonitoring
 
                 await this.processDownloads.ExecuteAsync(
                     channel.Reader,
-                    outputFolder,
+                    targetFolder: outputFolder,
                     generateCsv: parameters.GenerateCsv,
                     keepBinary: parameters.KeepBinary,
-                    cts.Token);
+                    postProcessorPath: parameters.PostProcessor,
+                    postProcessorArguments: parameters.PostProcessorArguments,
+                    cancellationToken: cts.Token);
 
                 await monitorDownloadsTask;
             }
             catch (Exception t) when (ExceptionUtilities.IsFromCancellation(t))
             {
-                //this.logger.LogInformation("Download monitoring was cancelled.");
+                // Download monitoring was cancelled.
             }
         }
     }
