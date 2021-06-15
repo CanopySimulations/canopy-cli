@@ -10,16 +10,16 @@ namespace Canopy.Cli.Executable.Services.DownloadMonitoring
     public class PostProcessStudyDownloadTests
     {
         const string WindowsSuccessfulCommand = "cmd";
-        const string WindowsSuccessfulCommandArguments = @"/c echo running& echo ""{0}""";
+        const string WindowsSuccessfulCommandArguments = @"/c echo running& echo {0}";
 
         const string LinuxSuccessfulCommand = "bash";
-        const string LinuxSuccessfulCommandArguments = "-c \"echo running && echo {0}\"";
+        const string LinuxSuccessfulCommandArguments = @"-c ""echo running && echo {0}""";
 
         const string WindowsFailingCommand = "cmd";
         const string WindowsFailingCommandArguments = "/c echo running& exit 1";
 
         const string LinuxFailingCommand = "bash";
-        const string LinuxFailingCommandArguments = "-c \"echo running && exit 1\"";
+        const string LinuxFailingCommandArguments = @"-c ""echo running && exit 1""";
 
         const string TargetFolderString = "target_folder";
 
@@ -53,7 +53,7 @@ namespace Canopy.Cli.Executable.Services.DownloadMonitoring
             this.logPostProcessorOutput.Received(1).Information(
                 PostProcessStudyDownload.PostProcessorOutputFormat, 
                 command, 
-                "\"target_folder\"");
+                "target_folder");
 
             this.logPostProcessorOutput.Received(0).Error(Arg.Any<string>(), Arg.Any<object[]>());
         }
