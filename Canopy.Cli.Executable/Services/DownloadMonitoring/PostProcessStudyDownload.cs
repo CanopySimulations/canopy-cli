@@ -44,10 +44,10 @@ namespace Canopy.Cli.Executable.Services.DownloadMonitoring
         {
             if (string.IsNullOrWhiteSpace(postProcessorArguments))
             {
-                postProcessorArguments = "\"{0}\"";
+                postProcessorArguments = "{0}";
             }
 
-            var resolvedArguments = string.Format(postProcessorArguments, targetFolder);
+            var resolvedArguments = string.Format(postProcessorArguments, "\"" + targetFolder + "\"");
 
             var psi = new ProcessStartInfo(postProcessorPath, resolvedArguments);
             psi.RedirectStandardOutput = true;
