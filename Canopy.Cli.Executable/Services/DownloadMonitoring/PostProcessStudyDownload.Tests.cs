@@ -10,7 +10,7 @@ namespace Canopy.Cli.Executable.Services.DownloadMonitoring
     public class PostProcessStudyDownloadTests
     {
         const string WindowsSuccessfulCommand = "cmd";
-        const string WindowsSuccessfulCommandArguments = "/c echo running& echo {0}";
+        const string WindowsSuccessfulCommandArguments = @"/c echo running& echo ""{0}""";
 
         const string LinuxSuccessfulCommand = "bash";
         const string LinuxSuccessfulCommandArguments = "-c \"echo running && echo {0}\"";

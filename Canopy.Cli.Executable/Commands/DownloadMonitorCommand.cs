@@ -63,7 +63,7 @@ namespace Canopy.Cli.Executable.Commands
             command.AddOption(new Option<string>(
                 new [] { "--post-processor-arguments", "-ppa" }, 
                 getDefaultValue: () => string.Empty, 
-                description: "The arguments to pass to the post-processor. The string {0} will be replaced with the quoted study path."));
+                description: "The arguments to pass to the post-processor. The string {0} will be replaced with the unquoted study path."));
 
             command.Handler = CommandHandler.Create((IHost host, Parameters parameters) =>
                 host.Services.GetRequiredService<IRunDownloader>().ExecuteAsync(parameters));
