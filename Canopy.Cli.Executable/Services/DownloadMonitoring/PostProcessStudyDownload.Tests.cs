@@ -53,7 +53,7 @@ namespace Canopy.Cli.Executable.Services.DownloadMonitoring
             this.logPostProcessorOutput.Received(1).Information(
                 PostProcessStudyDownload.PostProcessorOutputFormat, 
                 command, 
-                "target_folder");
+                "\"target_folder\"");
 
             this.logPostProcessorOutput.Received(0).Error(Arg.Any<string>(), Arg.Any<object[]>());
         }
