@@ -22,14 +22,17 @@
         private string password;
 
         private AuthenticatedUser authenticatedUser;
+        private readonly ITokenClient tokenClient;
         private readonly ILogger<AuthenticationManager> logger;
 
         public AuthenticationManager(
             IConnectionManager connectionManager,
+            ITokenClient tokenClient,
             ILogger<AuthenticationManager> logger)
         {
-            this.logger = logger;
             this.connectionManager = connectionManager;
+            this.tokenClient = tokenClient;
+            this.logger = logger;
             this.saveFolder = PlatformUtilities.AppDataFolder();
             this.saveAuthenticatedUserFile = Path.Combine(this.saveFolder, "authenticated-user.json");
         }
@@ -113,20 +116,20 @@
             this.logger.LogInformation("Authenticating... ");
             try
             {
-                var now = DateTime.UtcNow;
-                var client = new HttpClient();
-                var request = new HttpRequestMessage();
                 var connection = this.connectionManager.Connection;
-                request.Method = new HttpMethod("POST");
-                request.RequestUri = new Uri(connection.Endpoint + "/token");
-                request.Content = new StringContent(
-                    $"grant_type=password&username={this.username}&tenant={this.tenantName}&password={this.password}" +
-                    $"&client_id={connection.ClientId}&client_secret={connection.ClientSecret}",
-                    Encoding.UTF8,
-                    "application/x-www-form-urlencoded");
+                var response = await this.tokenClient.PostTokenAsync(
+                    new Body
+                    {
+                        Grant_type = "password",
+                        Username = this.username,
+                        Tenant = this.tenantName,
+                        Password = this.password,
+                        Client_id = connection.ClientId,
+                        Client_secret = connection.ClientSecret
+                    });
+                var now = DateTime.UtcNow;
 
-                var response = await client.SendAsync(request, HttpCompletionOption.ResponseContentRead);
-                await ProcessTokenResponse(response, now);
+                this.ProcessTokenResponse(response, now);
 
                 this.logger.LogInformation("Authenticated.");
             }
@@ -142,20 +145,19 @@
             this.logger.LogInformation("Refreshing access token... ");
             try
             {
-                var now = DateTime.UtcNow;
-                var client = new HttpClient();
-                var request = new HttpRequestMessage();
                 var connection = this.connectionManager.Connection;
-                request.Method = new HttpMethod("POST");
-                request.RequestUri = new Uri(connection.Endpoint + "/token");
-                request.Content = new StringContent(
-                    $"grant_type=refresh_token&refresh_token={this.authenticatedUser.RefreshToken}&tenant={this.authenticatedUser.TenantId}" +
-                    $"&client_id={connection.ClientId}&client_secret={connection.ClientSecret}",
-                    Encoding.UTF8,
-                    "application/x-www-form-urlencoded");
+                var response = await this.tokenClient.PostTokenAsync(
+                    new Body
+                    {
+                        Grant_type = "refresh_token",
+                        Refresh_token = this.authenticatedUser.RefreshToken,
+                        Tenant = this.authenticatedUser.TenantId,
+                        Client_id = connection.ClientId,
+                        Client_secret = connection.ClientSecret
+                    });
+                var now = DateTime.UtcNow;
 
-                var response = await client.SendAsync(request, HttpCompletionOption.ResponseContentRead);
-                await ProcessTokenResponse(response, now);
+                this.ProcessTokenResponse(response, now);
                 this.logger.LogInformation("Refreshed access token.");
             }
             catch (Exception)
@@ -168,22 +170,13 @@
             }
         }
 
-        private async Task ProcessTokenResponse(HttpResponseMessage response, DateTime now)
+        private void ProcessTokenResponse(GrantTypeHandlerResponse response, DateTime now)
         {
-            if (response.StatusCode != HttpStatusCode.OK)
-            {
-                var responseMessage = await response.Content.ReadAsStringAsync();
-                throw new Exception($"Response {response.StatusCode}: {responseMessage}");
-            }
-
-            var responseString = await response.Content.ReadAsStringAsync();
-            var responseJson = JObject.Parse(responseString);
-
-            var accessToken = responseJson["access_token"].Value<string>();
-            var refreshToken = responseJson["refresh_token"].Value<string>();
-            var expiresIn = responseJson["expires_in"].Value<int>();
-            var userId = responseJson["user_id"].Value<string>();
-            var tenantId = responseJson["tenant_id"].Value<string>();
+            var accessToken = response.Access_token;
+            var refreshToken = response.Refresh_token;
+            var expiresIn = response.Expires_in;
+            var userId = response.User_id;
+            var tenantId = response.Tenant_id;
 
             this.authenticatedUser = new AuthenticatedUser(accessToken, now.AddSeconds(expiresIn), refreshToken, userId, tenantId);
             this.SaveAuthenticatedUser();

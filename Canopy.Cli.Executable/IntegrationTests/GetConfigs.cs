@@ -58,14 +58,14 @@ namespace Canopy.Cli.Executable.IntegrationTests
             this.logger.LogInformation("Saving as user weather config.");
             var configId = await this.configClient.PostConfigAsync(
                 authenticationUser.TenantId,
+                null,
                 new NewConfigData
                 {
                     Name = WeatherConfigName,
                     ConfigType = Constants.WeatherConfigType,
                     Config = weatherContent,
                     SimVersion = simVersion,
-                },
-                null);
+                });
         }
 
         public async Task _02_GetWeatherConfigs()

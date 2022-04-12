@@ -10,7 +10,7 @@
             "request": "launch",
             "preLaunchTask": "build",
             "program": "${workspaceFolder}/Canopy.Cli.Executable/bin/Debug/net5.0/canopy.dll",
-            "args": ["integration-tests", "-n", "GetStudy"],
+            "args": ["integration-tests", "-n", "GetConfigs"],
             "cwd": "${workspaceFolder}/Canopy.Cli.Executable",
             "console": "internalConsole",
             "stopAtEntry": false

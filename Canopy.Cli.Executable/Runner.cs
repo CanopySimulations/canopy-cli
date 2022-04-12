@@ -88,7 +88,9 @@ namespace Canopy.Cli.Executable
             services.AddSingleton<IConfiguration>(context.Configuration);
             services.AddSingleton<IConnectionManager, ConnectionManager>();
             services.AddSingleton<IAuthenticationManager, AuthenticationManager>();
-            services.AddSingleton<CanopyApiConfiguration>();
+            services.AddSingleton<ITokenAuthenticationManager, TokenAuthenticationManager>();
+            services.AddSingleton<ICanopyApiConfiguration, CanopyApiConfiguration>();
+            services.AddSingleton<ICanopyTokenApiConfiguration, CanopyTokenApiConfiguration>();
             services.AddSingleton<ISimVersionCache, SimVersionCache>();
             services.AddSingleton<IStudyTypesCache, StudyTypesCache>();
 
@@ -163,10 +165,20 @@ namespace Canopy.Cli.Executable
             var apiClients = from t in assembly.GetTypes()
                              where typeof(CanopyApiClient).IsAssignableFrom(t) && t != typeof(CanopyApiClient)
                              select (Class: t, Interface: t.GetInterface($"I{t.Name}"));
+            
             foreach (var client in apiClients)
             {
+                if (client.Interface == typeof(ITokenClient)) 
+                {
+                    continue;
+                }
+
                 services.AddTransient(client.Interface, client.Class);
             }
+
+            // The TokenClient is used for authentication by the AuthenticationManager, so we inject a special configuration object
+            // which contains a dummy AuthenticationManager instead.
+            services.AddTransient<ITokenClient, TokenClient>(s => new TokenClient(s.GetService<ICanopyTokenApiConfiguration>()));
         }
 
         private static void AddIntegrationTestServices(IServiceCollection services)

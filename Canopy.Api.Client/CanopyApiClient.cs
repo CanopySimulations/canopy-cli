@@ -1,17 +1,14 @@
 ﻿namespace Canopy.Api.Client
 {
-    using System;
-    using System.Collections.Generic;
     using System.Net.Http;
-    using System.Text;
     using System.Threading;
     using System.Threading.Tasks;
 
     public class CanopyApiClient
     {
-        private readonly CanopyApiConfiguration configuration;
+        private readonly ICanopyApiConfiguration configuration;
 
-        public CanopyApiClient(CanopyApiConfiguration configuration)
+        public CanopyApiClient(ICanopyApiConfiguration configuration)
         {
             this.configuration = configuration;
         }
@@ -35,7 +32,7 @@
             return result;
         }
 
-        protected virtual void PrepareRequest(System.Net.Http.HttpClient client, System.Net.Http.HttpRequestMessage request, System.Text.StringBuilder urlBuilder)
+        protected Task PrepareRequestAsync(HttpClient client, HttpRequestMessage request, System.Text.StringBuilder urlBuilder)
         {
             // ASP.NET Web API doesn't like having trailing ampersands in URLs.
             if (urlBuilder[urlBuilder.Length - 1] == '&')
@@ -45,6 +42,18 @@
 
             var connection = this.configuration.ConnectionManager.Connection;
             urlBuilder.Insert(0, '/').Insert(0, connection.Endpoint);
+
+            return Task.CompletedTask;
+        }
+
+        protected Task PrepareRequestAsync(HttpClient client, HttpRequestMessage request, string url)
+        {
+            return Task.CompletedTask;
+        }
+
+        protected Task ProcessResponseAsync(HttpClient client, HttpResponseMessage response, CancellationToken cancellationToken)
+        {
+            return Task.CompletedTask;
         }
     }
 }

@@ -74,10 +74,11 @@ namespace Canopy.Cli.Executable.IntegrationTests
 
             var studyResult = await this.studyClient.PostStudyAsync(
                 authenticationUser.TenantId,
+                false,
                 new NewStudyData
                 {
                     Name = StudyName,
-                    StudyType = NewStudyDataStudyType.StraightSim,
+                    StudyType = StudyType.StraightSim,
                     Sources = new List<NewStudyDataSource>
                     {
                         new NewStudyDataSource { ConfigType = Constants.CarConfigType, Name = CarName, ConfigId = loadedCar.FilePath },
@@ -85,8 +86,7 @@ namespace Canopy.Cli.Executable.IntegrationTests
                     },
                     Study = study,
                     SimVersion = simVersion,
-                },
-                null);
+                });
 
             this.studyId = studyResult.StudyId;
 
