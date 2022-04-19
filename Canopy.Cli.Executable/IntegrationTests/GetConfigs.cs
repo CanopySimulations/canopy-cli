@@ -22,6 +22,8 @@ namespace Canopy.Cli.Executable.IntegrationTests
 
         private readonly string WeatherConfigName = "Canopy CLI Integration Test Weather " + Guid.NewGuid().ToString();
 
+        private string? configId;
+
         public GetConfigs(
             IEnsureAuthenticated ensureAuthenticated,
             IGetDefaultConfigPath getDefaultConfigPath,
@@ -56,7 +58,7 @@ namespace Canopy.Cli.Executable.IntegrationTests
             var weatherContent = JObject.Parse(weatherDocument.Document.Content);
             
             this.logger.LogInformation("Saving as user weather config.");
-            var configId = await this.configClient.PostConfigAsync(
+            this.configId = await this.configClient.PostConfigAsync(
                 authenticationUser.TenantId,
                 null,
                 new NewConfigData
@@ -68,7 +70,18 @@ namespace Canopy.Cli.Executable.IntegrationTests
                 });
         }
 
-        public async Task _02_GetWeatherConfigs()
+        public async Task _02_GetWeatherConfig()
+        {
+            var authenticationUser = await this.ensureAuthenticated.ExecuteAsync();
+            var simVersion = await this.simVersionCache.Get();
+
+            var config = await this.configClient.GetConfigAsync(authenticationUser.TenantId, this.configId, null, simVersion, null);
+
+            Assert.Equal(Constants.WeatherConfigType, config.Config.SubType);
+            Assert.NotNull(config.Config.Data);
+        }
+
+        public async Task _03_GetWeatherConfigs()
         {
             var authenticationUser = await this.ensureAuthenticated.ExecuteAsync();
             var simVersion = await this.simVersionCache.Get();

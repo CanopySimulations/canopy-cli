@@ -1512,7 +1512,7 @@ namespace Canopy.Api.Client
                     content_.Headers.ContentType = System.Net.Http.Headers.MediaTypeHeaderValue.Parse("application/json-patch+json");
                     request_.Content = content_;
                     request_.Method = new System.Net.Http.HttpMethod("POST");
-                    request_.Headers.Accept.Add(System.Net.Http.Headers.MediaTypeWithQualityHeaderValue.Parse("text/plain"));
+                    request_.Headers.Accept.Add(System.Net.Http.Headers.MediaTypeWithQualityHeaderValue.Parse("application/json"));
 
                     await PrepareRequestAsync(client_, request_, urlBuilder_).ConfigureAwait(false);
 
@@ -1537,9 +1537,12 @@ namespace Canopy.Api.Client
                         var status_ = (int)response_.StatusCode;
                         if (status_ == 200)
                         {
-                            var responseData_ = response_.Content == null ? null : await response_.Content.ReadAsStringAsync().ConfigureAwait(false);
-                            var result_ = (string)System.Convert.ChangeType(responseData_, typeof(string));
-                            return result_;
+                            var objectResponse_ = await ReadObjectResponseAsync<string>(response_, headers_, cancellationToken).ConfigureAwait(false);
+                            if (objectResponse_.Object == null)
+                            {
+                                throw new CanopyApiException("Response was null which was not expected.", status_, objectResponse_.Text, headers_, null);
+                            }
+                            return objectResponse_.Object;
                         }
                         else
                         {
