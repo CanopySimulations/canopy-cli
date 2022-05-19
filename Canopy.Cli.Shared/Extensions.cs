@@ -83,12 +83,12 @@ namespace Canopy.Cli.Shared
             return input.Split(new[] {'\r', '\n'}, StringSplitOptions.RemoveEmptyEntries);
         }
 
+        private static readonly Regex SplitCsvLinesRegex = new Regex("(?:^|,)(\"(?:[^\"]+|\"\")*\"|[^,]*)", RegexOptions.Compiled);
+
         // http://stackoverflow.com/a/23888636/37725
         public static IEnumerable<string> SplitCsvLine(this string input)
         {
-            var csvSplit = new Regex("(?:^|,)(\"(?:[^\"]+|\"\")*\"|[^,]*)", RegexOptions.Compiled);
-
-            foreach (Match match in csvSplit.Matches(input))
+            foreach (Match match in SplitCsvLinesRegex.Matches(input))
             {
                 yield return match.Value.TrimStart(',').Trim().WithoutQuotes().Trim();
             }
