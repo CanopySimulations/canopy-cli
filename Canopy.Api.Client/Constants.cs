@@ -8,6 +8,8 @@ namespace Canopy.Api.Client
     {
         public const string CurrentSimVersion = "current";
         
+        public const string StudyTypeStraightSim = "straightSim";
+
         public const string CarConfigType = "car";
         public const string WeatherConfigType = "weather";
 

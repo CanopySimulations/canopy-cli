@@ -78,7 +78,7 @@ namespace Canopy.Cli.Executable.IntegrationTests
                 new NewStudyData
                 {
                     Name = StudyName,
-                    StudyType = StudyType.StraightSim,
+                    StudyType = Constants.StudyTypeStraightSim,
                     Sources = new List<NewStudyDataSource>
                     {
                         new NewStudyDataSource { ConfigType = Constants.CarConfigType, Name = CarName, ConfigId = loadedCar.FilePath },

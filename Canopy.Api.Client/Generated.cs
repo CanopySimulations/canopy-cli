@@ -1512,7 +1512,7 @@ namespace Canopy.Api.Client
                     content_.Headers.ContentType = System.Net.Http.Headers.MediaTypeHeaderValue.Parse("application/json-patch+json");
                     request_.Content = content_;
                     request_.Method = new System.Net.Http.HttpMethod("POST");
-                    request_.Headers.Accept.Add(System.Net.Http.Headers.MediaTypeWithQualityHeaderValue.Parse("text/plain"));
+                    request_.Headers.Accept.Add(System.Net.Http.Headers.MediaTypeWithQualityHeaderValue.Parse("application/json"));
 
                     await PrepareRequestAsync(client_, request_, urlBuilder_, cancellationToken).ConfigureAwait(false);
 
@@ -3422,6 +3422,24 @@ namespace Canopy.Api.Client
 
         /// <returns>No Content</returns>
         /// <exception cref="CanopyApiException">A server side error occurred.</exception>
+        System.Threading.Tasks.Task PostEmailConfirmationRequestAsync(string tenantId, string userId);
+
+        /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
+        /// <returns>No Content</returns>
+        /// <exception cref="CanopyApiException">A server side error occurred.</exception>
+        System.Threading.Tasks.Task PostEmailConfirmationRequestAsync(string tenantId, string userId, System.Threading.CancellationToken cancellationToken);
+
+        /// <returns>No Content</returns>
+        /// <exception cref="CanopyApiException">A server side error occurred.</exception>
+        System.Threading.Tasks.Task PostEmailConfirmationAsync(EmailConfirmationData body);
+
+        /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
+        /// <returns>No Content</returns>
+        /// <exception cref="CanopyApiException">A server side error occurred.</exception>
+        System.Threading.Tasks.Task PostEmailConfirmationAsync(EmailConfirmationData body, System.Threading.CancellationToken cancellationToken);
+
+        /// <returns>No Content</returns>
+        /// <exception cref="CanopyApiException">A server side error occurred.</exception>
         System.Threading.Tasks.Task PostIdentifiedUserAsync(IdentifiedUserData body);
 
         /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
@@ -3464,6 +3482,15 @@ namespace Canopy.Api.Client
         /// <returns>Success</returns>
         /// <exception cref="CanopyApiException">A server side error occurred.</exception>
         System.Threading.Tasks.Task<GetUpvotyTokenQueryResult> GetUpvotyTokenAsync(string tenantId, string userId, System.Threading.CancellationToken cancellationToken);
+
+        /// <returns>Success</returns>
+        /// <exception cref="CanopyApiException">A server side error occurred.</exception>
+        System.Threading.Tasks.Task<GetZendeskTokenQueryResult> GetZendeskTokenAsync(string tenantId, string userId);
+
+        /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
+        /// <returns>Success</returns>
+        /// <exception cref="CanopyApiException">A server side error occurred.</exception>
+        System.Threading.Tasks.Task<GetZendeskTokenQueryResult> GetZendeskTokenAsync(string tenantId, string userId, System.Threading.CancellationToken cancellationToken);
 
     }
 
@@ -3808,6 +3835,154 @@ namespace Canopy.Api.Client
                 using (var request_ = await CreateHttpRequestMessageAsync(cancellationToken).ConfigureAwait(false))
                 {
                     request_.Method = new System.Net.Http.HttpMethod("GET");
+
+                    await PrepareRequestAsync(client_, request_, urlBuilder_, cancellationToken).ConfigureAwait(false);
+
+                    var url_ = urlBuilder_.ToString();
+                    request_.RequestUri = new System.Uri(url_, System.UriKind.RelativeOrAbsolute);
+
+                    await PrepareRequestAsync(client_, request_, url_, cancellationToken).ConfigureAwait(false);
+
+                    var response_ = await client_.SendAsync(request_, System.Net.Http.HttpCompletionOption.ResponseHeadersRead, cancellationToken).ConfigureAwait(false);
+                    var disposeResponse_ = true;
+                    try
+                    {
+                        var headers_ = System.Linq.Enumerable.ToDictionary(response_.Headers, h_ => h_.Key, h_ => h_.Value);
+                        if (response_.Content != null && response_.Content.Headers != null)
+                        {
+                            foreach (var item_ in response_.Content.Headers)
+                                headers_[item_.Key] = item_.Value;
+                        }
+
+                        await ProcessResponseAsync(client_, response_, cancellationToken).ConfigureAwait(false);
+
+                        var status_ = (int)response_.StatusCode;
+                        if (status_ == 204)
+                        {
+                            return;
+                        }
+                        else
+                        {
+                            var responseData_ = response_.Content == null ? null : await response_.Content.ReadAsStringAsync().ConfigureAwait(false);
+                            throw new CanopyApiException("The HTTP status code of the response was not expected (" + status_ + ").", status_, responseData_, headers_, null);
+                        }
+                    }
+                    finally
+                    {
+                        if (disposeResponse_)
+                            response_.Dispose();
+                    }
+                }
+            }
+            finally
+            {
+                if (disposeClient_)
+                    client_.Dispose();
+            }
+        }
+
+        /// <returns>No Content</returns>
+        /// <exception cref="CanopyApiException">A server side error occurred.</exception>
+        public virtual System.Threading.Tasks.Task PostEmailConfirmationRequestAsync(string tenantId, string userId)
+        {
+            return PostEmailConfirmationRequestAsync(tenantId, userId, System.Threading.CancellationToken.None);
+        }
+
+        /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
+        /// <returns>No Content</returns>
+        /// <exception cref="CanopyApiException">A server side error occurred.</exception>
+        public virtual async System.Threading.Tasks.Task PostEmailConfirmationRequestAsync(string tenantId, string userId, System.Threading.CancellationToken cancellationToken)
+        {
+            if (tenantId == null)
+                throw new System.ArgumentNullException("tenantId");
+
+            if (userId == null)
+                throw new System.ArgumentNullException("userId");
+
+            var urlBuilder_ = new System.Text.StringBuilder();
+            urlBuilder_.Append(BaseUrl != null ? BaseUrl.TrimEnd('/') : "").Append("/membership/email-confirmation-requests/{tenantId}/{userId}");
+            urlBuilder_.Replace("{tenantId}", System.Uri.EscapeDataString(ConvertToString(tenantId, System.Globalization.CultureInfo.InvariantCulture)));
+            urlBuilder_.Replace("{userId}", System.Uri.EscapeDataString(ConvertToString(userId, System.Globalization.CultureInfo.InvariantCulture)));
+
+            var client_ = new System.Net.Http.HttpClient();
+            var disposeClient_ = true;
+            try
+            {
+                using (var request_ = await CreateHttpRequestMessageAsync(cancellationToken).ConfigureAwait(false))
+                {
+                    request_.Content = new System.Net.Http.StringContent(string.Empty, System.Text.Encoding.UTF8, "application/json");
+                    request_.Method = new System.Net.Http.HttpMethod("POST");
+
+                    await PrepareRequestAsync(client_, request_, urlBuilder_, cancellationToken).ConfigureAwait(false);
+
+                    var url_ = urlBuilder_.ToString();
+                    request_.RequestUri = new System.Uri(url_, System.UriKind.RelativeOrAbsolute);
+
+                    await PrepareRequestAsync(client_, request_, url_, cancellationToken).ConfigureAwait(false);
+
+                    var response_ = await client_.SendAsync(request_, System.Net.Http.HttpCompletionOption.ResponseHeadersRead, cancellationToken).ConfigureAwait(false);
+                    var disposeResponse_ = true;
+                    try
+                    {
+                        var headers_ = System.Linq.Enumerable.ToDictionary(response_.Headers, h_ => h_.Key, h_ => h_.Value);
+                        if (response_.Content != null && response_.Content.Headers != null)
+                        {
+                            foreach (var item_ in response_.Content.Headers)
+                                headers_[item_.Key] = item_.Value;
+                        }
+
+                        await ProcessResponseAsync(client_, response_, cancellationToken).ConfigureAwait(false);
+
+                        var status_ = (int)response_.StatusCode;
+                        if (status_ == 204)
+                        {
+                            return;
+                        }
+                        else
+                        {
+                            var responseData_ = response_.Content == null ? null : await response_.Content.ReadAsStringAsync().ConfigureAwait(false);
+                            throw new CanopyApiException("The HTTP status code of the response was not expected (" + status_ + ").", status_, responseData_, headers_, null);
+                        }
+                    }
+                    finally
+                    {
+                        if (disposeResponse_)
+                            response_.Dispose();
+                    }
+                }
+            }
+            finally
+            {
+                if (disposeClient_)
+                    client_.Dispose();
+            }
+        }
+
+        /// <returns>No Content</returns>
+        /// <exception cref="CanopyApiException">A server side error occurred.</exception>
+        public virtual System.Threading.Tasks.Task PostEmailConfirmationAsync(EmailConfirmationData body)
+        {
+            return PostEmailConfirmationAsync(body, System.Threading.CancellationToken.None);
+        }
+
+        /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
+        /// <returns>No Content</returns>
+        /// <exception cref="CanopyApiException">A server side error occurred.</exception>
+        public virtual async System.Threading.Tasks.Task PostEmailConfirmationAsync(EmailConfirmationData body, System.Threading.CancellationToken cancellationToken)
+        {
+            var urlBuilder_ = new System.Text.StringBuilder();
+            urlBuilder_.Append(BaseUrl != null ? BaseUrl.TrimEnd('/') : "").Append("/membership/email-confirmations");
+
+            var client_ = new System.Net.Http.HttpClient();
+            var disposeClient_ = true;
+            try
+            {
+                using (var request_ = await CreateHttpRequestMessageAsync(cancellationToken).ConfigureAwait(false))
+                {
+                    var content_ = new System.Net.Http.StringContent(Newtonsoft.Json.JsonConvert.SerializeObject(body, _settings.Value));
+                    content_.Headers.ContentType = System.Net.Http.Headers.MediaTypeHeaderValue.Parse("application/json-patch+json");
+                    request_.Content = content_;
+                    request_.Method = new System.Net.Http.HttpMethod("POST");
 
                     await PrepareRequestAsync(client_, request_, urlBuilder_, cancellationToken).ConfigureAwait(false);
 
@@ -4218,6 +4393,88 @@ namespace Canopy.Api.Client
                         if (status_ == 200)
                         {
                             var objectResponse_ = await ReadObjectResponseAsync<GetUpvotyTokenQueryResult>(response_, headers_, cancellationToken).ConfigureAwait(false);
+                            if (objectResponse_.Object == null)
+                            {
+                                throw new CanopyApiException("Response was null which was not expected.", status_, objectResponse_.Text, headers_, null);
+                            }
+                            return objectResponse_.Object;
+                        }
+                        else
+                        {
+                            var responseData_ = response_.Content == null ? null : await response_.Content.ReadAsStringAsync().ConfigureAwait(false);
+                            throw new CanopyApiException("The HTTP status code of the response was not expected (" + status_ + ").", status_, responseData_, headers_, null);
+                        }
+                    }
+                    finally
+                    {
+                        if (disposeResponse_)
+                            response_.Dispose();
+                    }
+                }
+            }
+            finally
+            {
+                if (disposeClient_)
+                    client_.Dispose();
+            }
+        }
+
+        /// <returns>Success</returns>
+        /// <exception cref="CanopyApiException">A server side error occurred.</exception>
+        public virtual System.Threading.Tasks.Task<GetZendeskTokenQueryResult> GetZendeskTokenAsync(string tenantId, string userId)
+        {
+            return GetZendeskTokenAsync(tenantId, userId, System.Threading.CancellationToken.None);
+        }
+
+        /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
+        /// <returns>Success</returns>
+        /// <exception cref="CanopyApiException">A server side error occurred.</exception>
+        public virtual async System.Threading.Tasks.Task<GetZendeskTokenQueryResult> GetZendeskTokenAsync(string tenantId, string userId, System.Threading.CancellationToken cancellationToken)
+        {
+            if (tenantId == null)
+                throw new System.ArgumentNullException("tenantId");
+
+            if (userId == null)
+                throw new System.ArgumentNullException("userId");
+
+            var urlBuilder_ = new System.Text.StringBuilder();
+            urlBuilder_.Append(BaseUrl != null ? BaseUrl.TrimEnd('/') : "").Append("/membership/zendesk-token/{tenantId}/{userId}");
+            urlBuilder_.Replace("{tenantId}", System.Uri.EscapeDataString(ConvertToString(tenantId, System.Globalization.CultureInfo.InvariantCulture)));
+            urlBuilder_.Replace("{userId}", System.Uri.EscapeDataString(ConvertToString(userId, System.Globalization.CultureInfo.InvariantCulture)));
+
+            var client_ = new System.Net.Http.HttpClient();
+            var disposeClient_ = true;
+            try
+            {
+                using (var request_ = await CreateHttpRequestMessageAsync(cancellationToken).ConfigureAwait(false))
+                {
+                    request_.Method = new System.Net.Http.HttpMethod("GET");
+                    request_.Headers.Accept.Add(System.Net.Http.Headers.MediaTypeWithQualityHeaderValue.Parse("text/plain"));
+
+                    await PrepareRequestAsync(client_, request_, urlBuilder_, cancellationToken).ConfigureAwait(false);
+
+                    var url_ = urlBuilder_.ToString();
+                    request_.RequestUri = new System.Uri(url_, System.UriKind.RelativeOrAbsolute);
+
+                    await PrepareRequestAsync(client_, request_, url_, cancellationToken).ConfigureAwait(false);
+
+                    var response_ = await client_.SendAsync(request_, System.Net.Http.HttpCompletionOption.ResponseHeadersRead, cancellationToken).ConfigureAwait(false);
+                    var disposeResponse_ = true;
+                    try
+                    {
+                        var headers_ = System.Linq.Enumerable.ToDictionary(response_.Headers, h_ => h_.Key, h_ => h_.Value);
+                        if (response_.Content != null && response_.Content.Headers != null)
+                        {
+                            foreach (var item_ in response_.Content.Headers)
+                                headers_[item_.Key] = item_.Value;
+                        }
+
+                        await ProcessResponseAsync(client_, response_, cancellationToken).ConfigureAwait(false);
+
+                        var status_ = (int)response_.StatusCode;
+                        if (status_ == 200)
+                        {
+                            var objectResponse_ = await ReadObjectResponseAsync<GetZendeskTokenQueryResult>(response_, headers_, cancellationToken).ConfigureAwait(false);
                             if (objectResponse_.Object == null)
                             {
                                 throw new CanopyApiException("Response was null which was not expected.", status_, objectResponse_.Text, headers_, null);
@@ -12470,8 +12727,8 @@ namespace Canopy.Api.Client
     [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "13.16.1.0 (NJsonSchema v10.7.2.0 (Newtonsoft.Json v12.0.0.0))")]
     public partial class AdminTenantSettings
     {
-        [Newtonsoft.Json.JsonProperty("studyTypes", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore, ItemConverterType = typeof(Newtonsoft.Json.Converters.StringEnumConverter))]
-        public System.Collections.Generic.List<StudyType> StudyTypes { get; set; }
+        [Newtonsoft.Json.JsonProperty("studyTypes", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public System.Collections.Generic.List<string> StudyTypes { get; set; }
 
         [Newtonsoft.Json.JsonProperty("tags", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public System.Collections.Generic.List<string> Tags { get; set; }
@@ -12496,8 +12753,8 @@ namespace Canopy.Api.Client
     [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "13.16.1.0 (NJsonSchema v10.7.2.0 (Newtonsoft.Json v12.0.0.0))")]
     public partial class AdminTenantSettingsBuilder
     {
-        [Newtonsoft.Json.JsonProperty("studyTypes", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore, ItemConverterType = typeof(Newtonsoft.Json.Converters.StringEnumConverter))]
-        public System.Collections.Generic.List<StudyType> StudyTypes { get; set; }
+        [Newtonsoft.Json.JsonProperty("studyTypes", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public System.Collections.Generic.List<string> StudyTypes { get; set; }
 
         [Newtonsoft.Json.JsonProperty("tags", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public System.Collections.Generic.List<string> Tags { get; set; }
@@ -12619,8 +12876,7 @@ namespace Canopy.Api.Client
 
         [Newtonsoft.Json.JsonProperty("type", Required = Newtonsoft.Json.Required.Always)]
         [System.ComponentModel.DataAnnotations.Required(AllowEmptyStrings = true)]
-        [Newtonsoft.Json.JsonConverter(typeof(Newtonsoft.Json.Converters.StringEnumConverter))]
-        public DocumentType Type { get; set; }
+        public string Type { get; set; }
 
         [Newtonsoft.Json.JsonProperty("subType", Required = Newtonsoft.Json.Required.Always)]
         [System.ComponentModel.DataAnnotations.Required(AllowEmptyStrings = true)]
@@ -13037,8 +13293,7 @@ namespace Canopy.Api.Client
     {
         [Newtonsoft.Json.JsonProperty("target", Required = Newtonsoft.Json.Required.Always)]
         [System.ComponentModel.DataAnnotations.Required(AllowEmptyStrings = true)]
-        [Newtonsoft.Json.JsonConverter(typeof(Newtonsoft.Json.Converters.StringEnumConverter))]
-        public DocumentsWithProperties Target { get; set; }
+        public string Target { get; set; }
 
         [Newtonsoft.Json.JsonProperty("names", Required = Newtonsoft.Json.Required.Always)]
         [System.ComponentModel.DataAnnotations.Required]
@@ -13098,174 +13353,11 @@ namespace Canopy.Api.Client
     }
 
     [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "13.16.1.0 (NJsonSchema v10.7.2.0 (Newtonsoft.Json v12.0.0.0))")]
-    public enum DocumentSubTypeModifier
-    {
-
-        [System.Runtime.Serialization.EnumMember(Value = @"customView")]
-        CustomView = 0,
-
-        [System.Runtime.Serialization.EnumMember(Value = @"filter")]
-        Filter = 1,
-
-        [System.Runtime.Serialization.EnumMember(Value = @"viewer")]
-        Viewer = 2,
-
-    }
-
-    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "13.16.1.0 (NJsonSchema v10.7.2.0 (Newtonsoft.Json v12.0.0.0))")]
-    public enum DocumentSubTypeRoot
-    {
-
-        [System.Runtime.Serialization.EnumMember(Value = @"automatedTest")]
-        AutomatedTest = 0,
-
-        [System.Runtime.Serialization.EnumMember(Value = @"automatedTest2")]
-        AutomatedTest2 = 1,
-
-        [System.Runtime.Serialization.EnumMember(Value = @"car")]
-        Car = 2,
-
-        [System.Runtime.Serialization.EnumMember(Value = @"track")]
-        Track = 3,
-
-        [System.Runtime.Serialization.EnumMember(Value = @"weather")]
-        Weather = 4,
-
-        [System.Runtime.Serialization.EnumMember(Value = @"exploration")]
-        Exploration = 5,
-
-        [System.Runtime.Serialization.EnumMember(Value = @"virtual4PostOptions")]
-        Virtual4PostOptions = 6,
-
-        [System.Runtime.Serialization.EnumMember(Value = @"bankedLimitSimOptions")]
-        BankedLimitSimOptions = 7,
-
-        [System.Runtime.Serialization.EnumMember(Value = @"limitSimOptions")]
-        LimitSimOptions = 8,
-
-        [System.Runtime.Serialization.EnumMember(Value = @"subLimitSimOptions")]
-        SubLimitSimOptions = 9,
-
-        [System.Runtime.Serialization.EnumMember(Value = @"thermalReplayOptions")]
-        ThermalReplayOptions = 10,
-
-        [System.Runtime.Serialization.EnumMember(Value = @"channelInferenceOptions")]
-        ChannelInferenceOptions = 11,
-
-        [System.Runtime.Serialization.EnumMember(Value = @"dragSimOptions")]
-        DragSimOptions = 12,
-
-        [System.Runtime.Serialization.EnumMember(Value = @"overtaking")]
-        Overtaking = 13,
-
-        [System.Runtime.Serialization.EnumMember(Value = @"driveCycle")]
-        DriveCycle = 14,
-
-        [System.Runtime.Serialization.EnumMember(Value = @"userMaths")]
-        UserMaths = 15,
-
-        [System.Runtime.Serialization.EnumMember(Value = @"constraints")]
-        Constraints = 16,
-
-        [System.Runtime.Serialization.EnumMember(Value = @"telemetry")]
-        Telemetry = 17,
-
-        [System.Runtime.Serialization.EnumMember(Value = @"files")]
-        Files = 18,
-
-        [System.Runtime.Serialization.EnumMember(Value = @"aircraft")]
-        Aircraft = 19,
-
-        [System.Runtime.Serialization.EnumMember(Value = @"iliadBoat")]
-        IliadBoat = 20,
-
-        [System.Runtime.Serialization.EnumMember(Value = @"iliadCollocationOptions")]
-        IliadCollocationOptions = 21,
-
-        [System.Runtime.Serialization.EnumMember(Value = @"iliadVppOptions")]
-        IliadVppOptions = 22,
-
-        [System.Runtime.Serialization.EnumMember(Value = @"pacejkaTyres")]
-        PacejkaTyres = 23,
-
-        [System.Runtime.Serialization.EnumMember(Value = @"pacejkaCanopyConverterOptions")]
-        PacejkaCanopyConverterOptions = 24,
-
-        [System.Runtime.Serialization.EnumMember(Value = @"lineMultiPlot")]
-        LineMultiPlot = 25,
-
-        [System.Runtime.Serialization.EnumMember(Value = @"pointMultiPlot")]
-        PointMultiPlot = 26,
-
-        [System.Runtime.Serialization.EnumMember(Value = @"parallelCoordinates")]
-        ParallelCoordinates = 27,
-
-        [System.Runtime.Serialization.EnumMember(Value = @"pointScatterPlot")]
-        PointScatterPlot = 28,
-
-        [System.Runtime.Serialization.EnumMember(Value = @"lineScatterPlot")]
-        LineScatterPlot = 29,
-
-        [System.Runtime.Serialization.EnumMember(Value = @"definition")]
-        Definition = 30,
-
-        [System.Runtime.Serialization.EnumMember(Value = @"job")]
-        Job = 31,
-
-        [System.Runtime.Serialization.EnumMember(Value = @"result")]
-        Result = 32,
-
-        [System.Runtime.Serialization.EnumMember(Value = @"baseline")]
-        Baseline = 33,
-
-        [System.Runtime.Serialization.EnumMember(Value = @"deletedDefinition")]
-        DeletedDefinition = 34,
-
-        [System.Runtime.Serialization.EnumMember(Value = @"study")]
-        Study = 35,
-
-        [System.Runtime.Serialization.EnumMember(Value = @"worksheet")]
-        Worksheet = 36,
-
-    }
-
-    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "13.16.1.0 (NJsonSchema v10.7.2.0 (Newtonsoft.Json v12.0.0.0))")]
-    public enum DocumentType
-    {
-
-        [System.Runtime.Serialization.EnumMember(Value = @"automatedTest")]
-        AutomatedTest = 0,
-
-        [System.Runtime.Serialization.EnumMember(Value = @"config")]
-        Config = 1,
-
-        [System.Runtime.Serialization.EnumMember(Value = @"study")]
-        Study = 2,
-
-        [System.Runtime.Serialization.EnumMember(Value = @"tenantSettings")]
-        TenantSettings = 3,
-
-        [System.Runtime.Serialization.EnumMember(Value = @"adminTenantSettings")]
-        AdminTenantSettings = 4,
-
-        [System.Runtime.Serialization.EnumMember(Value = @"configSubTree")]
-        ConfigSubTree = 5,
-
-        [System.Runtime.Serialization.EnumMember(Value = @"userSettings")]
-        UserSettings = 6,
-
-        [System.Runtime.Serialization.EnumMember(Value = @"job")]
-        Job = 7,
-
-    }
-
-    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "13.16.1.0 (NJsonSchema v10.7.2.0 (Newtonsoft.Json v12.0.0.0))")]
     public partial class DocumentTypeCustomPropertyGroups
     {
         [Newtonsoft.Json.JsonProperty("target", Required = Newtonsoft.Json.Required.Always)]
         [System.ComponentModel.DataAnnotations.Required(AllowEmptyStrings = true)]
-        [Newtonsoft.Json.JsonConverter(typeof(Newtonsoft.Json.Converters.StringEnumConverter))]
-        public DocumentsWithProperties Target { get; set; }
+        public string Target { get; set; }
 
         [Newtonsoft.Json.JsonProperty("properties", Required = Newtonsoft.Json.Required.Always)]
         [System.ComponentModel.DataAnnotations.Required]
@@ -13294,84 +13386,6 @@ namespace Canopy.Api.Client
 
         [Newtonsoft.Json.JsonProperty("hasMoreResults", Required = Newtonsoft.Json.Required.Always)]
         public bool HasMoreResults { get; set; }
-
-    }
-
-    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "13.16.1.0 (NJsonSchema v10.7.2.0 (Newtonsoft.Json v12.0.0.0))")]
-    public enum DocumentsWithProperties
-    {
-
-        [System.Runtime.Serialization.EnumMember(Value = @"car")]
-        Car = 0,
-
-        [System.Runtime.Serialization.EnumMember(Value = @"track")]
-        Track = 1,
-
-        [System.Runtime.Serialization.EnumMember(Value = @"weather")]
-        Weather = 2,
-
-        [System.Runtime.Serialization.EnumMember(Value = @"exploration")]
-        Exploration = 3,
-
-        [System.Runtime.Serialization.EnumMember(Value = @"virtual4PostOptions")]
-        Virtual4PostOptions = 4,
-
-        [System.Runtime.Serialization.EnumMember(Value = @"bankedLimitSimOptions")]
-        BankedLimitSimOptions = 5,
-
-        [System.Runtime.Serialization.EnumMember(Value = @"limitSimOptions")]
-        LimitSimOptions = 6,
-
-        [System.Runtime.Serialization.EnumMember(Value = @"subLimitSimOptions")]
-        SubLimitSimOptions = 7,
-
-        [System.Runtime.Serialization.EnumMember(Value = @"thermalReplayOptions")]
-        ThermalReplayOptions = 8,
-
-        [System.Runtime.Serialization.EnumMember(Value = @"pacejkaTyres")]
-        PacejkaTyres = 9,
-
-        [System.Runtime.Serialization.EnumMember(Value = @"channelInferenceOptions")]
-        ChannelInferenceOptions = 10,
-
-        [System.Runtime.Serialization.EnumMember(Value = @"dragSimOptions")]
-        DragSimOptions = 11,
-
-        [System.Runtime.Serialization.EnumMember(Value = @"overtaking")]
-        Overtaking = 12,
-
-        [System.Runtime.Serialization.EnumMember(Value = @"userMaths")]
-        UserMaths = 13,
-
-        [System.Runtime.Serialization.EnumMember(Value = @"constraints")]
-        Constraints = 14,
-
-        [System.Runtime.Serialization.EnumMember(Value = @"telemetry")]
-        Telemetry = 15,
-
-        [System.Runtime.Serialization.EnumMember(Value = @"files")]
-        Files = 16,
-
-        [System.Runtime.Serialization.EnumMember(Value = @"driveCycle")]
-        DriveCycle = 17,
-
-        [System.Runtime.Serialization.EnumMember(Value = @"study")]
-        Study = 18,
-
-        [System.Runtime.Serialization.EnumMember(Value = @"worksheet")]
-        Worksheet = 19,
-
-        [System.Runtime.Serialization.EnumMember(Value = @"aircraft")]
-        Aircraft = 20,
-
-        [System.Runtime.Serialization.EnumMember(Value = @"iliadBoat")]
-        IliadBoat = 21,
-
-        [System.Runtime.Serialization.EnumMember(Value = @"iliadCollocationOptions")]
-        IliadCollocationOptions = 22,
-
-        [System.Runtime.Serialization.EnumMember(Value = @"iliadVppOptions")]
-        IliadVppOptions = 23,
 
     }
 
@@ -13406,6 +13420,15 @@ namespace Canopy.Api.Client
     }
 
     [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "13.16.1.0 (NJsonSchema v10.7.2.0 (Newtonsoft.Json v12.0.0.0))")]
+    public partial class EmailConfirmationData
+    {
+        [Newtonsoft.Json.JsonProperty("token", Required = Newtonsoft.Json.Required.Always)]
+        [System.ComponentModel.DataAnnotations.Required(AllowEmptyStrings = true)]
+        public string Token { get; set; }
+
+    }
+
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "13.16.1.0 (NJsonSchema v10.7.2.0 (Newtonsoft.Json v12.0.0.0))")]
     public partial class FileDownloadMetadata
     {
         [Newtonsoft.Json.JsonProperty("name", Required = Newtonsoft.Json.Required.Always)]
@@ -13431,6 +13454,9 @@ namespace Canopy.Api.Client
 
         [Newtonsoft.Json.JsonProperty("isEnabled", Required = Newtonsoft.Json.Required.Always)]
         public bool IsEnabled { get; set; }
+
+        [Newtonsoft.Json.JsonProperty("isEmailConfirmed", Required = Newtonsoft.Json.Required.Always)]
+        public bool IsEmailConfirmed { get; set; }
 
     }
 
@@ -13733,8 +13759,8 @@ namespace Canopy.Api.Client
         [Newtonsoft.Json.JsonProperty("convertedSimVersion", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public string ConvertedSimVersion { get; set; }
 
-        [Newtonsoft.Json.JsonProperty("simTypes", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore, ItemConverterType = typeof(Newtonsoft.Json.Converters.StringEnumConverter))]
-        public System.Collections.Generic.List<SimType> SimTypes { get; set; }
+        [Newtonsoft.Json.JsonProperty("simTypes", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public System.Collections.Generic.List<string> SimTypes { get; set; }
 
         [Newtonsoft.Json.JsonProperty("accessInformation", Required = Newtonsoft.Json.Required.Always)]
         [System.ComponentModel.DataAnnotations.Required]
@@ -13768,8 +13794,8 @@ namespace Canopy.Api.Client
         [System.ComponentModel.DataAnnotations.Required]
         public StudyBlobAccessInformation AccessInformation { get; set; } = new StudyBlobAccessInformation();
 
-        [Newtonsoft.Json.JsonProperty("simTypes", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore, ItemConverterType = typeof(Newtonsoft.Json.Converters.StringEnumConverter))]
-        public System.Collections.Generic.List<SimType> SimTypes { get; set; }
+        [Newtonsoft.Json.JsonProperty("simTypes", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public System.Collections.Generic.List<string> SimTypes { get; set; }
 
         [Newtonsoft.Json.JsonProperty("userInformation", Required = Newtonsoft.Json.Required.Always)]
         [System.ComponentModel.DataAnnotations.Required]
@@ -13863,8 +13889,8 @@ namespace Canopy.Api.Client
         [System.ComponentModel.DataAnnotations.Required]
         public System.Collections.Generic.List<DocumentTypeCustomPropertyGroups> CustomPropertyGroups { get; set; } = new System.Collections.Generic.List<DocumentTypeCustomPropertyGroups>();
 
-        [Newtonsoft.Json.JsonProperty("studyTypes", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore, ItemConverterType = typeof(Newtonsoft.Json.Converters.StringEnumConverter))]
-        public System.Collections.Generic.List<StudyType> StudyTypes { get; set; }
+        [Newtonsoft.Json.JsonProperty("studyTypes", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public System.Collections.Generic.List<string> StudyTypes { get; set; }
 
         [Newtonsoft.Json.JsonProperty("configTypes", Required = Newtonsoft.Json.Required.Always)]
         [System.ComponentModel.DataAnnotations.Required]
@@ -14045,6 +14071,15 @@ namespace Canopy.Api.Client
         [Newtonsoft.Json.JsonProperty("userInformation", Required = Newtonsoft.Json.Required.Always)]
         [System.ComponentModel.DataAnnotations.Required]
         public DocumentUserInformation UserInformation { get; set; } = new DocumentUserInformation();
+
+    }
+
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "13.16.1.0 (NJsonSchema v10.7.2.0 (Newtonsoft.Json v12.0.0.0))")]
+    public partial class GetZendeskTokenQueryResult
+    {
+        [Newtonsoft.Json.JsonProperty("token", Required = Newtonsoft.Json.Required.Always)]
+        [System.ComponentModel.DataAnnotations.Required(AllowEmptyStrings = true)]
+        public string Token { get; set; }
 
     }
 
@@ -14296,8 +14331,7 @@ namespace Canopy.Api.Client
         public bool IsTransient { get; set; }
 
         [Newtonsoft.Json.JsonProperty("studyType", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
-        [Newtonsoft.Json.JsonConverter(typeof(Newtonsoft.Json.Converters.StringEnumConverter))]
-        public StudyType StudyType { get; set; }
+        public string StudyType { get; set; }
 
         [Newtonsoft.Json.JsonProperty("sources", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public System.Collections.Generic.List<NewStudyDataSource> Sources { get; set; }
@@ -14532,108 +14566,11 @@ namespace Canopy.Api.Client
     }
 
     [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "13.16.1.0 (NJsonSchema v10.7.2.0 (Newtonsoft.Json v12.0.0.0))")]
-    public enum SimType
-    {
-
-        [System.Runtime.Serialization.EnumMember(Value = @"StraightSim")]
-        StraightSim = 0,
-
-        [System.Runtime.Serialization.EnumMember(Value = @"ApexSim")]
-        ApexSim = 1,
-
-        [System.Runtime.Serialization.EnumMember(Value = @"QuasiStaticLap")]
-        QuasiStaticLap = 2,
-
-        [System.Runtime.Serialization.EnumMember(Value = @"GenerateRacingLine")]
-        GenerateRacingLine = 3,
-
-        [System.Runtime.Serialization.EnumMember(Value = @"DeploymentLap")]
-        DeploymentLap = 4,
-
-        [System.Runtime.Serialization.EnumMember(Value = @"FailureSim")]
-        FailureSim = 5,
-
-        [System.Runtime.Serialization.EnumMember(Value = @"SuccessSim")]
-        SuccessSim = 6,
-
-        [System.Runtime.Serialization.EnumMember(Value = @"Virtual4Post")]
-        Virtual4Post = 7,
-
-        [System.Runtime.Serialization.EnumMember(Value = @"LimitSim")]
-        LimitSim = 8,
-
-        [System.Runtime.Serialization.EnumMember(Value = @"DriveCycleSim")]
-        DriveCycleSim = 9,
-
-        [System.Runtime.Serialization.EnumMember(Value = @"DynamicLap")]
-        DynamicLap = 10,
-
-        [System.Runtime.Serialization.EnumMember(Value = @"DragSim")]
-        DragSim = 11,
-
-        [System.Runtime.Serialization.EnumMember(Value = @"DynamicMultiLap")]
-        DynamicMultiLap = 12,
-
-        [System.Runtime.Serialization.EnumMember(Value = @"ThermalReplay")]
-        ThermalReplay = 13,
-
-        [System.Runtime.Serialization.EnumMember(Value = @"TyreReplay")]
-        TyreReplay = 14,
-
-        [System.Runtime.Serialization.EnumMember(Value = @"PacejkaCanopyConverter")]
-        PacejkaCanopyConverter = 15,
-
-        [System.Runtime.Serialization.EnumMember(Value = @"AircraftSim")]
-        AircraftSim = 16,
-
-        [System.Runtime.Serialization.EnumMember(Value = @"ChannelInference")]
-        ChannelInference = 17,
-
-        [System.Runtime.Serialization.EnumMember(Value = @"Telemetry")]
-        Telemetry = 18,
-
-        [System.Runtime.Serialization.EnumMember(Value = @"OvertakingLap")]
-        OvertakingLap = 19,
-
-        [System.Runtime.Serialization.EnumMember(Value = @"TyreThermalDynamicLap")]
-        TyreThermalDynamicLap = 20,
-
-        [System.Runtime.Serialization.EnumMember(Value = @"TyreThermalDynamicMultiLap")]
-        TyreThermalDynamicMultiLap = 21,
-
-        [System.Runtime.Serialization.EnumMember(Value = @"DynamicLapWithSLS")]
-        DynamicLapWithSLS = 22,
-
-        [System.Runtime.Serialization.EnumMember(Value = @"DynamicLapHD")]
-        DynamicLapHD = 23,
-
-        [System.Runtime.Serialization.EnumMember(Value = @"IliadCollocation")]
-        IliadCollocation = 24,
-
-        [System.Runtime.Serialization.EnumMember(Value = @"SubLimitSim")]
-        SubLimitSim = 25,
-
-        [System.Runtime.Serialization.EnumMember(Value = @"BankedLimitSim")]
-        BankedLimitSim = 26,
-
-        [System.Runtime.Serialization.EnumMember(Value = @"ConstraintSatisfier")]
-        ConstraintSatisfier = 27,
-
-        [System.Runtime.Serialization.EnumMember(Value = @"PostProcessUserMaths")]
-        PostProcessUserMaths = 28,
-
-        [System.Runtime.Serialization.EnumMember(Value = @"TrackConverter")]
-        TrackConverter = 29,
-
-    }
-
-    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "13.16.1.0 (NJsonSchema v10.7.2.0 (Newtonsoft.Json v12.0.0.0))")]
     public partial class SimTypeDefinition
     {
         [Newtonsoft.Json.JsonProperty("simType", Required = Newtonsoft.Json.Required.Always)]
         [System.ComponentModel.DataAnnotations.Required(AllowEmptyStrings = true)]
-        [Newtonsoft.Json.JsonConverter(typeof(Newtonsoft.Json.Converters.StringEnumConverter))]
-        public SimType SimType { get; set; }
+        public string SimType { get; set; }
 
         [Newtonsoft.Json.JsonProperty("name", Required = Newtonsoft.Json.Required.Always)]
         [System.ComponentModel.DataAnnotations.Required(AllowEmptyStrings = true)]
@@ -14675,9 +14612,9 @@ namespace Canopy.Api.Client
     [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "13.16.1.0 (NJsonSchema v10.7.2.0 (Newtonsoft.Json v12.0.0.0))")]
     public partial class SimTypeInputTelemetryChannels
     {
-        [Newtonsoft.Json.JsonProperty("validSourceSimTypes", Required = Newtonsoft.Json.Required.Always, ItemConverterType = typeof(Newtonsoft.Json.Converters.StringEnumConverter))]
+        [Newtonsoft.Json.JsonProperty("validSourceSimTypes", Required = Newtonsoft.Json.Required.Always)]
         [System.ComponentModel.DataAnnotations.Required]
-        public System.Collections.Generic.List<SimType> ValidSourceSimTypes { get; set; } = new System.Collections.Generic.List<SimType>();
+        public System.Collections.Generic.List<string> ValidSourceSimTypes { get; set; } = new System.Collections.Generic.List<string>();
 
         [Newtonsoft.Json.JsonProperty("channels", Required = Newtonsoft.Json.Required.Always)]
         [System.ComponentModel.DataAnnotations.Required]
@@ -14745,8 +14682,7 @@ namespace Canopy.Api.Client
     {
         [Newtonsoft.Json.JsonProperty("simType", Required = Newtonsoft.Json.Required.Always)]
         [System.ComponentModel.DataAnnotations.Required(AllowEmptyStrings = true)]
-        [Newtonsoft.Json.JsonConverter(typeof(Newtonsoft.Json.Converters.StringEnumConverter))]
-        public SimType SimType { get; set; }
+        public string SimType { get; set; }
 
         [Newtonsoft.Json.JsonProperty("labels", Required = Newtonsoft.Json.Required.Always)]
         [System.ComponentModel.DataAnnotations.Required]
@@ -14771,8 +14707,7 @@ namespace Canopy.Api.Client
     {
         [Newtonsoft.Json.JsonProperty("simType", Required = Newtonsoft.Json.Required.Always)]
         [System.ComponentModel.DataAnnotations.Required(AllowEmptyStrings = true)]
-        [Newtonsoft.Json.JsonConverter(typeof(Newtonsoft.Json.Converters.StringEnumConverter))]
-        public SimType SimType { get; set; }
+        public string SimType { get; set; }
 
         [Newtonsoft.Json.JsonProperty("resolvedLabels", Required = Newtonsoft.Json.Required.Always)]
         [System.ComponentModel.DataAnnotations.Required]
@@ -14848,8 +14783,7 @@ namespace Canopy.Api.Client
 
         [Newtonsoft.Json.JsonProperty("studyType", Required = Newtonsoft.Json.Required.Always)]
         [System.ComponentModel.DataAnnotations.Required(AllowEmptyStrings = true)]
-        [Newtonsoft.Json.JsonConverter(typeof(Newtonsoft.Json.Converters.StringEnumConverter))]
-        public StudyType StudyType { get; set; }
+        public string StudyType { get; set; }
 
         [Newtonsoft.Json.JsonProperty("studyState", Required = Newtonsoft.Json.Required.Always)]
         [System.ComponentModel.DataAnnotations.Required(AllowEmptyStrings = true)]
@@ -15020,9 +14954,9 @@ namespace Canopy.Api.Client
         [System.ComponentModel.DataAnnotations.Required]
         public System.Collections.Generic.List<StudyInputHashes> InputHashes { get; set; } = new System.Collections.Generic.List<StudyInputHashes>();
 
-        [Newtonsoft.Json.JsonProperty("simTypes", Required = Newtonsoft.Json.Required.Always, ItemConverterType = typeof(Newtonsoft.Json.Converters.StringEnumConverter))]
+        [Newtonsoft.Json.JsonProperty("simTypes", Required = Newtonsoft.Json.Required.Always)]
         [System.ComponentModel.DataAnnotations.Required]
-        public System.Collections.Generic.List<SimType> SimTypes { get; set; } = new System.Collections.Generic.List<SimType>();
+        public System.Collections.Generic.List<string> SimTypes { get; set; } = new System.Collections.Generic.List<string>();
 
         [Newtonsoft.Json.JsonProperty("simVersion", Required = Newtonsoft.Json.Required.Always)]
         [System.ComponentModel.DataAnnotations.Required(AllowEmptyStrings = true)]
@@ -15055,122 +14989,19 @@ namespace Canopy.Api.Client
     }
 
     [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "13.16.1.0 (NJsonSchema v10.7.2.0 (Newtonsoft.Json v12.0.0.0))")]
-    public enum StudyType
-    {
-
-        [System.Runtime.Serialization.EnumMember(Value = @"straightSim")]
-        StraightSim = 0,
-
-        [System.Runtime.Serialization.EnumMember(Value = @"apexSim")]
-        ApexSim = 1,
-
-        [System.Runtime.Serialization.EnumMember(Value = @"quasiStaticLap")]
-        QuasiStaticLap = 2,
-
-        [System.Runtime.Serialization.EnumMember(Value = @"generateRacingLine")]
-        GenerateRacingLine = 3,
-
-        [System.Runtime.Serialization.EnumMember(Value = @"quasiStaticLapWithGenerateRacingLine")]
-        QuasiStaticLapWithGenerateRacingLine = 4,
-
-        [System.Runtime.Serialization.EnumMember(Value = @"deploymentLap")]
-        DeploymentLap = 5,
-
-        [System.Runtime.Serialization.EnumMember(Value = @"failureSim")]
-        FailureSim = 6,
-
-        [System.Runtime.Serialization.EnumMember(Value = @"successSim")]
-        SuccessSim = 7,
-
-        [System.Runtime.Serialization.EnumMember(Value = @"virtual4Post")]
-        Virtual4Post = 8,
-
-        [System.Runtime.Serialization.EnumMember(Value = @"limitSim")]
-        LimitSim = 9,
-
-        [System.Runtime.Serialization.EnumMember(Value = @"driveCycleSim")]
-        DriveCycleSim = 10,
-
-        [System.Runtime.Serialization.EnumMember(Value = @"dynamicLap")]
-        DynamicLap = 11,
-
-        [System.Runtime.Serialization.EnumMember(Value = @"dynamicLapWithSLS")]
-        DynamicLapWithSLS = 12,
-
-        [System.Runtime.Serialization.EnumMember(Value = @"dynamicLapHD")]
-        DynamicLapHD = 13,
-
-        [System.Runtime.Serialization.EnumMember(Value = @"dynamicMultiLap")]
-        DynamicMultiLap = 14,
-
-        [System.Runtime.Serialization.EnumMember(Value = @"tyreThermalDynamicLap")]
-        TyreThermalDynamicLap = 15,
-
-        [System.Runtime.Serialization.EnumMember(Value = @"tyreThermalDynamicMultiLap")]
-        TyreThermalDynamicMultiLap = 16,
-
-        [System.Runtime.Serialization.EnumMember(Value = @"overtakingLap")]
-        OvertakingLap = 17,
-
-        [System.Runtime.Serialization.EnumMember(Value = @"allLapSims")]
-        AllLapSims = 18,
-
-        [System.Runtime.Serialization.EnumMember(Value = @"dragSim")]
-        DragSim = 19,
-
-        [System.Runtime.Serialization.EnumMember(Value = @"thermalReplay")]
-        ThermalReplay = 20,
-
-        [System.Runtime.Serialization.EnumMember(Value = @"tyreReplay")]
-        TyreReplay = 21,
-
-        [System.Runtime.Serialization.EnumMember(Value = @"pacejkaCanopyConverter")]
-        PacejkaCanopyConverter = 22,
-
-        [System.Runtime.Serialization.EnumMember(Value = @"aircraftSim")]
-        AircraftSim = 23,
-
-        [System.Runtime.Serialization.EnumMember(Value = @"channelInference")]
-        ChannelInference = 24,
-
-        [System.Runtime.Serialization.EnumMember(Value = @"telemetry")]
-        Telemetry = 25,
-
-        [System.Runtime.Serialization.EnumMember(Value = @"iliadCollocation")]
-        IliadCollocation = 26,
-
-        [System.Runtime.Serialization.EnumMember(Value = @"subLimitSim")]
-        SubLimitSim = 27,
-
-        [System.Runtime.Serialization.EnumMember(Value = @"bankedLimitSim")]
-        BankedLimitSim = 28,
-
-        [System.Runtime.Serialization.EnumMember(Value = @"postProcessUserMaths")]
-        PostProcessUserMaths = 29,
-
-        [System.Runtime.Serialization.EnumMember(Value = @"trackConverter")]
-        TrackConverter = 30,
-
-        [System.Runtime.Serialization.EnumMember(Value = @"unknown")]
-        Unknown = 31,
-
-    }
-
-    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "13.16.1.0 (NJsonSchema v10.7.2.0 (Newtonsoft.Json v12.0.0.0))")]
     public partial class StudyTypeDefinition
     {
         [Newtonsoft.Json.JsonProperty("studyType", Required = Newtonsoft.Json.Required.Always)]
         [System.ComponentModel.DataAnnotations.Required(AllowEmptyStrings = true)]
-        [Newtonsoft.Json.JsonConverter(typeof(Newtonsoft.Json.Converters.StringEnumConverter))]
-        public StudyType StudyType { get; set; }
+        public string StudyType { get; set; }
 
         [Newtonsoft.Json.JsonProperty("name", Required = Newtonsoft.Json.Required.Always)]
         [System.ComponentModel.DataAnnotations.Required(AllowEmptyStrings = true)]
         public string Name { get; set; }
 
-        [Newtonsoft.Json.JsonProperty("simTypes", Required = Newtonsoft.Json.Required.Always, ItemConverterType = typeof(Newtonsoft.Json.Converters.StringEnumConverter))]
+        [Newtonsoft.Json.JsonProperty("simTypes", Required = Newtonsoft.Json.Required.Always)]
         [System.ComponentModel.DataAnnotations.Required]
-        public System.Collections.Generic.List<SimType> SimTypes { get; set; } = new System.Collections.Generic.List<SimType>();
+        public System.Collections.Generic.List<string> SimTypes { get; set; } = new System.Collections.Generic.List<string>();
 
         [Newtonsoft.Json.JsonProperty("inputs", Required = Newtonsoft.Json.Required.Always)]
         [System.ComponentModel.DataAnnotations.Required]
@@ -15201,8 +15032,8 @@ namespace Canopy.Api.Client
         [System.ComponentModel.DataAnnotations.Required]
         public System.Collections.Generic.List<IPreviousDefinitionStudyTypeDefinition> PreviousDefinitions { get; set; } = new System.Collections.Generic.List<IPreviousDefinitionStudyTypeDefinition>();
 
-        [Newtonsoft.Json.JsonProperty("implicitSimTypes", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore, ItemConverterType = typeof(Newtonsoft.Json.Converters.StringEnumConverter))]
-        public System.Collections.Generic.List<SimType> ImplicitSimTypes { get; set; }
+        [Newtonsoft.Json.JsonProperty("implicitSimTypes", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
+        public System.Collections.Generic.List<string> ImplicitSimTypes { get; set; }
 
     }
 
@@ -15372,12 +15203,10 @@ namespace Canopy.Api.Client
     [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "13.16.1.0 (NJsonSchema v10.7.2.0 (Newtonsoft.Json v12.0.0.0))")]
     public partial class TextDocument
     {
-        [Newtonsoft.Json.JsonProperty("name", Required = Newtonsoft.Json.Required.Always)]
-        [System.ComponentModel.DataAnnotations.Required(AllowEmptyStrings = true)]
+        [Newtonsoft.Json.JsonProperty("name", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public string Name { get; set; }
 
-        [Newtonsoft.Json.JsonProperty("content", Required = Newtonsoft.Json.Required.Always)]
-        [System.ComponentModel.DataAnnotations.Required(AllowEmptyStrings = true)]
+        [Newtonsoft.Json.JsonProperty("content", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public string Content { get; set; }
 
     }

@@ -32,7 +32,7 @@
             return result;
         }
 
-        protected Task PrepareRequestAsync(HttpClient client, HttpRequestMessage request, System.Text.StringBuilder urlBuilder)
+        protected Task PrepareRequestAsync(HttpClient client, HttpRequestMessage request, System.Text.StringBuilder urlBuilder, CancellationToken cancellationToken)
         {
             // ASP.NET Web API doesn't like having trailing ampersands in URLs.
             if (urlBuilder[urlBuilder.Length - 1] == '&')
@@ -46,7 +46,7 @@
             return Task.CompletedTask;
         }
 
-        protected Task PrepareRequestAsync(HttpClient client, HttpRequestMessage request, string url)
+        protected Task PrepareRequestAsync(HttpClient client, HttpRequestMessage request, string url, CancellationToken cancellationToken)
         {
             return Task.CompletedTask;
         }
