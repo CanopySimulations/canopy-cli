@@ -168,6 +168,9 @@ namespace Canopy.Api.Client
             if (userId == null)
                 throw new System.ArgumentNullException("userId");
 
+            if (body == null)
+                throw new System.ArgumentNullException("body");
+
             var urlBuilder_ = new System.Text.StringBuilder();
             urlBuilder_.Append(BaseUrl != null ? BaseUrl.TrimEnd('/') : "").Append("/account-settings/{tenantId}/{userId}");
             urlBuilder_.Replace("{tenantId}", System.Uri.EscapeDataString(ConvertToString(tenantId, System.Globalization.CultureInfo.InvariantCulture)));
@@ -902,6 +905,9 @@ namespace Canopy.Api.Client
         [System.Obsolete]
         public virtual async System.Threading.Tasks.Task<object> EncryptAsync(string description, object body, System.Threading.CancellationToken cancellationToken)
         {
+            if (body == null)
+                throw new System.ArgumentNullException("body");
+
             var urlBuilder_ = new System.Text.StringBuilder();
             urlBuilder_.Append(BaseUrl != null ? BaseUrl.TrimEnd('/') : "").Append("/configs/encrypt?");
             if (description != null)
@@ -986,6 +992,9 @@ namespace Canopy.Api.Client
         [System.Obsolete]
         public virtual async System.Threading.Tasks.Task<object> DecryptAsync(object body, System.Threading.CancellationToken cancellationToken)
         {
+            if (body == null)
+                throw new System.ArgumentNullException("body");
+
             var urlBuilder_ = new System.Text.StringBuilder();
             urlBuilder_.Append(BaseUrl != null ? BaseUrl.TrimEnd('/') : "").Append("/configs/decrypt");
 
@@ -1063,6 +1072,9 @@ namespace Canopy.Api.Client
         /// <exception cref="CanopyApiException">A server side error occurred.</exception>
         public virtual async System.Threading.Tasks.Task<GetEncryptedDataQueryResult> EncryptWithMetadataAsync(DataToEncrypt body, System.Threading.CancellationToken cancellationToken)
         {
+            if (body == null)
+                throw new System.ArgumentNullException("body");
+
             var urlBuilder_ = new System.Text.StringBuilder();
             urlBuilder_.Append(BaseUrl != null ? BaseUrl.TrimEnd('/') : "").Append("/configs/encryptWithMetadata");
 
@@ -1140,6 +1152,9 @@ namespace Canopy.Api.Client
         /// <exception cref="CanopyApiException">A server side error occurred.</exception>
         public virtual async System.Threading.Tasks.Task<GetDecryptedDataQueryResult> DecryptWithMetadataAsync(DataToDecrypt body, System.Threading.CancellationToken cancellationToken)
         {
+            if (body == null)
+                throw new System.ArgumentNullException("body");
+
             var urlBuilder_ = new System.Text.StringBuilder();
             urlBuilder_.Append(BaseUrl != null ? BaseUrl.TrimEnd('/') : "").Append("/configs/decryptWithMetadata");
 
@@ -1221,6 +1236,9 @@ namespace Canopy.Api.Client
         {
             if (targetSimVersion == null)
                 throw new System.ArgumentNullException("targetSimVersion");
+
+            if (body == null)
+                throw new System.ArgumentNullException("body");
 
             var urlBuilder_ = new System.Text.StringBuilder();
             urlBuilder_.Append(BaseUrl != null ? BaseUrl.TrimEnd('/') : "").Append("/configs/upgrade/{targetSimVersion}?");
@@ -1311,6 +1329,9 @@ namespace Canopy.Api.Client
             if (targetSimVersion == null)
                 throw new System.ArgumentNullException("targetSimVersion");
 
+            if (body == null)
+                throw new System.ArgumentNullException("body");
+
             var urlBuilder_ = new System.Text.StringBuilder();
             urlBuilder_.Append(BaseUrl != null ? BaseUrl.TrimEnd('/') : "").Append("/configs/upgrade/{tenantId}/{targetSimVersion}?");
             urlBuilder_.Replace("{tenantId}", System.Uri.EscapeDataString(ConvertToString(tenantId, System.Globalization.CultureInfo.InvariantCulture)));
@@ -1398,13 +1419,13 @@ namespace Canopy.Api.Client
             if (tenantId == null)
                 throw new System.ArgumentNullException("tenantId");
 
+            if (configType == null)
+                throw new System.ArgumentNullException("configType");
+
             var urlBuilder_ = new System.Text.StringBuilder();
             urlBuilder_.Append(BaseUrl != null ? BaseUrl.TrimEnd('/') : "").Append("/configs/{tenantId}?");
             urlBuilder_.Replace("{tenantId}", System.Uri.EscapeDataString(ConvertToString(tenantId, System.Globalization.CultureInfo.InvariantCulture)));
-            if (configType != null)
-            {
-                urlBuilder_.Append(System.Uri.EscapeDataString("configType") + "=").Append(System.Uri.EscapeDataString(ConvertToString(configType, System.Globalization.CultureInfo.InvariantCulture))).Append("&");
-            }
+            urlBuilder_.Append(System.Uri.EscapeDataString("configType") + "=").Append(System.Uri.EscapeDataString(ConvertToString(configType, System.Globalization.CultureInfo.InvariantCulture))).Append("&");
             if (filter != null)
             {
                 urlBuilder_.Append(System.Uri.EscapeDataString("filter") + "=").Append(System.Uri.EscapeDataString(ConvertToString(filter, System.Globalization.CultureInfo.InvariantCulture))).Append("&");
@@ -1493,6 +1514,9 @@ namespace Canopy.Api.Client
             if (tenantId == null)
                 throw new System.ArgumentNullException("tenantId");
 
+            if (body == null)
+                throw new System.ArgumentNullException("body");
+
             var urlBuilder_ = new System.Text.StringBuilder();
             urlBuilder_.Append(BaseUrl != null ? BaseUrl.TrimEnd('/') : "").Append("/configs/{tenantId}?");
             urlBuilder_.Replace("{tenantId}", System.Uri.EscapeDataString(ConvertToString(tenantId, System.Globalization.CultureInfo.InvariantCulture)));
@@ -1512,7 +1536,7 @@ namespace Canopy.Api.Client
                     content_.Headers.ContentType = System.Net.Http.Headers.MediaTypeHeaderValue.Parse("application/json-patch+json");
                     request_.Content = content_;
                     request_.Method = new System.Net.Http.HttpMethod("POST");
-                    request_.Headers.Accept.Add(System.Net.Http.Headers.MediaTypeWithQualityHeaderValue.Parse("application/json"));
+                    request_.Headers.Accept.Add(System.Net.Http.Headers.MediaTypeWithQualityHeaderValue.Parse("text/plain"));
 
                     await PrepareRequestAsync(client_, request_, urlBuilder_, cancellationToken).ConfigureAwait(false);
 
@@ -1579,13 +1603,13 @@ namespace Canopy.Api.Client
             if (tenantId == null)
                 throw new System.ArgumentNullException("tenantId");
 
+            if (configType == null)
+                throw new System.ArgumentNullException("configType");
+
             var urlBuilder_ = new System.Text.StringBuilder();
             urlBuilder_.Append(BaseUrl != null ? BaseUrl.TrimEnd('/') : "").Append("/configs/{tenantId}/names?");
             urlBuilder_.Replace("{tenantId}", System.Uri.EscapeDataString(ConvertToString(tenantId, System.Globalization.CultureInfo.InvariantCulture)));
-            if (configType != null)
-            {
-                urlBuilder_.Append(System.Uri.EscapeDataString("configType") + "=").Append(System.Uri.EscapeDataString(ConvertToString(configType, System.Globalization.CultureInfo.InvariantCulture))).Append("&");
-            }
+            urlBuilder_.Append(System.Uri.EscapeDataString("configType") + "=").Append(System.Uri.EscapeDataString(ConvertToString(configType, System.Globalization.CultureInfo.InvariantCulture))).Append("&");
             if (resultType != null)
             {
                 urlBuilder_.Append(System.Uri.EscapeDataString("resultType") + "=").Append(System.Uri.EscapeDataString(ConvertToString(resultType, System.Globalization.CultureInfo.InvariantCulture))).Append("&");
@@ -1673,6 +1697,9 @@ namespace Canopy.Api.Client
         {
             if (tenantId == null)
                 throw new System.ArgumentNullException("tenantId");
+
+            if (body == null)
+                throw new System.ArgumentNullException("body");
 
             var urlBuilder_ = new System.Text.StringBuilder();
             urlBuilder_.Append(BaseUrl != null ? BaseUrl.TrimEnd('/') : "").Append("/configs/{tenantId}/batch?");
@@ -1762,6 +1789,9 @@ namespace Canopy.Api.Client
 
             if (configId == null)
                 throw new System.ArgumentNullException("configId");
+
+            if (body == null)
+                throw new System.ArgumentNullException("body");
 
             var urlBuilder_ = new System.Text.StringBuilder();
             urlBuilder_.Append(BaseUrl != null ? BaseUrl.TrimEnd('/') : "").Append("/configs/{tenantId}/{configId}?");
@@ -2027,6 +2057,9 @@ namespace Canopy.Api.Client
             if (configId == null)
                 throw new System.ArgumentNullException("configId");
 
+            if (body == null)
+                throw new System.ArgumentNullException("body");
+
             var urlBuilder_ = new System.Text.StringBuilder();
             urlBuilder_.Append(BaseUrl != null ? BaseUrl.TrimEnd('/') : "").Append("/configs/{tenantId}/{configId}/owner");
             urlBuilder_.Replace("{tenantId}", System.Uri.EscapeDataString(ConvertToString(tenantId, System.Globalization.CultureInfo.InvariantCulture)));
@@ -2195,6 +2228,9 @@ namespace Canopy.Api.Client
             if (userId == null)
                 throw new System.ArgumentNullException("userId");
 
+            if (body == null)
+                throw new System.ArgumentNullException("body");
+
             var urlBuilder_ = new System.Text.StringBuilder();
             urlBuilder_.Append(BaseUrl != null ? BaseUrl.TrimEnd('/') : "").Append("/configs/{tenantId}/{userId}/batch?");
             urlBuilder_.Replace("{tenantId}", System.Uri.EscapeDataString(ConvertToString(tenantId, System.Globalization.CultureInfo.InvariantCulture)));
@@ -2287,6 +2323,9 @@ namespace Canopy.Api.Client
             if (userId == null)
                 throw new System.ArgumentNullException("userId");
 
+            if (body == null)
+                throw new System.ArgumentNullException("body");
+
             var urlBuilder_ = new System.Text.StringBuilder();
             urlBuilder_.Append(BaseUrl != null ? BaseUrl.TrimEnd('/') : "").Append("/configs/{tenantId}/{userId}?");
             urlBuilder_.Replace("{tenantId}", System.Uri.EscapeDataString(ConvertToString(tenantId, System.Globalization.CultureInfo.InvariantCulture)));
@@ -2378,6 +2417,9 @@ namespace Canopy.Api.Client
 
             if (configId == null)
                 throw new System.ArgumentNullException("configId");
+
+            if (body == null)
+                throw new System.ArgumentNullException("body");
 
             var urlBuilder_ = new System.Text.StringBuilder();
             urlBuilder_.Append(BaseUrl != null ? BaseUrl.TrimEnd('/') : "").Append("/configs/{tenantId}/{userId}/{configId}?");
@@ -3819,13 +3861,13 @@ namespace Canopy.Api.Client
             if (userId == null)
                 throw new System.ArgumentNullException("userId");
 
+            if (token == null)
+                throw new System.ArgumentNullException("token");
+
             var urlBuilder_ = new System.Text.StringBuilder();
             urlBuilder_.Append(BaseUrl != null ? BaseUrl.TrimEnd('/') : "").Append("/membership/password-reset-tokens/{userId}?");
             urlBuilder_.Replace("{userId}", System.Uri.EscapeDataString(ConvertToString(userId, System.Globalization.CultureInfo.InvariantCulture)));
-            if (token != null)
-            {
-                urlBuilder_.Append(System.Uri.EscapeDataString("token") + "=").Append(System.Uri.EscapeDataString(ConvertToString(token, System.Globalization.CultureInfo.InvariantCulture))).Append("&");
-            }
+            urlBuilder_.Append(System.Uri.EscapeDataString("token") + "=").Append(System.Uri.EscapeDataString(ConvertToString(token, System.Globalization.CultureInfo.InvariantCulture))).Append("&");
             urlBuilder_.Length--;
 
             var client_ = new System.Net.Http.HttpClient();
@@ -4275,6 +4317,9 @@ namespace Canopy.Api.Client
 
             if (userId == null)
                 throw new System.ArgumentNullException("userId");
+
+            if (body == null)
+                throw new System.ArgumentNullException("body");
 
             var urlBuilder_ = new System.Text.StringBuilder();
             urlBuilder_.Append(BaseUrl != null ? BaseUrl.TrimEnd('/') : "").Append("/membership/roles/{tenantId}/{userId}");
@@ -5450,6 +5495,9 @@ namespace Canopy.Api.Client
         /// <exception cref="CanopyApiException">A server side error occurred.</exception>
         public virtual async System.Threading.Tasks.Task PostSimVersionAsync(NewSimVersionData body, System.Threading.CancellationToken cancellationToken)
         {
+            if (body == null)
+                throw new System.ArgumentNullException("body");
+
             var urlBuilder_ = new System.Text.StringBuilder();
             urlBuilder_.Append(BaseUrl != null ? BaseUrl.TrimEnd('/') : "").Append("/sim-versions/current");
 
@@ -6666,6 +6714,9 @@ namespace Canopy.Api.Client
             if (tenantId == null)
                 throw new System.ArgumentNullException("tenantId");
 
+            if (body == null)
+                throw new System.ArgumentNullException("body");
+
             var urlBuilder_ = new System.Text.StringBuilder();
             urlBuilder_.Append(BaseUrl != null ? BaseUrl.TrimEnd('/') : "").Append("/studies/{tenantId}?");
             urlBuilder_.Replace("{tenantId}", System.Uri.EscapeDataString(ConvertToString(tenantId, System.Globalization.CultureInfo.InvariantCulture)));
@@ -6832,6 +6883,9 @@ namespace Canopy.Api.Client
 
             if (studyId == null)
                 throw new System.ArgumentNullException("studyId");
+
+            if (body == null)
+                throw new System.ArgumentNullException("body");
 
             var urlBuilder_ = new System.Text.StringBuilder();
             urlBuilder_.Append(BaseUrl != null ? BaseUrl.TrimEnd('/') : "").Append("/studies/{tenantId}/{studyId}");
@@ -7080,6 +7134,9 @@ namespace Canopy.Api.Client
             if (studyId == null)
                 throw new System.ArgumentNullException("studyId");
 
+            if (body == null)
+                throw new System.ArgumentNullException("body");
+
             var urlBuilder_ = new System.Text.StringBuilder();
             urlBuilder_.Append(BaseUrl != null ? BaseUrl.TrimEnd('/') : "").Append("/studies/{tenantId}/{studyId}/owner");
             urlBuilder_.Replace("{tenantId}", System.Uri.EscapeDataString(ConvertToString(tenantId, System.Globalization.CultureInfo.InvariantCulture)));
@@ -7159,18 +7216,18 @@ namespace Canopy.Api.Client
             if (studyId == null)
                 throw new System.ArgumentNullException("studyId");
 
+            if (accessSignature == null)
+                throw new System.ArgumentNullException("accessSignature");
+
+            if (expiry == null)
+                throw new System.ArgumentNullException("expiry");
+
             var urlBuilder_ = new System.Text.StringBuilder();
             urlBuilder_.Append(BaseUrl != null ? BaseUrl.TrimEnd('/') : "").Append("/studies/{tenantId}/{studyId}/download?");
             urlBuilder_.Replace("{tenantId}", System.Uri.EscapeDataString(ConvertToString(tenantId, System.Globalization.CultureInfo.InvariantCulture)));
             urlBuilder_.Replace("{studyId}", System.Uri.EscapeDataString(ConvertToString(studyId, System.Globalization.CultureInfo.InvariantCulture)));
-            if (accessSignature != null)
-            {
-                urlBuilder_.Append(System.Uri.EscapeDataString("accessSignature") + "=").Append(System.Uri.EscapeDataString(ConvertToString(accessSignature, System.Globalization.CultureInfo.InvariantCulture))).Append("&");
-            }
-            if (expiry != null)
-            {
-                urlBuilder_.Append(System.Uri.EscapeDataString("expiry") + "=").Append(System.Uri.EscapeDataString(ConvertToString(expiry, System.Globalization.CultureInfo.InvariantCulture))).Append("&");
-            }
+            urlBuilder_.Append(System.Uri.EscapeDataString("accessSignature") + "=").Append(System.Uri.EscapeDataString(ConvertToString(accessSignature, System.Globalization.CultureInfo.InvariantCulture))).Append("&");
+            urlBuilder_.Append(System.Uri.EscapeDataString("expiry") + "=").Append(System.Uri.EscapeDataString(ConvertToString(expiry, System.Globalization.CultureInfo.InvariantCulture))).Append("&");
             if (fileName != null)
             {
                 urlBuilder_.Append(System.Uri.EscapeDataString("fileName") + "=").Append(System.Uri.EscapeDataString(ConvertToString(fileName, System.Globalization.CultureInfo.InvariantCulture))).Append("&");
@@ -7263,19 +7320,19 @@ namespace Canopy.Api.Client
             if (jobId == null)
                 throw new System.ArgumentNullException("jobId");
 
+            if (accessSignature == null)
+                throw new System.ArgumentNullException("accessSignature");
+
+            if (expiry == null)
+                throw new System.ArgumentNullException("expiry");
+
             var urlBuilder_ = new System.Text.StringBuilder();
             urlBuilder_.Append(BaseUrl != null ? BaseUrl.TrimEnd('/') : "").Append("/studies/{tenantId}/{studyId}/jobs/{jobId}/download?");
             urlBuilder_.Replace("{tenantId}", System.Uri.EscapeDataString(ConvertToString(tenantId, System.Globalization.CultureInfo.InvariantCulture)));
             urlBuilder_.Replace("{studyId}", System.Uri.EscapeDataString(ConvertToString(studyId, System.Globalization.CultureInfo.InvariantCulture)));
             urlBuilder_.Replace("{jobId}", System.Uri.EscapeDataString(ConvertToString(jobId, System.Globalization.CultureInfo.InvariantCulture)));
-            if (accessSignature != null)
-            {
-                urlBuilder_.Append(System.Uri.EscapeDataString("accessSignature") + "=").Append(System.Uri.EscapeDataString(ConvertToString(accessSignature, System.Globalization.CultureInfo.InvariantCulture))).Append("&");
-            }
-            if (expiry != null)
-            {
-                urlBuilder_.Append(System.Uri.EscapeDataString("expiry") + "=").Append(System.Uri.EscapeDataString(ConvertToString(expiry, System.Globalization.CultureInfo.InvariantCulture))).Append("&");
-            }
+            urlBuilder_.Append(System.Uri.EscapeDataString("accessSignature") + "=").Append(System.Uri.EscapeDataString(ConvertToString(accessSignature, System.Globalization.CultureInfo.InvariantCulture))).Append("&");
+            urlBuilder_.Append(System.Uri.EscapeDataString("expiry") + "=").Append(System.Uri.EscapeDataString(ConvertToString(expiry, System.Globalization.CultureInfo.InvariantCulture))).Append("&");
             if (fileName != null)
             {
                 urlBuilder_.Append(System.Uri.EscapeDataString("fileName") + "=").Append(System.Uri.EscapeDataString(ConvertToString(fileName, System.Globalization.CultureInfo.InvariantCulture))).Append("&");
@@ -7873,6 +7930,9 @@ namespace Canopy.Api.Client
             if (userId == null)
                 throw new System.ArgumentNullException("userId");
 
+            if (body == null)
+                throw new System.ArgumentNullException("body");
+
             var urlBuilder_ = new System.Text.StringBuilder();
             urlBuilder_.Append(BaseUrl != null ? BaseUrl.TrimEnd('/') : "").Append("/studies/{tenantId}/{userId}?");
             urlBuilder_.Replace("{tenantId}", System.Uri.EscapeDataString(ConvertToString(tenantId, System.Globalization.CultureInfo.InvariantCulture)));
@@ -7967,6 +8027,9 @@ namespace Canopy.Api.Client
 
             if (studyId == null)
                 throw new System.ArgumentNullException("studyId");
+
+            if (body == null)
+                throw new System.ArgumentNullException("body");
 
             var urlBuilder_ = new System.Text.StringBuilder();
             urlBuilder_.Append(BaseUrl != null ? BaseUrl.TrimEnd('/') : "").Append("/studies/{tenantId}/{userId}/{studyId}");
@@ -9502,6 +9565,9 @@ namespace Canopy.Api.Client
             if (documentId == null)
                 throw new System.ArgumentNullException("documentId");
 
+            if (body == null)
+                throw new System.ArgumentNullException("body");
+
             var urlBuilder_ = new System.Text.StringBuilder();
             urlBuilder_.Append(BaseUrl != null ? BaseUrl.TrimEnd('/') : "").Append("/support-sessions/{tenantId}/{documentId}");
             urlBuilder_.Replace("{tenantId}", System.Uri.EscapeDataString(ConvertToString(tenantId, System.Globalization.CultureInfo.InvariantCulture)));
@@ -9673,6 +9739,9 @@ namespace Canopy.Api.Client
 
             if (documentId == null)
                 throw new System.ArgumentNullException("documentId");
+
+            if (body == null)
+                throw new System.ArgumentNullException("body");
 
             var urlBuilder_ = new System.Text.StringBuilder();
             urlBuilder_.Append(BaseUrl != null ? BaseUrl.TrimEnd('/') : "").Append("/support-sessions/{tenantId}/{userId}/{documentId}");
@@ -10085,6 +10154,9 @@ namespace Canopy.Api.Client
         {
             if (tenantId == null)
                 throw new System.ArgumentNullException("tenantId");
+
+            if (body == null)
+                throw new System.ArgumentNullException("body");
 
             var urlBuilder_ = new System.Text.StringBuilder();
             urlBuilder_.Append(BaseUrl != null ? BaseUrl.TrimEnd('/') : "").Append("/tenants/{tenantId}");
@@ -10711,6 +10783,9 @@ namespace Canopy.Api.Client
             if (tenantId == null)
                 throw new System.ArgumentNullException("tenantId");
 
+            if (body == null)
+                throw new System.ArgumentNullException("body");
+
             var urlBuilder_ = new System.Text.StringBuilder();
             urlBuilder_.Append(BaseUrl != null ? BaseUrl.TrimEnd('/') : "").Append("/tenant-settings/channel-whitelists/{tenantId}");
             urlBuilder_.Replace("{tenantId}", System.Uri.EscapeDataString(ConvertToString(tenantId, System.Globalization.CultureInfo.InvariantCulture)));
@@ -10869,6 +10944,9 @@ namespace Canopy.Api.Client
             if (tenantId == null)
                 throw new System.ArgumentNullException("tenantId");
 
+            if (body == null)
+                throw new System.ArgumentNullException("body");
+
             var urlBuilder_ = new System.Text.StringBuilder();
             urlBuilder_.Append(BaseUrl != null ? BaseUrl.TrimEnd('/') : "").Append("/tenant-settings/default-custom-property-names/{tenantId}");
             urlBuilder_.Replace("{tenantId}", System.Uri.EscapeDataString(ConvertToString(tenantId, System.Globalization.CultureInfo.InvariantCulture)));
@@ -11021,6 +11099,9 @@ namespace Canopy.Api.Client
         {
             if (tenantId == null)
                 throw new System.ArgumentNullException("tenantId");
+
+            if (body == null)
+                throw new System.ArgumentNullException("body");
 
             var urlBuilder_ = new System.Text.StringBuilder();
             urlBuilder_.Append(BaseUrl != null ? BaseUrl.TrimEnd('/') : "").Append("/tenant-settings/channel-import-mappings/{tenantId}");
@@ -11175,6 +11256,9 @@ namespace Canopy.Api.Client
             if (tenantId == null)
                 throw new System.ArgumentNullException("tenantId");
 
+            if (body == null)
+                throw new System.ArgumentNullException("body");
+
             var urlBuilder_ = new System.Text.StringBuilder();
             urlBuilder_.Append(BaseUrl != null ? BaseUrl.TrimEnd('/') : "").Append("/tenant-settings/worksheet-label-definitions/{tenantId}");
             urlBuilder_.Replace("{tenantId}", System.Uri.EscapeDataString(ConvertToString(tenantId, System.Globalization.CultureInfo.InvariantCulture)));
@@ -11328,6 +11412,9 @@ namespace Canopy.Api.Client
             if (tenantId == null)
                 throw new System.ArgumentNullException("tenantId");
 
+            if (body == null)
+                throw new System.ArgumentNullException("body");
+
             var urlBuilder_ = new System.Text.StringBuilder();
             urlBuilder_.Append(BaseUrl != null ? BaseUrl.TrimEnd('/') : "").Append("/tenant-settings/sim-version/{tenantId}");
             urlBuilder_.Replace("{tenantId}", System.Uri.EscapeDataString(ConvertToString(tenantId, System.Globalization.CultureInfo.InvariantCulture)));
@@ -11480,6 +11567,9 @@ namespace Canopy.Api.Client
         {
             if (tenantId == null)
                 throw new System.ArgumentNullException("tenantId");
+
+            if (body == null)
+                throw new System.ArgumentNullException("body");
 
             var urlBuilder_ = new System.Text.StringBuilder();
             urlBuilder_.Append(BaseUrl != null ? BaseUrl.TrimEnd('/') : "").Append("/tenant-settings/admin/{tenantId}");
@@ -12025,6 +12115,9 @@ namespace Canopy.Api.Client
             if (userId == null)
                 throw new System.ArgumentNullException("userId");
 
+            if (body == null)
+                throw new System.ArgumentNullException("body");
+
             var urlBuilder_ = new System.Text.StringBuilder();
             urlBuilder_.Append(BaseUrl != null ? BaseUrl.TrimEnd('/') : "").Append("/user-settings/{tenantId}/{userId}");
             urlBuilder_.Replace("{tenantId}", System.Uri.EscapeDataString(ConvertToString(tenantId, System.Globalization.CultureInfo.InvariantCulture)));
@@ -12369,6 +12462,9 @@ namespace Canopy.Api.Client
             if (worksheetId == null)
                 throw new System.ArgumentNullException("worksheetId");
 
+            if (body == null)
+                throw new System.ArgumentNullException("body");
+
             var urlBuilder_ = new System.Text.StringBuilder();
             urlBuilder_.Append(BaseUrl != null ? BaseUrl.TrimEnd('/') : "").Append("/worksheets/{tenantId}/{worksheetId}");
             urlBuilder_.Replace("{tenantId}", System.Uri.EscapeDataString(ConvertToString(tenantId, System.Globalization.CultureInfo.InvariantCulture)));
@@ -12450,6 +12546,9 @@ namespace Canopy.Api.Client
         {
             if (tenantId == null)
                 throw new System.ArgumentNullException("tenantId");
+
+            if (body == null)
+                throw new System.ArgumentNullException("body");
 
             var urlBuilder_ = new System.Text.StringBuilder();
             urlBuilder_.Append(BaseUrl != null ? BaseUrl.TrimEnd('/') : "").Append("/worksheets/{tenantId}");
@@ -12534,6 +12633,9 @@ namespace Canopy.Api.Client
 
             if (worksheetId == null)
                 throw new System.ArgumentNullException("worksheetId");
+
+            if (body == null)
+                throw new System.ArgumentNullException("body");
 
             var urlBuilder_ = new System.Text.StringBuilder();
             urlBuilder_.Append(BaseUrl != null ? BaseUrl.TrimEnd('/') : "").Append("/worksheets/{tenantId}/{worksheetId}/duplicate?");
@@ -14201,7 +14303,7 @@ namespace Canopy.Api.Client
     [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "13.16.1.0 (NJsonSchema v10.7.2.0 (Newtonsoft.Json v12.0.0.0))")]
     public partial class ListFilter
     {
-        [Newtonsoft.Json.JsonProperty("itemsPerPage", Required = Newtonsoft.Json.Required.Always)]
+        [Newtonsoft.Json.JsonProperty("itemsPerPage", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public int ItemsPerPage { get; set; }
 
         [Newtonsoft.Json.JsonProperty("continuationToken", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
@@ -14214,7 +14316,7 @@ namespace Canopy.Api.Client
         [Newtonsoft.Json.JsonConverter(typeof(Newtonsoft.Json.Converters.StringEnumConverter))]
         public OrderByProperty? OrderByProperty { get; set; }
 
-        [Newtonsoft.Json.JsonProperty("orderByDescending", Required = Newtonsoft.Json.Required.Always)]
+        [Newtonsoft.Json.JsonProperty("orderByDescending", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public bool OrderByDescending { get; set; }
 
         [Newtonsoft.Json.JsonProperty("filterName", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
@@ -14223,10 +14325,10 @@ namespace Canopy.Api.Client
         [Newtonsoft.Json.JsonProperty("query", Required = Newtonsoft.Json.Required.Default, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public ListFilterGroup Query { get; set; }
 
-        [Newtonsoft.Json.JsonProperty("includeIfDeleteRequested", Required = Newtonsoft.Json.Required.Always)]
+        [Newtonsoft.Json.JsonProperty("includeIfDeleteRequested", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public bool IncludeIfDeleteRequested { get; set; }
 
-        [Newtonsoft.Json.JsonProperty("includeIfHasParentWorksheet", Required = Newtonsoft.Json.Required.Always)]
+        [Newtonsoft.Json.JsonProperty("includeIfHasParentWorksheet", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public bool IncludeIfHasParentWorksheet { get; set; }
 
     }
@@ -14751,25 +14853,25 @@ namespace Canopy.Api.Client
         [Newtonsoft.Json.JsonProperty("succeededJobCount", Required = Newtonsoft.Json.Required.Always)]
         public int SucceededJobCount { get; set; }
 
-        [Newtonsoft.Json.JsonProperty("dispatchedComputeCredits", Required = Newtonsoft.Json.Required.Always)]
+        [Newtonsoft.Json.JsonProperty("dispatchedComputeCredits", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public double DispatchedComputeCredits { get; set; }
 
-        [Newtonsoft.Json.JsonProperty("completedComputeCredits", Required = Newtonsoft.Json.Required.Always)]
+        [Newtonsoft.Json.JsonProperty("completedComputeCredits", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public double CompletedComputeCredits { get; set; }
 
         [Newtonsoft.Json.JsonProperty("succeededComputeCredits", Required = Newtonsoft.Json.Required.Always)]
         public double SucceededComputeCredits { get; set; }
 
-        [Newtonsoft.Json.JsonProperty("dispatchedStorageCredits", Required = Newtonsoft.Json.Required.Always)]
+        [Newtonsoft.Json.JsonProperty("dispatchedStorageCredits", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public double DispatchedStorageCredits { get; set; }
 
-        [Newtonsoft.Json.JsonProperty("completedStorageCredits", Required = Newtonsoft.Json.Required.Always)]
+        [Newtonsoft.Json.JsonProperty("completedStorageCredits", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public double CompletedStorageCredits { get; set; }
 
         [Newtonsoft.Json.JsonProperty("succeededStorageCredits", Required = Newtonsoft.Json.Required.Always)]
         public double SucceededStorageCredits { get; set; }
 
-        [Newtonsoft.Json.JsonProperty("succeededSimulationCount", Required = Newtonsoft.Json.Required.Always)]
+        [Newtonsoft.Json.JsonProperty("succeededSimulationCount", Required = Newtonsoft.Json.Required.DisallowNull, NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore)]
         public int SucceededSimulationCount { get; set; }
 
         [Newtonsoft.Json.JsonProperty("seed", Required = Newtonsoft.Json.Required.Always)]
