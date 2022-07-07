@@ -3645,6 +3645,9 @@ namespace Canopy.Api.Client
         /// <exception cref="CanopyApiException">A server side error occurred.</exception>
         public virtual async System.Threading.Tasks.Task PostRegistrationAsync(RegistrationData body, System.Threading.CancellationToken cancellationToken)
         {
+            if (body == null)
+                throw new System.ArgumentNullException("body");
+
             var urlBuilder_ = new System.Text.StringBuilder();
             urlBuilder_.Append(BaseUrl != null ? BaseUrl.TrimEnd('/') : "").Append("/membership/registrations");
 
@@ -3716,6 +3719,9 @@ namespace Canopy.Api.Client
         /// <exception cref="CanopyApiException">A server side error occurred.</exception>
         public virtual async System.Threading.Tasks.Task PostPasswordResetRequestAsync(PasswordResetRequestData body, System.Threading.CancellationToken cancellationToken)
         {
+            if (body == null)
+                throw new System.ArgumentNullException("body");
+
             var urlBuilder_ = new System.Text.StringBuilder();
             urlBuilder_.Append(BaseUrl != null ? BaseUrl.TrimEnd('/') : "").Append("/membership/password-reset-requests");
 
@@ -3787,6 +3793,9 @@ namespace Canopy.Api.Client
         /// <exception cref="CanopyApiException">A server side error occurred.</exception>
         public virtual async System.Threading.Tasks.Task PostPasswordResetConfirmationAsync(PasswordResetConfirmationData body, System.Threading.CancellationToken cancellationToken)
         {
+            if (body == null)
+                throw new System.ArgumentNullException("body");
+
             var urlBuilder_ = new System.Text.StringBuilder();
             urlBuilder_.Append(BaseUrl != null ? BaseUrl.TrimEnd('/') : "").Append("/membership/password-reset-confirmations");
 
@@ -4012,6 +4021,9 @@ namespace Canopy.Api.Client
         /// <exception cref="CanopyApiException">A server side error occurred.</exception>
         public virtual async System.Threading.Tasks.Task PostEmailConfirmationAsync(EmailConfirmationData body, System.Threading.CancellationToken cancellationToken)
         {
+            if (body == null)
+                throw new System.ArgumentNullException("body");
+
             var urlBuilder_ = new System.Text.StringBuilder();
             urlBuilder_.Append(BaseUrl != null ? BaseUrl.TrimEnd('/') : "").Append("/membership/email-confirmations");
 
@@ -4083,6 +4095,9 @@ namespace Canopy.Api.Client
         /// <exception cref="CanopyApiException">A server side error occurred.</exception>
         public virtual async System.Threading.Tasks.Task PostIdentifiedUserAsync(IdentifiedUserData body, System.Threading.CancellationToken cancellationToken)
         {
+            if (body == null)
+                throw new System.ArgumentNullException("body");
+
             var urlBuilder_ = new System.Text.StringBuilder();
             urlBuilder_.Append(BaseUrl != null ? BaseUrl.TrimEnd('/') : "").Append("/membership/identified-users");
 
