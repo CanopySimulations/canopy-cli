@@ -5,7 +5,7 @@ namespace Canopy.Cli.Executable.Services.DownloadMonitoring
 {
     public interface IPerformAutomaticStudyDownload
     {
-        Task ExecuteAsync(
+        Task<StudyDownloadMetadata> ExecuteAsync(
             string tokenPath,
             string outputFolder,
             string tenantId,

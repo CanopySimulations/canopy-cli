@@ -51,8 +51,11 @@ namespace Canopy.Cli.Executable.Services.DownloadMonitoring
                     targetFolder: outputFolder,
                     generateCsv: parameters.GenerateCsv,
                     keepBinary: parameters.KeepBinary,
-                    postProcessorPath: parameters.PostProcessor,
-                    postProcessorArguments: parameters.PostProcessorArguments,
+                    postProcessingParameters: new PostProcessingParameters(
+                        PostProcessorPath: parameters.PostProcessor,
+                        PostProcessorArguments: parameters.PostProcessorArguments,
+                        DecryptingTenantShortName: parameters.DecryptingTenantShortName
+                    ),
                     cancellationToken: cts.Token);
 
                 await monitorDownloadsTask;

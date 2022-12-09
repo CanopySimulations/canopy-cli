@@ -1,5 +1,4 @@
 using System.Threading;
-using System.IO;
 using System.Threading.Tasks;
 using Canopy.Cli.Executable.Services.GetStudies;
 
@@ -21,7 +20,7 @@ namespace Canopy.Cli.Executable.Services.DownloadMonitoring
             this.getStudy = getStudy;
         }
 
-        public async Task ExecuteAsync(
+        public async Task<StudyDownloadMetadata> ExecuteAsync(
             string tokenPath,
             string outputFolder,
             string tenantId,
@@ -31,7 +30,7 @@ namespace Canopy.Cli.Executable.Services.DownloadMonitoring
             bool keepBinary,
             CancellationToken cancellationToken)
         {
-            await this.getStudy.ExecuteAsync(
+            var result = await this.getStudy.ExecuteWithResultAsync(
                 new Commands.GetStudyCommand.Parameters(
                     outputFolder,
                     tenantId,
@@ -43,6 +42,8 @@ namespace Canopy.Cli.Executable.Services.DownloadMonitoring
 
             this.moveCompletedDownloadToken.Execute(tokenPath, outputFolder);
             this.addedDownloadTokensCache.TryRemove(tokenPath);
+
+            return new StudyDownloadMetadata(result.SimVersion);
         }
     }
 }

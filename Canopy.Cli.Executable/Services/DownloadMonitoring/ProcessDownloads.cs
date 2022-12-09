@@ -11,18 +11,18 @@ namespace Canopy.Cli.Executable.Services.DownloadMonitoring
         private readonly IGetDownloadTokenFolderName getDownloadTokenFolderName;
         private readonly IPerformAutomaticStudyDownload performAutomaticStudyDownload;
         private readonly IGetAvailableOutputFolder getAvailableOutputFolder;
-        private readonly IPostProcessStudyDownload postProcessStudyDownload;
+        private readonly IRunAllPostProcessors runAllPostProcessors;
         private readonly ILogger<ProcessDownloads> logger;
 
         public ProcessDownloads(
             IGetDownloadTokenFolderName getDownloadTokenFolderName,
             IPerformAutomaticStudyDownload performAutomaticStudyDownload,
             IGetAvailableOutputFolder getAvailableOutputFolder,
-            IPostProcessStudyDownload postProcessStudyDownload,
+            IRunAllPostProcessors runAllPostProcessors,
             ILogger<ProcessDownloads> logger)
         {
             this.getAvailableOutputFolder = getAvailableOutputFolder;
-            this.postProcessStudyDownload = postProcessStudyDownload;
+            this.runAllPostProcessors = runAllPostProcessors;
             this.logger = logger;
             this.getDownloadTokenFolderName = getDownloadTokenFolderName;
             this.performAutomaticStudyDownload = performAutomaticStudyDownload;
@@ -33,8 +33,7 @@ namespace Canopy.Cli.Executable.Services.DownloadMonitoring
             string targetFolder,
             bool generateCsv,
             bool keepBinary,
-            string postProcessorPath,
-            string postProcessorArguments,
+            PostProcessingParameters postProcessingParameters,
             CancellationToken cancellationToken)
         {
             await foreach (var item in channelReader.ReadAllAsync(cancellationToken))
@@ -47,7 +46,7 @@ namespace Canopy.Cli.Executable.Services.DownloadMonitoring
 
                 this.logger.LogInformation("Starting download of {0} to {1}.", folderName, outputFolder);
 
-                await this.performAutomaticStudyDownload.ExecuteAsync(
+                var studyDownloadMetadata = await this.performAutomaticStudyDownload.ExecuteAsync(
                     tokenPath: item.TokenPath,
                     outputFolder: outputFolder,
                     tenantId: item.Token.TenantId,
@@ -59,17 +58,11 @@ namespace Canopy.Cli.Executable.Services.DownloadMonitoring
 
                 this.logger.LogInformation("Completed download of {0} to {1}.", folderName, outputFolder);
 
-                if (!string.IsNullOrWhiteSpace(postProcessorPath))
-                {
-                    this.logger.LogInformation("Running post-processor on {0}.", outputFolder);
-
-                    await this.postProcessStudyDownload.ExecuteAsync(
-                        postProcessorPath,
-                        postProcessorArguments,
-                        outputFolder);
-                    
-                    this.logger.LogInformation("Completed running post-processor on {0}.", outputFolder);
-                }
+                await this.runAllPostProcessors.ExecuteAsync(
+                    postProcessingParameters,
+                    outputFolder,
+                    studyDownloadMetadata,
+                    cancellationToken);
             }
         }
     }

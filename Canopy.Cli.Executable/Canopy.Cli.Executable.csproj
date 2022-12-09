@@ -38,6 +38,7 @@
     <PackageReference Include="Polly" Version="7.2.2" />
     <PackageReference Include="Humanizer.Core" Version="2.11.10" />
     <PackageReference Include="xunit" Version="2.4.1" /> <!-- Used for integration tests. -->
+    <PackageReference Include="Diff.Match.Patch" Version="3.0.1" />
   </ItemGroup>
 
   <ItemGroup Condition="'$(Configuration)' == 'Release'">
