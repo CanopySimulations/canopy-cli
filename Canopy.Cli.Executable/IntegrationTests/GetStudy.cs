@@ -104,7 +104,7 @@ namespace Canopy.Cli.Executable.IntegrationTests
 
             using (this.downloadBlobDirectoryMock.Record())
             {
-                await this.getStudy.ExecuteAsync(new Commands.GetStudyCommand.Parameters(
+                await this.getStudy.ExecuteAndHandleCancellationAsync(new Commands.GetStudyCommand.Parameters(
                     outputFolder.FullName,
                     authenticationUser.TenantId,
                     this.studyId,

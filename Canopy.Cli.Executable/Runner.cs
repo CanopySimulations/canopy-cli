@@ -132,6 +132,12 @@ namespace Canopy.Cli.Executable
             services.AddTransient<IGetPathWithSanitizedFolderName, GetPathWithSanitizedFolderName>();
             services.AddTransient<IPostProcessStudyDownload, PostProcessStudyDownload>();
             services.AddTransient<ILogPostProcessorOutput, LogPostProcessorOutput>();
+            services.AddTransient<IFileOperations, FileOperations>();
+            services.AddTransient<IPatchJobInputFile, PatchJobInputFile>();
+            services.AddTransient<IPatchJobInputFiles, PatchJobInputFiles>();
+            services.AddTransient<IReEncryptFile, ReEncryptFile>();
+            services.AddTransient<IReEncryptJobInputFiles, ReEncryptJobInputFiles>();
+            services.AddTransient<IRunAllPostProcessors, RunAllPostProcessors>();
 
             if (isIntegrationTests)
             {

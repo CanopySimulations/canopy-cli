@@ -67,7 +67,7 @@ namespace Canopy.Cli.Executable.Commands
             command.Handler = CommandHandler.Create((IHost host, Parameters parameters) =>
             {
                 var cts = CommandUtilities.CreateCommandCancellationTokenSource();
-                host.Services.GetRequiredService<IGetStudy>().ExecuteAsync(
+                host.Services.GetRequiredService<IGetStudy>().ExecuteAndHandleCancellationAsync(
                     parameters with
                     {
                         StudyId = CommandUtilities.ValueOrPrompt(parameters.StudyId, "Study ID: ", "Study ID is required.", false),

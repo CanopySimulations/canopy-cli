@@ -1,6 +1,5 @@
 using System.IO;
 using System.Threading;
-using System;
 using System.Threading.Channels;
 using System.Threading.Tasks;
 using Canopy.Cli.Shared;
@@ -15,24 +14,24 @@ namespace Canopy.Cli.Executable.Services.DownloadMonitoring
         private readonly IGetDownloadTokenFolderName getDownloadTokenFolderName;
         private readonly IPerformAutomaticStudyDownload performAutomaticStudyDownload;
         private readonly IGetAvailableOutputFolder getAvailableOutputFolder;
-        private readonly IPostProcessStudyDownload postProcessStudyDownload;
+        private readonly IRunAllPostProcessors runAllPostProcessors;
         private readonly ILogger<ProcessDownloads> logger;
 
-        private ProcessDownloads target;
+        private readonly ProcessDownloads target;
 
         public ProcessDownloadsTests()
         {
             this.getDownloadTokenFolderName = Substitute.For<IGetDownloadTokenFolderName>();
             this.performAutomaticStudyDownload = Substitute.For<IPerformAutomaticStudyDownload>();
             this.getAvailableOutputFolder = Substitute.For<IGetAvailableOutputFolder>();
-            this.postProcessStudyDownload = Substitute.For<IPostProcessStudyDownload>();
+            this.runAllPostProcessors = Substitute.For<IRunAllPostProcessors>();
             this.logger = Substitute.For<ILogger<ProcessDownloads>>();
 
             this.target = new(
                 this.getDownloadTokenFolderName,
                 this.performAutomaticStudyDownload,
                 this.getAvailableOutputFolder,
-                this.postProcessStudyDownload,
+                this.runAllPostProcessors,
                 this.logger);
         }
 
@@ -50,8 +49,11 @@ namespace Canopy.Cli.Executable.Services.DownloadMonitoring
             var generateCsv = SingletonRandom.Instance.NextBoolean();
             var keepBinary = SingletonRandom.Instance.NextBoolean();
             var cancellationToken = new CancellationTokenSource().Token;
-            var postProcessorPath = SingletonRandom.Instance.NextString();
-            var postProcessorArguments = SingletonRandom.Instance.NextString();
+
+            var postProcessingParameters = PostProcessingParameters.Random();
+
+            var studyDownloadMetadata1 = StudyDownloadMetadata.Random();
+            var studyDownloadMetadata2 = StudyDownloadMetadata.Random();
 
             this.getDownloadTokenFolderName.Execute(token1).Returns("f1");
             this.getDownloadTokenFolderName.Execute(token2).Returns("f2");
@@ -63,30 +65,6 @@ namespace Canopy.Cli.Executable.Services.DownloadMonitoring
             this.getAvailableOutputFolder.Execute(Path.Combine(targetFolder, "f2")).Returns(availableOutputFolder2);
 
             this.performAutomaticStudyDownload.ExecuteAsync(
-                Arg.Any<string>(),
-                Arg.Any<string>(),
-                Arg.Any<string>(),
-                Arg.Any<string>(),
-                Arg.Any<int?>(),
-                Arg.Any<bool>(),
-                Arg.Any<bool>(),
-                Arg.Any<CancellationToken>()).Returns(Task.CompletedTask);
-
-            this.postProcessStudyDownload.ExecuteAsync(
-                Arg.Any<string>(),
-                Arg.Any<string>(),
-                Arg.Any<string>()).Returns(Task.CompletedTask);
-
-            await this.target.ExecuteAsync(
-                channelReader,
-                targetFolder,
-                generateCsv,
-                keepBinary,
-                postProcessorPath,
-                postProcessorArguments,
-                cancellationToken);
-
-            await this.performAutomaticStudyDownload.Received(1).ExecuteAsync(
                 token1.TokenPath,
                 availableOutputFolder1,
                 token1.Token.TenantId,
@@ -94,9 +72,9 @@ namespace Canopy.Cli.Executable.Services.DownloadMonitoring
                 token1.Token.Job?.JobIndex,
                 generateCsv,
                 keepBinary,
-                cancellationToken);
+                cancellationToken).Returns(Task.FromResult(studyDownloadMetadata1));
 
-            await this.performAutomaticStudyDownload.Received(1).ExecuteAsync(
+            this.performAutomaticStudyDownload.ExecuteAsync(
                 token2.TokenPath,
                 availableOutputFolder2,
                 token2.Token.TenantId,
@@ -104,17 +82,33 @@ namespace Canopy.Cli.Executable.Services.DownloadMonitoring
                 token2.Token.Job?.JobIndex,
                 generateCsv,
                 keepBinary,
+                cancellationToken).Returns(studyDownloadMetadata2);
+
+            this.runAllPostProcessors.ExecuteAsync(
+                postProcessingParameters,
+                Arg.Any<string>(),
+                Arg.Any<StudyDownloadMetadata>(),
+                cancellationToken).Returns(Task.CompletedTask);
+
+            await this.target.ExecuteAsync(
+                channelReader,
+                targetFolder,
+                generateCsv,
+                keepBinary,
+                postProcessingParameters,
                 cancellationToken);
 
-            await this.postProcessStudyDownload.Received(1).ExecuteAsync(
-                postProcessorPath,
-                postProcessorArguments,
-                availableOutputFolder1);
+            await this.runAllPostProcessors.Received(1).ExecuteAsync(
+                postProcessingParameters,
+                availableOutputFolder1,
+                studyDownloadMetadata1,
+                cancellationToken);
 
-            await this.postProcessStudyDownload.Received(1).ExecuteAsync(
-                postProcessorPath,
-                postProcessorArguments,
-                availableOutputFolder2);
+            await this.runAllPostProcessors.Received(1).ExecuteAsync(
+                postProcessingParameters,
+                availableOutputFolder2,
+                studyDownloadMetadata2,
+                cancellationToken);
         }
     }
 }

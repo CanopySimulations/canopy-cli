@@ -17,7 +17,8 @@ namespace Canopy.Cli.Executable.Commands
             bool GenerateCsv,
             bool KeepBinary,
             string PostProcessor,
-            string PostProcessorArguments)
+            string PostProcessorArguments,
+            string DecryptingTenantShortName)
         {
             public static Parameters Random()
             {
@@ -26,6 +27,7 @@ namespace Canopy.Cli.Executable.Commands
                     SingletonRandom.Instance.NextString(),
                     SingletonRandom.Instance.NextBoolean(),
                     SingletonRandom.Instance.NextBoolean(),
+                    SingletonRandom.Instance.NextString(),
                     SingletonRandom.Instance.NextString(),
                     SingletonRandom.Instance.NextString());
             }
@@ -64,6 +66,11 @@ namespace Canopy.Cli.Executable.Commands
                 new [] { "--post-processor-arguments", "-ppa" }, 
                 getDefaultValue: () => string.Empty, 
                 description: "The arguments to pass to the post-processor. The string {0} will be replaced with the unquoted study path."));
+
+            command.AddOption(new Option<string>(
+                new [] { "--decrypting-tenant-short-name", "-d" }, 
+                getDefaultValue: () => string.Empty, 
+                description: "If specified the job files will be re-encrypted using the specified decrypting tenant's key."));
 
             command.Handler = CommandHandler.Create((IHost host, Parameters parameters) =>
                 host.Services.GetRequiredService<IRunDownloader>().ExecuteAsync(parameters));

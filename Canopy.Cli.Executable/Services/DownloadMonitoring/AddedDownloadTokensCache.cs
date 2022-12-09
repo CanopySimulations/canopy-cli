@@ -14,7 +14,7 @@ namespace Canopy.Cli.Executable.Services.DownloadMonitoring
 
         public bool TryRemove(string filePath)
         {
-            return this.cache.TryRemove(new FileInfo(filePath).FullName, out var value);
+            return this.cache.TryRemove(new FileInfo(filePath).FullName, out _);
         }
     }
 }

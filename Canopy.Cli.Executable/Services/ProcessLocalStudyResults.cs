@@ -23,7 +23,10 @@ namespace Canopy.Cli.Executable.Services
             this.processStudyResults = processStudyResults;
         }
 
-        public async Task ExecuteAsync(string targetFolder, bool deleteProcessedFiles, CancellationToken cancellationToken)
+        public async Task ExecuteAsync(
+            string targetFolder,
+            bool deleteProcessedFiles,
+            CancellationToken cancellationToken)
         {
             foreach (var folder in Directory.EnumerateDirectories(targetFolder, "*", SearchOption.AllDirectories).Concat(new[] { targetFolder }))
             {

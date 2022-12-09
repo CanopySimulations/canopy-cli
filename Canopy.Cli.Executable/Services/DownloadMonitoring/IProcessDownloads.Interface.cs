@@ -12,8 +12,7 @@ namespace Canopy.Cli.Executable.Services.DownloadMonitoring
             string targetFolder,
             bool generateCsv,
             bool keepBinary,
-            string postProcessorPath,
-            string postProcessorArguments,
+            PostProcessingParameters postProcessingParameters,
             CancellationToken cancellationToken);
     }
 }

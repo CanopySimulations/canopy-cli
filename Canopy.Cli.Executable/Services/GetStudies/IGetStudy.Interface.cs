@@ -6,6 +6,8 @@ namespace Canopy.Cli.Executable.Services.GetStudies
 {
     public interface IGetStudy
     {
-        Task ExecuteAsync(GetStudyCommand.Parameters parameters, CancellationToken cancellationToken);
+        Task ExecuteAndHandleCancellationAsync(GetStudyCommand.Parameters parameters, CancellationToken cancellationToken);
+
+        Task<GetStudyResult> ExecuteWithResultAsync(GetStudyCommand.Parameters parameters, CancellationToken cancellationToken);
     }
 }

@@ -59,8 +59,7 @@ namespace Canopy.Cli.Executable.Services.DownloadMonitoring
                 Arg.Any<string>(),
                 Arg.Any<bool>(),
                 Arg.Any<bool>(),
-                Arg.Any<string>(),
-                Arg.Any<string>(),
+                Arg.Any<PostProcessingParameters>(),
                 Arg.Any<CancellationToken>()).Returns(Task.CompletedTask);
 
             await this.target.ExecuteAsync(parameters);
@@ -75,8 +74,10 @@ namespace Canopy.Cli.Executable.Services.DownloadMonitoring
                 createdOutputFolder,
                 parameters.GenerateCsv,
                 parameters.KeepBinary,
-                parameters.PostProcessor,
-                parameters.PostProcessorArguments,
+                new PostProcessingParameters(
+                    parameters.PostProcessor,
+                    parameters.PostProcessorArguments,
+                    parameters.DecryptingTenantShortName),
                 Arg.Any<CancellationToken>());
         }
     }

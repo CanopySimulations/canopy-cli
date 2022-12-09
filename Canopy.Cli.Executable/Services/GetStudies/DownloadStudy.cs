@@ -37,10 +37,10 @@ namespace Canopy.Cli.Executable.Services.GetStudies
             this.logger = logger;
         }
 
-        public async Task ExecuteAsync(string outputFolder, string tenantId, string studyId, int? jobIndex, CancellationToken cancellationToken)
+        public async Task<GetStudyQueryResult> ExecuteAsync(string outputFolder, string tenantId, string studyId, int? jobIndex, CancellationToken cancellationToken)
         {
-            var studyMetadata = await this.studyClient.GetStudyMetadataAsync(tenantId, studyId);
-
+            var studyMetadata = await this.studyClient.GetStudyMetadataAsync(tenantId, studyId, cancellationToken);
+            
             var directoriesMetadata = this.getAllRequiredDirectoryMetadata.Execute(studyMetadata, outputFolder, jobIndex);
             
             var directories = directoriesMetadata.Select(v => new BlobDirectoryAndOutputFolder(
@@ -93,6 +93,8 @@ namespace Canopy.Cli.Executable.Services.GetStudies
                     }
                 }
             });
+
+            return studyMetadata;
         }
 
         private void ConfigureContext(DirectoryTransferContext context)

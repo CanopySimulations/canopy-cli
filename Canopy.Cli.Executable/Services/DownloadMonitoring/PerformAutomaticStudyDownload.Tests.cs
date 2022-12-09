@@ -34,9 +34,12 @@ namespace Canopy.Cli.Executable.Services.DownloadMonitoring
             var tokenPath = SingletonRandom.Instance.NextString();
             var cancellationToken = new CancellationTokenSource().Token;
 
-            this.getStudy.ExecuteAsync(Arg.Any<Commands.GetStudyCommand.Parameters>(), Arg.Any<CancellationToken>()).Returns(Task.CompletedTask);
+            var getStudyResult = GetStudyResult.Random();
 
-            await this.target.ExecuteAsync(
+            this.getStudy.ExecuteWithResultAsync(Arg.Any<Commands.GetStudyCommand.Parameters>(), Arg.Any<CancellationToken>())
+                .Returns(Task.FromResult(getStudyResult));
+
+            var result = await this.target.ExecuteAsync(
                 tokenPath,
                 parameters.OutputFolder,
                 parameters.TenantId,
@@ -46,10 +49,14 @@ namespace Canopy.Cli.Executable.Services.DownloadMonitoring
                 parameters.KeepBinary,
                 cancellationToken);
 
-            await this.getStudy.Received(1).ExecuteAsync(parameters, cancellationToken);
+            await this.getStudy.Received(1).ExecuteWithResultAsync(parameters, cancellationToken);
 
             this.moveCompletedDownloadToken.Received(1).Execute(tokenPath, parameters.OutputFolder);
             this.addedDownloadTokensCache.Received(1).TryRemove(tokenPath);
+
+            Assert.Equal(
+                new StudyDownloadMetadata(getStudyResult.SimVersion),
+                result);
         }
     }
 }
