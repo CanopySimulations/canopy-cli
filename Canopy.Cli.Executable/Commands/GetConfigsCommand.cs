@@ -16,7 +16,8 @@ namespace Canopy.Cli.Executable.Commands
             DirectoryInfo? OutputFolder,
             string SimVersion,
             bool Unwrap,
-            bool Format);
+            bool Format,
+            string DecryptingTenantShortName);
 
         public override Command Create()
         {
@@ -56,6 +57,11 @@ namespace Canopy.Cli.Executable.Commands
                 new[] { "--format", "-f" },
                 description: $"Format the config JSON.",
                 getDefaultValue: () => false));
+
+            command.AddOption(new Option<string>(
+                new [] { "--decrypting-tenant-short-name", "-d" }, 
+                getDefaultValue: () => string.Empty, 
+                description: "If specified the job files will be re-encrypted using the specified decrypting tenant's key."));
 
             command.Handler = CommandHandler.Create(async (IHost host, Parameters parameters) =>
                 await host.Services.GetRequiredService<IGetConfigs>().ExecuteAsync(

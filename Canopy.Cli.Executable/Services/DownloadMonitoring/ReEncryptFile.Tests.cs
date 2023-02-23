@@ -31,10 +31,10 @@ namespace Canopy.Cli.Executable.Services.DownloadMonitoring
         {
             var contents = "{ a: 1 }";
             var decryptingTenantShortName = string.Empty;
-            var studyDownloadMetadata = StudyDownloadMetadata.Random();
+            var simVersion = StudyDownloadMetadata.Random().SimVersion;
             var cancellationToken = new CancellationTokenSource().Token;
 
-            await Assert.ThrowsAsync<InvalidOperationException>(() => this.target.ExecuteAsync(contents, decryptingTenantShortName, studyDownloadMetadata, cancellationToken));
+            await Assert.ThrowsAsync<InvalidOperationException>(() => this.target.ExecuteAsync(contents, decryptingTenantShortName, simVersion, cancellationToken));
 
             await this.ensureAuthenticated.DidNotReceive().ExecuteAsync();
         }
@@ -44,7 +44,7 @@ namespace Canopy.Cli.Executable.Services.DownloadMonitoring
         {
             var contents = "{ a: 1 }";
             var decryptingTenantShortName = SingletonRandom.Instance.NextString();
-            var studyDownloadMetadata = StudyDownloadMetadata.Random();
+            var simVersion = StudyDownloadMetadata.Random().SimVersion;
             var cancellationToken = new CancellationTokenSource().Token;
 
             var authenticatedUser = AuthenticatedUser.Random();
@@ -55,7 +55,7 @@ namespace Canopy.Cli.Executable.Services.DownloadMonitoring
             this.encryptionClient.ReEncryptAsync(
                 authenticatedUser.TenantId,
                 Arg.Is<DataToReEncrypt>(
-                    v => v.SimVersion == studyDownloadMetadata.SimVersion 
+                    v => v.SimVersion == simVersion 
                     && v.DecryptingTenantShortName == decryptingTenantShortName
                     && v.Data.ToString() == JObject.Parse(contents).ToString()),
                 cancellationToken)
@@ -64,7 +64,7 @@ namespace Canopy.Cli.Executable.Services.DownloadMonitoring
                     Data = reEncryptedData,
                 }));
 
-            var result = await this.target.ExecuteAsync(contents, decryptingTenantShortName, studyDownloadMetadata, cancellationToken);
+            var result = await this.target.ExecuteAsync(contents, decryptingTenantShortName, simVersion, cancellationToken);
 
             Assert.Equal(
                 reEncryptedData.ToString(Newtonsoft.Json.Formatting.Indented),

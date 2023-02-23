@@ -8,7 +8,7 @@ namespace Canopy.Cli.Executable.Services.DownloadMonitoring
         Task<string> ExecuteAsync(
             string contents,
             string decryptingTenantShortName,
-            StudyDownloadMetadata studyDownloadMetadata,
+            string simVersion,
             CancellationToken cancellationToken);
     }
 }

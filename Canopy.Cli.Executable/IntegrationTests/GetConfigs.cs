@@ -96,7 +96,8 @@ namespace Canopy.Cli.Executable.IntegrationTests
                     outputFolder,
                     simVersion,
                     Unwrap: true,
-                    Format: false));
+                    Format: false,
+                    DecryptingTenantShortName: string.Empty));
 
                 Assert.True(this.writeFileMock.Count > 0, "No files were written.");
 

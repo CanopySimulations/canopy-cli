@@ -39,7 +39,7 @@ namespace Canopy.Cli.Executable.Services.DownloadMonitoring
                 }
 
                 var fileContents = await this.fileOperations.ReadAllTextAsync(filePath, cancellationToken);
-                var newFileContents = await this.reEncryptFile.ExecuteAsync(fileContents, decryptingTenantShortName, studyDownloadMetadata, cancellationToken);
+                var newFileContents = await this.reEncryptFile.ExecuteAsync(fileContents, decryptingTenantShortName, studyDownloadMetadata.SimVersion, cancellationToken);
                 
                 await this.fileOperations.WriteAllTextAsync(filePath, newFileContents, cancellationToken);
                 await this.fileOperations.WriteAllTextAsync(filePath + Constants.OrignalFileSuffix, fileContents, cancellationToken);

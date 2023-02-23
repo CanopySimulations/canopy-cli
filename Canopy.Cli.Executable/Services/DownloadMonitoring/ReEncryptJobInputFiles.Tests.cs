@@ -70,8 +70,8 @@ namespace Canopy.Cli.Executable.Services.DownloadMonitoring
             var newJobContent1 = "new-j-1";
             var newStudyBaselineContent = "new-sb-1";
 
-            this.reEncryptFile.ExecuteAsync(jobContent1, decryptingTenantShortName, studyDownloadMetadata, cancellationToken).Returns(newJobContent1);
-            this.reEncryptFile.ExecuteAsync(studyBaselineContent, decryptingTenantShortName, studyDownloadMetadata, cancellationToken).Returns(newStudyBaselineContent);
+            this.reEncryptFile.ExecuteAsync(jobContent1, decryptingTenantShortName, studyDownloadMetadata.SimVersion, cancellationToken).Returns(newJobContent1);
+            this.reEncryptFile.ExecuteAsync(studyBaselineContent, decryptingTenantShortName, studyDownloadMetadata.SimVersion, cancellationToken).Returns(newStudyBaselineContent);
 
             this.fileOperations.WriteAllTextAsync(Arg.Any<string>(), Arg.Any<string>(), cancellationToken).Returns(Task.CompletedTask);
 

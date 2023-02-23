@@ -1,9 +1,11 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using Canopy.Api.Client;
 using Canopy.Cli.Executable.Commands;
+using Canopy.Cli.Executable.Services.DownloadMonitoring;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -18,6 +20,7 @@ namespace Canopy.Cli.Executable.Services
         private readonly IConfigClient configClient;
         private readonly IWriteFile writeFile;
         private readonly IGetCreatedOutputFolder getCreatedOutputFolder;
+        private readonly IReEncryptFile reEncryptFile;
         private readonly ILogger<GetConfigs> logger;
 
         public GetConfigs(
@@ -27,6 +30,7 @@ namespace Canopy.Cli.Executable.Services
             IConfigClient configClient,
             IWriteFile writeFile,
             IGetCreatedOutputFolder getCreatedOutputFolder,
+            IReEncryptFile reEncryptFile,
             ILogger<GetConfigs> logger)
         {
             this.ensureAuthenticated = ensureAuthenticated;
@@ -35,6 +39,7 @@ namespace Canopy.Cli.Executable.Services
             this.configClient = configClient;
             this.writeFile = writeFile;
             this.getCreatedOutputFolder = getCreatedOutputFolder;
+            this.reEncryptFile = reEncryptFile;
             this.logger = logger;
         }
 
@@ -100,6 +105,17 @@ namespace Canopy.Cli.Executable.Services
                             null);
 
                         var content = JObject.FromObject(config.Config.Data);
+
+                        if (!string.IsNullOrWhiteSpace(parameters.DecryptingTenantShortName))
+                        {
+                            var reEncryptedContent = await this.reEncryptFile.ExecuteAsync(
+                                content.ToString(Formatting.None),
+                                parameters.DecryptingTenantShortName,
+                                simVersion,
+                                CancellationToken.None);
+                            content = JObject.Parse(reEncryptedContent);
+                        }
+
                         if (!unwrap)
                         {
                             content = new JObject(

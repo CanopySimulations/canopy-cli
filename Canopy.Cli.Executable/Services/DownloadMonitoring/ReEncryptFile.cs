@@ -20,7 +20,7 @@ namespace Canopy.Cli.Executable.Services.DownloadMonitoring
         public async Task<string> ExecuteAsync(
             string contents,
             string decryptingTenantShortName,
-            StudyDownloadMetadata studyDownloadMetadata,
+            string simVersion,
             CancellationToken cancellationToken)
         {
             if (string.IsNullOrWhiteSpace(decryptingTenantShortName))
@@ -35,7 +35,7 @@ namespace Canopy.Cli.Executable.Services.DownloadMonitoring
                 new DataToReEncrypt
                 {
                     Data = JObject.Parse(contents),
-                    SimVersion = studyDownloadMetadata.SimVersion,
+                    SimVersion = simVersion,
                     DecryptingTenantShortName = decryptingTenantShortName,
                 },
                 cancellationToken);

@@ -48,7 +48,7 @@ namespace Canopy.Cli.Executable.Services
 
         public Task<string> GetOrSet(string? requestedSimVersion)
         {
-            if (requestedSimVersion == null)
+            if (string.IsNullOrWhiteSpace(requestedSimVersion))
             {
                 return this.Get();
             }
