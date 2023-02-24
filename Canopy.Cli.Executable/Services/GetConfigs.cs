@@ -21,6 +21,7 @@ namespace Canopy.Cli.Executable.Services
         private readonly IWriteFile writeFile;
         private readonly IGetCreatedOutputFolder getCreatedOutputFolder;
         private readonly IReEncryptFile reEncryptFile;
+        private readonly IContainsEncryptedToken containsEncryptedToken;
         private readonly ILogger<GetConfigs> logger;
 
         public GetConfigs(
@@ -31,6 +32,7 @@ namespace Canopy.Cli.Executable.Services
             IWriteFile writeFile,
             IGetCreatedOutputFolder getCreatedOutputFolder,
             IReEncryptFile reEncryptFile,
+            IContainsEncryptedToken containsEncryptedToken,
             ILogger<GetConfigs> logger)
         {
             this.ensureAuthenticated = ensureAuthenticated;
@@ -40,6 +42,7 @@ namespace Canopy.Cli.Executable.Services
             this.writeFile = writeFile;
             this.getCreatedOutputFolder = getCreatedOutputFolder;
             this.reEncryptFile = reEncryptFile;
+            this.containsEncryptedToken = containsEncryptedToken;
             this.logger = logger;
         }
 
@@ -52,7 +55,7 @@ namespace Canopy.Cli.Executable.Services
             var outputFolder = parameters.OutputFolder;
             var format = parameters.Format;
             var unwrap = parameters.Unwrap;
-            
+
             var simVersion = await this.simVersionCache.GetOrSet(parameters.SimVersion);
 
             var authenticatedUser = await this.ensureAuthenticated.ExecuteAsync();
@@ -106,8 +109,10 @@ namespace Canopy.Cli.Executable.Services
 
                         var content = JObject.FromObject(config.Config.Data);
 
-                        if (!string.IsNullOrWhiteSpace(parameters.DecryptingTenantShortName))
+                        if (!string.IsNullOrWhiteSpace(parameters.DecryptingTenantShortName)
+                            && this.containsEncryptedToken.Execute(content))
                         {
+                            this.logger.LogInformation($"Re-encrypting {configMetadata.Name}...");
                             var reEncryptedContent = await this.reEncryptFile.ExecuteAsync(
                                 content.ToString(Formatting.None),
                                 parameters.DecryptingTenantShortName,

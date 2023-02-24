@@ -138,6 +138,7 @@ namespace Canopy.Cli.Executable
             services.AddTransient<IReEncryptFile, ReEncryptFile>();
             services.AddTransient<IReEncryptJobInputFiles, ReEncryptJobInputFiles>();
             services.AddTransient<IRunAllPostProcessors, RunAllPostProcessors>();
+            services.AddTransient<IContainsEncryptedToken, ContainsEncryptedToken>();
 
             if (isIntegrationTests)
             {
