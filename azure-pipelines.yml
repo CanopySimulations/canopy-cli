@@ -28,7 +28,7 @@ steps:
 - task: UseDotNet@2
   inputs:
     packageType: 'sdk'
-    version: '5.x'
+    version: '8.x'
 
 - powershell: |
     $tags = git tag --sort=-creatordate
@@ -140,7 +140,7 @@ steps:
 
 - task: ArchiveFiles@2
   inputs:
-    rootFolderOrFile: '$(Build.SourcesDirectory)/Canopy.Cli.Executable/bin/Release/net5.0/win10-x64/publish'
+    rootFolderOrFile: '$(Build.SourcesDirectory)/Canopy.Cli.Executable/bin/Release/net8.0/win-x64/publish'
     includeRootFolder: false
     archiveType: 'zip'
     archiveFile: '$(Build.ArtifactStagingDirectory)/canopy-cli-windows.zip'
@@ -148,7 +148,7 @@ steps:
 
 - task: ArchiveFiles@2
   inputs:
-    rootFolderOrFile: '$(Build.SourcesDirectory)/Canopy.Cli.Executable/bin/Release/net5.0/osx.10.12-x64/publish'
+    rootFolderOrFile: '$(Build.SourcesDirectory)/Canopy.Cli.Executable/bin/Release/net8.0/osx-arm64/publish'
     includeRootFolder: false
     archiveType: 'zip'
     archiveFile: '$(Build.ArtifactStagingDirectory)/canopy-cli-mac.zip'
