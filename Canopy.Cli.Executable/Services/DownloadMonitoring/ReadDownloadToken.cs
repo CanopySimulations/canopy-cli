@@ -1,3 +1,4 @@
+using System;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
@@ -19,7 +20,7 @@ namespace Canopy.Cli.Executable.Services.DownloadMonitoring
             var tokenContent = await this.retryPolicies.FilePolicy.ExecuteAsync(
                 () => File.ReadAllTextAsync(filePath, cancellationToken));
 
-            return JsonConvert.DeserializeObject<DownloadToken>(tokenContent);
+            return JsonConvert.DeserializeObject<DownloadToken>(tokenContent) ?? throw new Exception("Failed to read download token.");
         }
     }
 }

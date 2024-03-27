@@ -66,7 +66,7 @@ namespace Canopy.Cli.Executable.Services
             }
 
             var filter = new JObject(
-                new JProperty("continuationToken", null));
+                new JProperty("continuationToken", (object?)null));
 
             if (!string.IsNullOrWhiteSpace(userId))
             {

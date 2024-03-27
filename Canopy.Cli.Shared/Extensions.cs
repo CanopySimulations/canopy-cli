@@ -10,25 +10,16 @@ namespace Canopy.Cli.Shared
 
     public static class Extensions
     {
-        /// <summary>
-        /// http://blogs.msdn.com/b/pfxteam/archive/2012/03/05/10278165.aspx
-        /// http://stackoverflow.com/a/25877042/37725
-        /// </summary>
-        public static async Task ForEachAsync<T>(this IEnumerable<T> collection, int maxDegreeOfConcurrency, Func<T, Task> taskFactory)
-        {
-            var activeTasks = new List<Task>(maxDegreeOfConcurrency);
-            foreach (var task in collection.Select(taskFactory))
-            {
-                activeTasks.Add(task);
-                if (activeTasks.Count == maxDegreeOfConcurrency)
-                {
-                    var completedTask = await Task.WhenAny(activeTasks.ToArray());
-                    await completedTask;
-                    activeTasks.RemoveAll(t => t.IsCompleted);
-                }
-            }
 
-            await Task.WhenAll(activeTasks.ToArray());
+        public static Task ForEachAsync<T>(this IEnumerable<T> collection, int maxDegreeOfConcurrency, Func<T, Task> taskFactory)
+        {
+            return Parallel.ForEachAsync(
+                collection,
+                new ParallelOptions() { MaxDegreeOfParallelism = maxDegreeOfConcurrency },
+                async (item, cancellationToken) =>
+                {
+                    await taskFactory(item);
+                });
         }
 
         public static IReadOnlyList<IReadOnlyList<string>> ToCsvColumns(this string input)
