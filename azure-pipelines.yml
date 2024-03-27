@@ -92,7 +92,7 @@ steps:
   inputs:
     command: 'restore'
     projects: 'Canopy.Cli.Executable'
-    restoreArguments: '-r win10-x64'
+    restoreArguments: '-r win-x64'
     feedsToUse: 'select'
   displayName: 'Restore Win'
 
@@ -100,7 +100,7 @@ steps:
   inputs:
     command: 'build'
     projects: 'Canopy.Cli.Executable'
-    arguments: '-c Release -r win10-x64'
+    arguments: '-c Release -r win-x64'
   displayName: 'Build Win'
 
 - task: DotNetCoreCLI@2
@@ -108,7 +108,7 @@ steps:
     command: 'publish'
     projects: 'Canopy.Cli.Executable'
     publishWebProjects: false
-    arguments: '-c Release -r win10-x64'
+    arguments: '-c Release -r win-x64'
     zipAfterPublish: false
     modifyOutputPath: false
   displayName: 'Publish Win'
@@ -117,7 +117,7 @@ steps:
   inputs:
     command: 'restore'
     projects: 'Canopy.Cli.Executable'
-    restoreArguments: '-r osx.10.12-x64'
+    restoreArguments: '-r osx-arm64'
     feedsToUse: 'select'
   displayName: 'Restore OSX'
 
@@ -125,7 +125,7 @@ steps:
   inputs:
     command: 'build'
     projects: 'Canopy.Cli.Executable'
-    arguments: '-c Release -r osx.10.12-x64'
+    arguments: '-c Release -r osx-arm64'
   displayName: 'Build OSX'
 
 - task: DotNetCoreCLI@2
@@ -133,7 +133,7 @@ steps:
     command: 'publish'
     projects: 'Canopy.Cli.Executable'
     publishWebProjects: false
-    arguments: '-c Release -r osx.10.12-x64'
+    arguments: '-c Release -r osx-arm64'
     zipAfterPublish: false
     modifyOutputPath: false
   displayName: 'Publsh OSX'
