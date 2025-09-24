@@ -15,7 +15,8 @@
             IFileWriter writer,
             bool deleteProcessedFiles,
             int parallelism,
-            ChannelDataColumns channelDataColumns)
+            ChannelDataColumns channelDataColumns,
+            string? xDomainFilter = null)
         {
             foreach (var simType in channelDataColumns.SimTypes)
             {
@@ -32,9 +33,17 @@
                     foreach (var xDomainGroup in xDomainGroups)
                     {
                         var xDomain = xDomainGroup.Key.Trim();
+
+                        // Filter by X-domain if specified
+                        if (!string.IsNullOrEmpty(xDomainFilter) &&
+                            !string.Equals(xDomain, xDomainFilter, StringComparison.OrdinalIgnoreCase))
+                        {
+                            continue;
+                        }
+
                         var fileSuffix = "_" + (string.IsNullOrWhiteSpace(xDomain) ? "Unspecified" : xDomain);
 
-                        var resolvedData = new ConcurrentQueue<ResolvedCsvColumn>();
+                        var resolvedData = new ConcurrentQueue<ResolvedCsvColumn>(); 
                         await xDomainGroup.ForEachAsync(
                             parallelism,
                             async column =>
