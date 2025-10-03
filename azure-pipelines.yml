@@ -18,7 +18,7 @@ variables:
   major: 0
   # Define a counter to continue on from AppVeyor.
   minor: $[counter(variables.major, 87)]
-  buildVersion: $[format('{0}.{1}.0', variables.major, variables.minor)]
+  buildVersion: $[iif(eq(variables['Build.Reason'], 'IndividualCI'), format('{0}.{1}.0', variables.major, variables.minor), format('{0}.{1}.0-{2}', variables.major, variables.minor, variables['System.PullRequest.SourceBranch']))]
 
   isPullRequest: $[eq(variables['Build.Reason'], 'PullRequest')]
 
@@ -156,7 +156,6 @@ steps:
     replaceExistingArchive: true
     
 - task: NuGetCommand@2
-  condition: eq(variables['isPullRequest'], 'False')
   inputs:
     command: 'push'
     packagesToPush: '$(Build.ArtifactStagingDirectory)/**/*.nupkg;!$(Build.ArtifactStagingDirectory)/**/*.symbols.nupkg'
