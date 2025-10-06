@@ -168,14 +168,16 @@ steps:
     archiveFile: '$(Build.ArtifactStagingDirectory)/canopy-cli-mac.zip'
     replaceExistingArchive: true
     
-- task: NuGetCommand@2
+- task: DotNetCoreCLI@2
+  displayName: 'Push to internal feed'
   inputs:
     command: 'push'
     packagesToPush: '$(Build.ArtifactStagingDirectory)/**/*.nupkg;!$(Build.ArtifactStagingDirectory)/**/*.symbols.nupkg'
     nuGetFeedType: 'internal'
     publishVstsFeed: '20d08566-c42a-44c8-b627-3f221476c5c4'
     
-- task: NuGetCommand@2
+- task: DotNetCoreCLI@2
+  displayName: 'Push to public feed'
   condition: eq(variables['isPullRequest'], 'False')
   inputs:
     command: 'push'
