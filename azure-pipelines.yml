@@ -19,7 +19,7 @@ variables:
   # Define a counter to continue on from AppVeyor.
   minor: $[counter(variables.major, 87)]
   buildVersion: $[iif(eq(variables['Build.Reason'], 'IndividualCI'), format('{0}.{1}.0', variables.major, variables.minor), format('{0}.{1}.0-{2}', variables.major, variables.minor, variables['System.PullRequest.SourceBranch']))]
-
+  
   isPullRequest: $[eq(variables['Build.Reason'], 'PullRequest')]
 
 name: $(buildVersion)
@@ -44,6 +44,13 @@ steps:
     (Get-Content './Canopy.Cli.Shared/Canopy.Cli.Shared.csproj' -Raw).Replace("<AssemblyVersion>0.0.0.0</AssemblyVersion>", "<AssemblyVersion>$($env:BUILDVERSION)</AssemblyVersion>") | Out-File './Canopy.Cli.Shared/Canopy.Cli.Shared.csproj'
     (Get-Content './Canopy.Cli.Shared/Canopy.Cli.Shared.csproj' -Raw).Replace("<FileVersion>0.0.0.0</FileVersion>", "<FileVersion>$($env:BUILDVERSION)</FileVersion>") | Out-File './Canopy.Cli.Shared/Canopy.Cli.Shared.csproj'
   displayName: 'Update release version in files'
+
+- task: DotNetCoreCLI@2
+  displayName: 'dotnet build'
+  inputs:
+    command: 'build'
+    projects: '**/*.csproj'
+    arguments: '/p:Configuration=$(BuildConfiguration)'
 
 - task: DotNetCoreCLI@2
   inputs:
