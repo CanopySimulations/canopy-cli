@@ -21,6 +21,7 @@ variables:
   buildVersion: $[iif(eq(variables['Build.Reason'], 'IndividualCI'), format('{0}.{1}.0', variables.major, variables.minor), format('{0}.{1}.0-{2}', variables.major, variables.minor, variables['System.PullRequest.SourceBranch']))]
   
   isPullRequest: $[eq(variables['Build.Reason'], 'PullRequest')]
+  buildConfiguration: $[iif(eq(variables['Build.Reason'], 'IndividualCI'), 'Release', 'Debug')]
 
 name: $(buildVersion)
 
