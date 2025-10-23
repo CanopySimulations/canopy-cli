@@ -52,13 +52,6 @@ steps:
   displayName: 'Update release version in files'
 
 - task: DotNetCoreCLI@2
-  displayName: 'dotnet build'
-  inputs:
-    command: 'build'
-    projects: '**/*.csproj'
-    arguments: '/p:Configuration=$(BuildConfiguration)'
-
-- task: DotNetCoreCLI@2
   inputs:
     command: 'test'
   displayName: 'Unit tests'
@@ -177,7 +170,7 @@ steps:
     publishVstsFeed: '20d08566-c42a-44c8-b627-3f221476c5c4'
     
 - task: DotNetCoreCLI@2
-  displayName: 'Push to public feed'
+  displayName: 'Push to internal feed'
   condition: eq(variables['isPullRequest'], 'False')
   inputs:
     command: 'push'
