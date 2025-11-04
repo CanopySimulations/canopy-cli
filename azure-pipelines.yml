@@ -18,9 +18,13 @@ variables:
   major: 0
   # Define a counter to continue on from AppVeyor.
   minor: $[counter(variables.major, 87)]
-  buildVersion: $[format('{0}.{1}.0', variables.major, variables.minor)]
-
+  # Package version can include pre-release identifiers
+  buildVersion: $[iif(eq(variables['Build.Reason'], 'IndividualCI'), format('{0}.{1}.0', variables.major, variables.minor), format('{0}.{1}.0-{2}', variables.major, variables.minor, variables['System.PullRequest.SourceBranch']))]
+  # Assembly version must be numeric only (no pre-release identifiers)
+  assemblyVersion: $[format('{0}.{1}.0.0', variables.major, variables.minor)]
+  
   isPullRequest: $[eq(variables['Build.Reason'], 'PullRequest')]
+  buildConfiguration: $[iif(eq(variables['Build.Reason'], 'IndividualCI'), 'Release', 'Debug')]
 
 name: $(buildVersion)
 
@@ -35,14 +39,16 @@ steps:
     $releaseBuildVersion = $tags[0].TrimStart("v")
     echo "Setting release version to $releaseBuildVersion"
     echo "##vso[task.setvariable variable=buildVersion]$releaseBuildVersion"
+    echo "##vso[task.setvariable variable=assemblyVersion]$releaseBuildVersion.0"
   condition: startsWith(variables['Build.SourceBranch'], 'refs/tags/')
   displayName: 'Set release version'
 
 - powershell: |
-    Write-Host "Release Version: $env:BUILDVERSION"
+    Write-Host "Package Version: $env:BUILDVERSION"
+    Write-Host "Assembly Version: $env:ASSEMBLYVERSION"
     (Get-Content './Canopy.Cli.Shared/Canopy.Cli.Shared.csproj' -Raw).Replace("<Version>0.0.0</Version>", "<Version>$($env:BUILDVERSION)</Version>") | Out-File './Canopy.Cli.Shared/Canopy.Cli.Shared.csproj'
-    (Get-Content './Canopy.Cli.Shared/Canopy.Cli.Shared.csproj' -Raw).Replace("<AssemblyVersion>0.0.0.0</AssemblyVersion>", "<AssemblyVersion>$($env:BUILDVERSION)</AssemblyVersion>") | Out-File './Canopy.Cli.Shared/Canopy.Cli.Shared.csproj'
-    (Get-Content './Canopy.Cli.Shared/Canopy.Cli.Shared.csproj' -Raw).Replace("<FileVersion>0.0.0.0</FileVersion>", "<FileVersion>$($env:BUILDVERSION)</FileVersion>") | Out-File './Canopy.Cli.Shared/Canopy.Cli.Shared.csproj'
+    (Get-Content './Canopy.Cli.Shared/Canopy.Cli.Shared.csproj' -Raw).Replace("<AssemblyVersion>0.0.0.0</AssemblyVersion>", "<AssemblyVersion>$($env:ASSEMBLYVERSION)</AssemblyVersion>") | Out-File './Canopy.Cli.Shared/Canopy.Cli.Shared.csproj'
+    (Get-Content './Canopy.Cli.Shared/Canopy.Cli.Shared.csproj' -Raw).Replace("<FileVersion>0.0.0.0</FileVersion>", "<FileVersion>$($env:ASSEMBLYVERSION)</FileVersion>") | Out-File './Canopy.Cli.Shared/Canopy.Cli.Shared.csproj'
   displayName: 'Update release version in files'
 
 - task: DotNetCoreCLI@2
@@ -155,15 +161,16 @@ steps:
     archiveFile: '$(Build.ArtifactStagingDirectory)/canopy-cli-mac.zip'
     replaceExistingArchive: true
     
-- task: NuGetCommand@2
-  condition: eq(variables['isPullRequest'], 'False')
+- task: DotNetCoreCLI@2
+  displayName: 'Push to internal feed'
   inputs:
     command: 'push'
     packagesToPush: '$(Build.ArtifactStagingDirectory)/**/*.nupkg;!$(Build.ArtifactStagingDirectory)/**/*.symbols.nupkg'
     nuGetFeedType: 'internal'
     publishVstsFeed: '20d08566-c42a-44c8-b627-3f221476c5c4'
     
-- task: NuGetCommand@2
+- task: DotNetCoreCLI@2
+  displayName: 'Push to internal feed'
   condition: eq(variables['isPullRequest'], 'False')
   inputs:
     command: 'push'

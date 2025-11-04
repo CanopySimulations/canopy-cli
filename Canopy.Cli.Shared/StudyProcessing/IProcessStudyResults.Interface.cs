@@ -9,6 +9,7 @@
             IFileWriter writer,
             bool channelsAsCsv,
             bool deleteProcessedFiles,
-            int parallelism);
+            int parallelism,
+            string? xDomainFilter = null);
     }
 }

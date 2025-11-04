@@ -17,7 +17,8 @@ namespace Canopy.Cli.Shared.StudyProcessing
             IFileWriter writer,
             bool channelsAsCsv,
             bool deleteProcessedFiles,
-            int parallelism)
+            int parallelism,
+            string? xDomainFilter = null)
         {
             var studyScalarFiles = new StudyScalarFiles();
             var channelDataColumns = new ChannelDataColumns();
@@ -57,7 +58,7 @@ namespace Canopy.Cli.Shared.StudyProcessing
                 await writer.WriteExistingFile(root, file);
             });
 
-            await WriteChannelDataAsCsv.ExecuteAsync(root, writer, deleteProcessedFiles, parallelism, channelDataColumns);
+            await WriteChannelDataAsCsv.ExecuteAsync(root, writer, deleteProcessedFiles, parallelism, channelDataColumns, xDomainFilter);
             await WriteCombinedStudyScalarData.ExecuteAsync(root, writer, studyScalarFiles);
         }
     }
