@@ -15,9 +15,9 @@ pool:
   vmImage: 'ubuntu-latest'
 
 variables:
-  major: 0
+  major: 1
   # Define a counter to continue on from AppVeyor.
-  minor: $[counter(variables.major, 87)]
+  minor: $[counter(variables.major, 1)]
   # Package version can include pre-release identifiers
   buildVersion: $[iif(eq(variables['Build.Reason'], 'IndividualCI'), format('{0}.{1}.0', variables.major, variables.minor), format('{0}.{1}.0-{2}', variables.major, variables.minor, variables['System.PullRequest.SourceBranch']))]
   # Assembly version must be numeric only (no pre-release identifiers)
