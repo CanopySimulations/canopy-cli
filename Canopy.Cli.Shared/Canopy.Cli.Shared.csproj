@@ -9,4 +9,8 @@
     <FileVersion>0.0.0.0</FileVersion>
   </PropertyGroup>
 
+  <ItemGroup>
+    <PackageReference Include="Parquet.Net" Version="5.4.0" />
+  </ItemGroup>
+
 </Project>

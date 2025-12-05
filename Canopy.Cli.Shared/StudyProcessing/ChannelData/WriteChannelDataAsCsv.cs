@@ -1,5 +1,6 @@
 ﻿namespace Canopy.Cli.Shared.StudyProcessing.ChannelData
 {
+    using Parquet;
     using System;
     using System.Collections.Concurrent;
     using System.Collections.Generic;
@@ -43,7 +44,7 @@
 
                         var fileSuffix = "_" + (string.IsNullOrWhiteSpace(xDomain) ? "Unspecified" : xDomain);
 
-                        var resolvedData = new ConcurrentQueue<ResolvedCsvColumn>(); 
+                        var resolvedData = new ConcurrentQueue<ResolvedCsvColumn>();
                         await xDomainGroup.ForEachAsync(
                             parallelism,
                             async column =>
@@ -59,7 +60,7 @@
                                         var values = new double[floatValues.Length];
                                         for (int i = 0; i < floatValues.Length; i++)
                                         {
-                                            values[i] = (double) floatValues[i];
+                                            values[i] = (double)floatValues[i];
                                         }
                                         resolvedData.Enqueue(
                                             new ResolvedCsvColumn(column.File, column.Metadata.ChannelName, values));
@@ -130,7 +131,7 @@
 
                             var bytes = Encoding.UTF8.GetBytes(csv.ToString());
                             var fileName = simType + "_VectorResults" + fileSuffix + ".csv";
-                            if(string.IsNullOrWhiteSpace(relativePathToFile))
+                            if (string.IsNullOrWhiteSpace(relativePathToFile))
                             {
                                 Console.WriteLine($"Writing '{fileName}'.");
                             }
@@ -138,7 +139,178 @@
                             {
                                 Console.WriteLine($"Writing '{fileName}' to '{relativePathToFile}'.");
                             }
-                            await writer.WriteNewFile(root, relativePathToFile, simType + "_VectorResults" + fileSuffix +  ".csv", bytes);
+                            await writer.WriteNewFile(root, relativePathToFile, simType + "_VectorResults" + fileSuffix + ".csv", bytes);
+
+                            if (deleteProcessedFiles)
+                            {
+                                foreach (var column in data)
+                                {
+                                    await writer.DeleteProcessedFile(root, column.File);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        public static async Task ExecuteAsync(
+            IRootFolder root,
+            IFileWriter writer,
+            bool deleteProcessedFiles,
+            int parallelism,
+            ChannelDataFiles channelDataColumns,
+            string? xDomainFilter = null)
+        {
+            foreach (var simType in channelDataColumns.SimTypes)
+            {
+                var columns = channelDataColumns.GetColumns(simType);
+                var folderGroups = columns.GroupBy(v => v.File.RelativePathToFile);
+
+                foreach (var folderGroup in folderGroups)
+                {
+                    var relativePathToFile = folderGroup.Key;
+                    var metadata = await GetSimTypeMetadataAsync(root, relativePathToFile, simType);
+
+                    foreach (var domain in folderGroup)
+                    {
+                        var xDomain = domain.Domain.Trim();
+
+                        // Filter by X-domain if specified
+                        if (!string.IsNullOrEmpty(xDomainFilter) &&
+                            !string.Equals(xDomain, xDomainFilter, StringComparison.OrdinalIgnoreCase))
+                        {
+                            continue;
+                        }
+
+                        var fileSuffix = "_" + (string.IsNullOrWhiteSpace(xDomain) ? "Unspecified" : xDomain);
+
+                        var data = new List<ResolvedCsvColumn>();
+                        try
+                        {
+                            // Read the parquet file containing all channels for this xDomain
+                            var parquetBytes = await domain.File.GetContentAsBytesAsync();
+
+                            using (var memoryStream = new System.IO.MemoryStream(parquetBytes))
+                            {
+                                using (var parquetReader = await ParquetReader.CreateAsync(memoryStream))
+                                {
+                                    var dataFields = parquetReader.Schema.GetDataFields();
+                                    var rowCount = (int)parquetReader.RowGroupCount;
+
+                                    // Dictionary to accumulate all values for each channel
+                                    var channelData = new Dictionary<string, List<double>>();
+
+                                    // Read all row groups
+                                    for (int i = 0; i < parquetReader.RowGroupCount; i++)
+                                    {
+                                        using (var rowGroupReader = parquetReader.OpenRowGroupReader(i))
+                                        {
+                                            foreach (var field in parquetReader.Schema.GetDataFields())
+                                            {
+                                                var columnData = await rowGroupReader.ReadColumnAsync(field);
+
+                                                // Initialize list for this channel if first row group
+                                                if (!channelData.ContainsKey(field.Name))
+                                                {
+                                                    channelData[field.Name] = new List<double>();
+                                                }
+
+                                                // Convert column values to doubles and add to list
+                                                for (int j = 0; j < columnData.Data.Length; j++)
+                                                {
+                                                    var value = columnData.Data.GetValue(j);
+                                                    var doubleValue = value switch
+                                                    {
+                                                        double d => d,
+                                                        float f => (double)f,
+                                                        int n => (double)n,
+                                                        long l => (double)l,
+                                                        _ => double.NaN
+                                                    };
+                                                    channelData[field.Name].Add(doubleValue);
+                                                }
+                                            }
+                                        }
+                                    }
+
+
+                                    // Convert to ResolvedCsvColumn objects
+                                    foreach (var kvp in channelData)
+                                    {
+                                        data.Add(new ResolvedCsvColumn(
+                                            domain.File,
+                                            kvp.Key,
+                                            kvp.Value.ToArray()));
+                                    }
+                                }
+                            }
+                        }
+                        catch (Exception t)
+                        {
+                            writer.ReportError(
+                                "Failed to parse parquet file: " + domain.File.FullPath,
+                                t);
+                            continue;
+                        }
+                        if (data.Count > 0)
+                        {
+                            // Always put sLap at the start for ATLAS compatibility.
+                            const string AtlasPrimaryChannel = "tRun";
+                            data.Sort((a, b) =>
+                            {
+                                if (a == b)
+                                {
+                                    return 0;
+                                }
+
+                                if (a.ChannelName == AtlasPrimaryChannel)
+                                {
+                                    return -1;
+                                }
+
+                                if (b.ChannelName == AtlasPrimaryChannel)
+                                {
+                                    return 1;
+                                }
+
+                                return String.Compare(a.ChannelName, b.ChannelName, StringComparison.OrdinalIgnoreCase);
+                            });
+
+                            var maxDataLength = data.Select(v => v.Data.Length).Max();
+                            var csv = new StringBuilder();
+                            csv.AppendLine(relativePathToFile + simType);
+                            csv.AppendLine(string.Join(",", data.Select(v => v.ChannelName)));
+                            csv.AppendLine(string.Join(",", data.Select(v =>
+                            {
+                                var units = metadata.GetChannelUnits(v.ChannelName);
+                                if (string.IsNullOrWhiteSpace(units))
+                                {
+                                    return "\"()\"";
+                                }
+
+                                return "\"" + units + "\"";
+                            })));
+
+                            for (int i = 0; i < maxDataLength; i++)
+                            {
+                                csv.AppendLine(
+                                    string.Join(
+                                        ",",
+                                        data.Select(v => v.Data.Length > i ? v.Data[i].NumericOrNaN().ToString(CultureInfo.InvariantCulture) : "").ToList()));
+                            }
+
+                            var bytes = Encoding.UTF8.GetBytes(csv.ToString());
+                            var fileName = simType + "_VectorResults" + fileSuffix + ".csv";
+                            if (string.IsNullOrWhiteSpace(relativePathToFile))
+                            {
+                                Console.WriteLine($"Writing '{fileName}'.");
+                            }
+                            else
+                            {
+                                Console.WriteLine($"Writing '{fileName}' to '{relativePathToFile}'.");
+                            }
+                            await writer.WriteNewFile(root, relativePathToFile, simType + "_VectorResults" + fileSuffix + ".csv", bytes);
 
                             if (deleteProcessedFiles)
                             {
@@ -155,7 +327,7 @@
 
         private static async Task<SimTypeMetadataResult> GetSimTypeMetadataAsync(
             IRootFolder baseDirectory,
-            string relativePathToFile, 
+            string relativePathToFile,
             string simType)
         {
             var lookup = new Dictionary<string, SimTypeMetadataRow>();

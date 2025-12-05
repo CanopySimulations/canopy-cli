@@ -21,19 +21,23 @@ namespace Canopy.Cli.Shared.StudyProcessing
             string? xDomainFilter = null)
         {
             var studyScalarFiles = new StudyScalarFiles();
-            var channelDataColumns = new ChannelDataColumns();
-
+            var channelDataFiles = new ChannelDataFiles();
+             
             var allFiles = await root.GetFilesAsync();
             var filesToWrite = new List<IFile>();
+
+            // here all .bin files are being red individually
+            // we need to change it to the parquet files being read at once instead of for each single column
+
             foreach (var file in allFiles)
             {
                 try
                 {
                     TryAddFileToStudyScalarResults.Execute(file, studyScalarFiles);
 
-                    if (channelsAsCsv && TryGetChannelMetadata.Execute(file, out var channelMetadata))
+                    if (channelsAsCsv && TryGetVectorResultsDomain.Execute(file, out var resultsDomain))
                     {
-                        channelDataColumns.Add(new CsvColumn(channelMetadata, file));
+                        channelDataFiles.Add(resultsDomain);
                     }
                     else
                     {
@@ -58,7 +62,7 @@ namespace Canopy.Cli.Shared.StudyProcessing
                 await writer.WriteExistingFile(root, file);
             });
 
-            await WriteChannelDataAsCsv.ExecuteAsync(root, writer, deleteProcessedFiles, parallelism, channelDataColumns, xDomainFilter);
+            await WriteChannelDataAsCsv.ExecuteAsync(root, writer, deleteProcessedFiles, parallelism, channelDataFiles, xDomainFilter);
             await WriteCombinedStudyScalarData.ExecuteAsync(root, writer, studyScalarFiles);
         }
     }
