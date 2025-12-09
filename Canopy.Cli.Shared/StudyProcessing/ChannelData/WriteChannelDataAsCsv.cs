@@ -1,4 +1,5 @@
-﻿namespace Canopy.Cli.Shared.StudyProcessing.ChannelData
+﻿#nullable enable
+namespace Canopy.Cli.Shared.StudyProcessing.ChannelData
 {
     using Parquet;
     using System;
@@ -160,10 +161,18 @@
             bool deleteProcessedFiles,
             int parallelism,
             ChannelDataFiles channelDataColumns,
+            string? simTypeFilter = null,
             string? xDomainFilter = null)
         {
             foreach (var simType in channelDataColumns.SimTypes)
             {
+                // early exit to avoid unnecessary processing
+                // else all sim types would be processed and only writer.WriteNewFile (line 322) actually filters out which file is written
+                if (!string.IsNullOrEmpty(simTypeFilter) && !simType.Equals(simTypeFilter, StringComparison.InvariantCultureIgnoreCase))
+                {
+                    continue;
+                }
+
                 var columns = channelDataColumns.GetColumns(simType);
                 var folderGroups = columns.GroupBy(v => v.File.RelativePathToFile);
 

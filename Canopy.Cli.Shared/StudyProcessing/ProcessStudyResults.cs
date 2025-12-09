@@ -1,4 +1,5 @@
-﻿using System;
+﻿#nullable enable
+using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
@@ -18,6 +19,7 @@ namespace Canopy.Cli.Shared.StudyProcessing
             bool channelsAsCsv,
             bool deleteProcessedFiles,
             int parallelism,
+            string? simTypeFilter = null,
             string? xDomainFilter = null)
         {
             var studyScalarFiles = new StudyScalarFiles();
@@ -62,7 +64,7 @@ namespace Canopy.Cli.Shared.StudyProcessing
                 await writer.WriteExistingFile(root, file);
             });
 
-            await WriteChannelDataAsCsv.ExecuteAsync(root, writer, deleteProcessedFiles, parallelism, channelDataFiles, xDomainFilter);
+            await WriteChannelDataAsCsv.ExecuteAsync(root, writer, deleteProcessedFiles, parallelism, channelDataFiles, simTypeFilter, xDomainFilter);
             await WriteCombinedStudyScalarData.ExecuteAsync(root, writer, studyScalarFiles);
         }
     }
