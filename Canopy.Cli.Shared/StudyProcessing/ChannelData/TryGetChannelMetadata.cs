@@ -54,7 +54,7 @@ namespace Canopy.Cli.Shared.StudyProcessing.ChannelData
             var simType = parts[0];
             var domain = fileName.Substring(simType.Length + 1);
 
-            result = new  VectorResultsDomain(domain, simType, file);
+            result = new VectorResultsDomain(domain, simType, file);
             return true;
         }
     }
