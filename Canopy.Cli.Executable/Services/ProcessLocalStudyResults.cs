@@ -87,6 +87,11 @@ namespace Canopy.Cli.Executable.Services
                 File.Delete(file.FullPath);
                 return Task.CompletedTask;
             }
+
+            public bool Writes(ResultsFile fileType)
+            {
+                return true;
+            }
         }
 
         public class LocalFile : IFile
