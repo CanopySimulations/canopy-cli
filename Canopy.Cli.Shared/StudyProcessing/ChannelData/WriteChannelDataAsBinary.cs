@@ -41,7 +41,7 @@ namespace Canopy.Cli.Shared.StudyProcessing.ChannelData
                             var parquetBytes = await domain.File.GetContentAsBytesAsync();
 
                             // Use shared converter to extract all channels
-                            var channelDataDict = await ParquetChannelConverter.ConvertChannelsAsync(parquetBytes);
+                            var channelDataDict = await TelemetryChannelSerializer.ConvertChannelsAsync(parquetBytes);
 
                             // Write each channel as a separate .bin file
                             foreach (var kvp in channelDataDict)
