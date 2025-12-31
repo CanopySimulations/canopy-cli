@@ -27,7 +27,7 @@ namespace Canopy.Cli.Shared.StudyProcessing.ChannelData
             ArgumentNullException.ThrowIfNull(parquetBytes);
 
             using var memoryStream = new MemoryStream(parquetBytes);
-            return await ConvertChannelsAsync(memoryStream, channelNames);
+            return await ConvertChannelsAsync(memoryStream, channelNames).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -41,7 +41,7 @@ namespace Canopy.Cli.Shared.StudyProcessing.ChannelData
         {
             ArgumentNullException.ThrowIfNull(parquetStream);
 
-            var channelDataDict = await ExtractChannelsAsync(parquetStream, channelNames);
+            var channelDataDict = await ExtractChannelsAsync(parquetStream, channelNames).ConfigureAwait(false);
             var result = new Dictionary<string, byte[]>(channelDataDict.Count);
 
             foreach (var kvp in channelDataDict)
@@ -68,7 +68,7 @@ namespace Canopy.Cli.Shared.StudyProcessing.ChannelData
         {
             ArgumentNullException.ThrowIfNull(parquetStream);
 
-            using var parquetReader = await ParquetReader.CreateAsync(parquetStream, cancellationToken: cancellationToken);
+            using var parquetReader = await ParquetReader.CreateAsync(parquetStream, cancellationToken: cancellationToken).ConfigureAwait(false);
 
             var channelNamesSet = channelNames != null && channelNames.Count > 0
                 ? new HashSet<string>(channelNames)
@@ -88,7 +88,7 @@ namespace Canopy.Cli.Shared.StudyProcessing.ChannelData
                 {
                     cancellationToken.ThrowIfCancellationRequested();
 
-                    var columnData = await rowGroupReader.ReadColumnAsync(field);
+                    var columnData = await rowGroupReader.ReadColumnAsync(field).ConfigureAwait(false);
 
                     var floatList = new List<float>();
                     ConvertAndAddValues(columnData, floatList);
@@ -100,20 +100,11 @@ namespace Canopy.Cli.Shared.StudyProcessing.ChannelData
         }
 
         /// <summary>
-        /// Extracts channels from Parquet bytes.
-        /// </summary>
-        private static async Task<Dictionary<string, List<float>>> ExtractChannelsAsync(byte[] parquetBytes, IReadOnlyList<string>? channelNames)
-        {
-            using var memoryStream = new MemoryStream(parquetBytes);
-            return await ExtractChannelsAsync(memoryStream, channelNames);
-        }
-
-        /// <summary>
         /// Extracts channels from a Parquet stream.
         /// </summary>
         private static async Task<Dictionary<string, List<float>>> ExtractChannelsAsync(Stream parquetStream, IReadOnlyList<string>? channelNames)
         {
-            using var parquetReader = await ParquetReader.CreateAsync(parquetStream);
+            using var parquetReader = await ParquetReader.CreateAsync(parquetStream).ConfigureAwait(false);
 
             var channelNamesSet = channelNames != null && channelNames.Count > 0
                 ? new HashSet<string>(channelNames)
@@ -131,7 +122,7 @@ namespace Canopy.Cli.Shared.StudyProcessing.ChannelData
 
                 foreach (var field in dataFields)
                 {
-                    var columnData = await rowGroupReader.ReadColumnAsync(field);
+                    var columnData = await rowGroupReader.ReadColumnAsync(field).ConfigureAwait(false);
 
                     if (!channelData.TryGetValue(field.Name, out var list))
                     {

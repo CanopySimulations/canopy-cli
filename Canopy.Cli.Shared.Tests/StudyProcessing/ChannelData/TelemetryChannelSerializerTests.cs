@@ -7,6 +7,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Canopy.Cli.Shared.StudyProcessing.ChannelData
@@ -14,7 +15,7 @@ namespace Canopy.Cli.Shared.StudyProcessing.ChannelData
     [TestClass]
     public class TelemetryChannelSerializerTests
     {
-        private byte[] CreateTestParquetFile(Dictionary<string, List<object>> columns)
+        private async Task<byte[]> CreateTestParquetFileAsync(Dictionary<string, List<object>> columns)
         {
             using var memoryStream = new MemoryStream();
             
@@ -41,7 +42,7 @@ namespace Canopy.Cli.Shared.StudyProcessing.ChannelData
 
             var schema = new ParquetSchema(fields);
 
-            using (var parquetWriter = ParquetWriter.CreateAsync(schema, memoryStream).Result)
+            using (var parquetWriter = await ParquetWriter.CreateAsync(schema, memoryStream))
             {
                 using var groupWriter = parquetWriter.CreateRowGroup();
                 
@@ -55,28 +56,28 @@ namespace Canopy.Cli.Shared.StudyProcessing.ChannelData
                         var dataColumn = new DataColumn(
                             field as DataField,
                             column.Value.Cast<float>().ToArray());
-                        groupWriter.WriteColumnAsync(dataColumn).Wait();
+                        await groupWriter.WriteColumnAsync(dataColumn);
                     }
                     else if (firstValue is double)
                     {
                         var dataColumn = new DataColumn(
                             field as DataField,
                             column.Value.Cast<double>().ToArray());
-                        groupWriter.WriteColumnAsync(dataColumn).Wait();
+                        await groupWriter.WriteColumnAsync(dataColumn);
                     }
                     else if (firstValue is int)
                     {
                         var dataColumn = new DataColumn(
                             field as DataField,
                             column.Value.Cast<int>().ToArray());
-                        groupWriter.WriteColumnAsync(dataColumn).Wait();
+                        await groupWriter.WriteColumnAsync(dataColumn);
                     }
                     else if (firstValue is long)
                     {
                         var dataColumn = new DataColumn(
                             field as DataField,
                             column.Value.Cast<long>().ToArray());
-                        groupWriter.WriteColumnAsync(dataColumn).Wait();
+                        await groupWriter.WriteColumnAsync(dataColumn);
                     }
                 }
             }
@@ -98,7 +99,7 @@ namespace Canopy.Cli.Shared.StudyProcessing.ChannelData
             {
                 { "Channel1", new List<object> { 1.0f, 2.0f, 3.0f } }
             };
-            var parquetBytes = CreateTestParquetFile(testData);
+            var parquetBytes = await CreateTestParquetFileAsync(testData);
 
             var result = await TelemetryChannelSerializer.ConvertChannelsAsync(parquetBytes);
 
@@ -121,7 +122,7 @@ namespace Canopy.Cli.Shared.StudyProcessing.ChannelData
                 { "Channel2", new List<object> { 3.0f, 4.0f } },
                 { "Channel3", new List<object> { 5.0f, 6.0f } }
             };
-            var parquetBytes = CreateTestParquetFile(testData);
+            var parquetBytes = await CreateTestParquetFileAsync(testData);
 
             var result = await TelemetryChannelSerializer.ConvertChannelsAsync(parquetBytes);
 
@@ -140,7 +141,7 @@ namespace Canopy.Cli.Shared.StudyProcessing.ChannelData
                 { "Channel2", new List<object> { 3.0f, 4.0f } },
                 { "Channel3", new List<object> { 5.0f, 6.0f } }
             };
-            var parquetBytes = CreateTestParquetFile(testData);
+            var parquetBytes = await CreateTestParquetFileAsync(testData);
             var requestedChannels = new List<string> { "Channel1", "Channel3" };
 
             var result = await TelemetryChannelSerializer.ConvertChannelsAsync(parquetBytes, requestedChannels);
@@ -158,7 +159,7 @@ namespace Canopy.Cli.Shared.StudyProcessing.ChannelData
             {
                 { "Channel1", new List<object> { 1.0f, 2.0f } }
             };
-            var parquetBytes = CreateTestParquetFile(testData);
+            var parquetBytes = await CreateTestParquetFileAsync(testData);
             var requestedChannels = new List<string> { "Channel1", "NonExistent" };
 
             var result = await TelemetryChannelSerializer.ConvertChannelsAsync(parquetBytes, requestedChannels);
@@ -176,7 +177,7 @@ namespace Canopy.Cli.Shared.StudyProcessing.ChannelData
                 { "Channel1", new List<object> { 1.0f, 2.0f } },
                 { "Channel2", new List<object> { 3.0f, 4.0f } }
             };
-            var parquetBytes = CreateTestParquetFile(testData);
+            var parquetBytes = await CreateTestParquetFileAsync(testData);
             var requestedChannels = new List<string>();
 
             var result = await TelemetryChannelSerializer.ConvertChannelsAsync(parquetBytes, requestedChannels);
@@ -192,7 +193,7 @@ namespace Canopy.Cli.Shared.StudyProcessing.ChannelData
                 { "Channel1", new List<object> { 1.0f, 2.0f } },
                 { "Channel2", new List<object> { 3.0f, 4.0f } }
             };
-            var parquetBytes = CreateTestParquetFile(testData);
+            var parquetBytes = await CreateTestParquetFileAsync(testData);
 
             var result = await TelemetryChannelSerializer.ConvertChannelsAsync(parquetBytes, null);
 
@@ -206,7 +207,7 @@ namespace Canopy.Cli.Shared.StudyProcessing.ChannelData
             {
                 { "DoubleChannel", new List<object> { 1.5, 2.5, 3.5 } }
             };
-            var parquetBytes = CreateTestParquetFile(testData);
+            var parquetBytes = await CreateTestParquetFileAsync(testData);
 
             var result = await TelemetryChannelSerializer.ConvertChannelsAsync(parquetBytes);
 
@@ -225,7 +226,7 @@ namespace Canopy.Cli.Shared.StudyProcessing.ChannelData
             {
                 { "IntChannel", new List<object> { 1, 2, 3 } }
             };
-            var parquetBytes = CreateTestParquetFile(testData);
+            var parquetBytes = await CreateTestParquetFileAsync(testData);
 
             var result = await TelemetryChannelSerializer.ConvertChannelsAsync(parquetBytes);
 
@@ -241,7 +242,7 @@ namespace Canopy.Cli.Shared.StudyProcessing.ChannelData
             {
                 { "LongChannel", new List<object> { 1L, 2L, 3L } }
             };
-            var parquetBytes = CreateTestParquetFile(testData);
+            var parquetBytes = await CreateTestParquetFileAsync(testData);
 
             var result = await TelemetryChannelSerializer.ConvertChannelsAsync(parquetBytes);
 
@@ -260,7 +261,7 @@ namespace Canopy.Cli.Shared.StudyProcessing.ChannelData
                 { "IntChannel", new List<object> { 5, 6 } },
                 { "LongChannel", new List<object> { 7L, 8L } }
             };
-            var parquetBytes = CreateTestParquetFile(testData);
+            var parquetBytes = await CreateTestParquetFileAsync(testData);
 
             var result = await TelemetryChannelSerializer.ConvertChannelsAsync(parquetBytes);
 
@@ -279,7 +280,7 @@ namespace Canopy.Cli.Shared.StudyProcessing.ChannelData
             {
                 { "LargeChannel", largeDataset }
             };
-            var parquetBytes = CreateTestParquetFile(testData);
+            var parquetBytes = await CreateTestParquetFileAsync(testData);
 
             var result = await TelemetryChannelSerializer.ConvertChannelsAsync(parquetBytes);
 
@@ -297,7 +298,7 @@ namespace Canopy.Cli.Shared.StudyProcessing.ChannelData
         {
             await Assert.ThrowsExceptionAsync<ArgumentNullException>(async () =>
             {
-                await TelemetryChannelSerializer.ConvertChannelsAsync(null!);
+                await TelemetryChannelSerializer.ConvertChannelsAsync((byte[])null!);
             });
         }
 
@@ -316,5 +317,214 @@ namespace Canopy.Cli.Shared.StudyProcessing.ChannelData
                 exception.Message.Contains("size too small"),
                 $"Unexpected error message: {exception.Message}");
         }
+
+        #region ConvertChannelsStreamAsync Tests
+
+        private async Task<List<(string Name, byte[] Data)>> ConvertChannelsStreamToList(
+            byte[] parquetBytes,
+            IReadOnlyList<string>? channelNames = null,
+            CancellationToken cancellationToken = default)
+        {
+            var results = new List<(string Name, byte[] Data)>();
+            using var stream = new MemoryStream(parquetBytes);
+            await foreach (var item in TelemetryChannelSerializer.ConvertChannelsStreamAsync(
+                stream, channelNames, cancellationToken))
+            {
+                results.Add(item);
+            }
+            return results;
+        }
+
+        [TestMethod]
+        public async Task ConvertChannelsStreamAsync_WithSingleChannel_ShouldYieldCorrectData()
+        {
+            var testData = new Dictionary<string, List<object>>
+            {
+                { "Channel1", new List<object> { 1.0f, 2.0f, 3.0f } }
+            };
+            var parquetBytes = await CreateTestParquetFileAsync(testData);
+
+            var results = await ConvertChannelsStreamToList(parquetBytes);
+
+            Assert.AreEqual(1, results.Count);
+            Assert.AreEqual("Channel1", results[0].Name);
+            Assert.AreEqual(3 * sizeof(float), results[0].Data.Length);
+
+            var floats = BytesToFloatArray(results[0].Data);
+            CollectionAssert.AreEqual(new[] { 1.0f, 2.0f, 3.0f }, floats);
+        }
+
+        [TestMethod]
+        public async Task ConvertChannelsStreamAsync_WithMultipleChannels_ShouldYieldAllChannels()
+        {
+            var testData = new Dictionary<string, List<object>>
+            {
+                { "Channel1", new List<object> { 1.0f, 2.0f } },
+                { "Channel2", new List<object> { 3.0f, 4.0f } },
+                { "Channel3", new List<object> { 5.0f, 6.0f } }
+            };
+            var parquetBytes = await CreateTestParquetFileAsync(testData);
+
+            var results = await ConvertChannelsStreamToList(parquetBytes);
+
+            Assert.AreEqual(3, results.Count);
+            var channelNames = results.Select(r => r.Name).ToList();
+            CollectionAssert.Contains(channelNames, "Channel1");
+            CollectionAssert.Contains(channelNames, "Channel2");
+            CollectionAssert.Contains(channelNames, "Channel3");
+        }
+
+        [TestMethod]
+        public async Task ConvertChannelsStreamAsync_WithSpecificChannelNames_ShouldYieldOnlyRequestedChannels()
+        {
+            var testData = new Dictionary<string, List<object>>
+            {
+                { "Channel1", new List<object> { 1.0f, 2.0f } },
+                { "Channel2", new List<object> { 3.0f, 4.0f } },
+                { "Channel3", new List<object> { 5.0f, 6.0f } }
+            };
+            var parquetBytes = await CreateTestParquetFileAsync(testData);
+            var requestedChannels = new List<string> { "Channel1", "Channel3" };
+
+            var results = await ConvertChannelsStreamToList(parquetBytes, requestedChannels);
+
+            Assert.AreEqual(2, results.Count);
+            var channelNames = results.Select(r => r.Name).ToList();
+            CollectionAssert.Contains(channelNames, "Channel1");
+            CollectionAssert.DoesNotContain(channelNames, "Channel2");
+            CollectionAssert.Contains(channelNames, "Channel3");
+        }
+
+        [TestMethod]
+        public async Task ConvertChannelsStreamAsync_WithEmptyChannelList_ShouldYieldAllChannels()
+        {
+            var testData = new Dictionary<string, List<object>>
+            {
+                { "Channel1", new List<object> { 1.0f, 2.0f } },
+                { "Channel2", new List<object> { 3.0f, 4.0f } }
+            };
+            var parquetBytes = await CreateTestParquetFileAsync(testData);
+            var requestedChannels = new List<string>();
+
+            var results = await ConvertChannelsStreamToList(parquetBytes, requestedChannels);
+
+            Assert.AreEqual(2, results.Count);
+        }
+
+        [TestMethod]
+        public async Task ConvertChannelsStreamAsync_WithNullChannelList_ShouldYieldAllChannels()
+        {
+            var testData = new Dictionary<string, List<object>>
+            {
+                { "Channel1", new List<object> { 1.0f, 2.0f } },
+                { "Channel2", new List<object> { 3.0f, 4.0f } }
+            };
+            var parquetBytes = await CreateTestParquetFileAsync(testData);
+
+            var results = await ConvertChannelsStreamToList(parquetBytes);
+
+            Assert.AreEqual(2, results.Count);
+        }
+
+        [TestMethod]
+        public async Task ConvertChannelsStreamAsync_WithMixedDataTypes_ShouldConvertAllToFloat()
+        {
+            var testData = new Dictionary<string, List<object>>
+            {
+                { "FloatChannel", new List<object> { 1.0f, 2.0f } },
+                { "DoubleChannel", new List<object> { 3.0, 4.0 } },
+                { "IntChannel", new List<object> { 5, 6 } },
+                { "LongChannel", new List<object> { 7L, 8L } }
+            };
+            var parquetBytes = await CreateTestParquetFileAsync(testData);
+
+            var results = await ConvertChannelsStreamToList(parquetBytes);
+
+            Assert.AreEqual(4, results.Count);
+            foreach (var result in results)
+            {
+                Assert.AreEqual(2 * sizeof(float), result.Data.Length);
+            }
+        } 
+
+        [TestMethod]
+        public async Task ConvertChannelsStreamAsync_WithCancelledToken_ShouldThrowImmediately()
+        {
+            var testData = new Dictionary<string, List<object>>
+            {
+                { "Channel1", new List<object> { 1.0f, 2.0f } }
+            };
+            var parquetBytes = await CreateTestParquetFileAsync(testData);
+
+            using var cts = new CancellationTokenSource();
+            cts.Cancel();
+
+            using var stream = new MemoryStream(parquetBytes);
+            await Assert.ThrowsExceptionAsync<OperationCanceledException>(async () =>
+            {
+                await foreach (var item in TelemetryChannelSerializer.ConvertChannelsStreamAsync(stream, null, cts.Token))
+                {
+                    Assert.Fail("Should not yield any items with cancelled token");
+                }
+            });
+        }
+
+        [TestMethod]
+        public async Task ConvertChannelsStreamAsync_WithNullStream_ShouldThrowArgumentNullException()
+        {
+            await Assert.ThrowsExceptionAsync<ArgumentNullException>(async () =>
+            {
+                await foreach (var item in TelemetryChannelSerializer.ConvertChannelsStreamAsync(null!, null, CancellationToken.None))
+                {
+                    Assert.Fail("Should not yield any items");
+                }
+            });
+        }
+
+        [TestMethod]
+        public async Task ConvertChannelsStreamAsync_WithLargeDataset_ShouldHandleCorrectly()
+        {
+            var largeDataset = Enumerable.Range(0, 10000).Select(i => (object)(float)i).ToList();
+            var testData = new Dictionary<string, List<object>>
+            {
+                { "LargeChannel", largeDataset }
+            };
+            var parquetBytes = await CreateTestParquetFileAsync(testData);
+
+            var results = await ConvertChannelsStreamToList(parquetBytes);
+
+            Assert.AreEqual(1, results.Count);
+            Assert.AreEqual(10000 * sizeof(float), results[0].Data.Length);
+
+            var floats = BytesToFloatArray(results[0].Data);
+            Assert.AreEqual(0.0f, floats[0]);
+            Assert.AreEqual(9999.0f, floats[9999]);
+        }
+
+        [TestMethod]
+        public async Task ConvertChannelsStreamAsync_StreamingBehavior_ShouldYieldOneAtATime()
+        {
+            var testData = new Dictionary<string, List<object>>
+            {
+                { "Channel1", new List<object> { 1.0f, 2.0f } },
+                { "Channel2", new List<object> { 3.0f, 4.0f } },
+                { "Channel3", new List<object> { 5.0f, 6.0f } }
+            };
+            var parquetBytes = await CreateTestParquetFileAsync(testData);
+
+            var yieldCount = 0;
+            using var stream = new MemoryStream(parquetBytes);
+            await foreach (var item in TelemetryChannelSerializer.ConvertChannelsStreamAsync(stream, null, CancellationToken.None))
+            {
+                yieldCount++;
+                Assert.IsNotNull(item.Name);
+                Assert.IsNotNull(item.Data);
+                Assert.IsTrue(item.Data.Length > 0);
+            }
+
+            Assert.AreEqual(3, yieldCount);
+        }
+
+        #endregion
     }
-}
+} 
