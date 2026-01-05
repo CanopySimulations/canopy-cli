@@ -29,33 +29,5 @@ namespace Canopy.Cli.Shared.StudyProcessing.ChannelData
             result = new BlobChannelMetadata(simType, channelName);
             return true;
         }
-    }
-    public static class TryGetVectorResultsDomain
-    {
-        public static bool Execute(IFile file, out VectorResultsDomain result)
-        {
-            result = null;
-            const string vectorResultsFileEnding = "_VectorResults.parquet";
-
-            var fileName = file.FileName;
-            if (!fileName.EndsWith(vectorResultsFileEnding))
-            {
-                return false;
-            }
-
-            fileName = fileName.Substring(0, fileName.Length - vectorResultsFileEnding.Length);
-
-            var parts = fileName.Split('_');
-            if (parts.Length < 2)
-            {
-                return false;
-            }
-
-            var simType = parts[0];
-            var domain = fileName.Substring(simType.Length + 1);
-
-            result = new VectorResultsDomain(domain, simType, file);
-            return true;
-        }
-    }
+    }    
 }

@@ -28,5 +28,9 @@ namespace Canopy.Cli.Shared.StudyProcessing.ChannelData
         {
             return Enumerable.ToList(this.items[simType]);
         }
+
+        public int Count() => items.Count;
+
+        public bool Any() => items.Count > 0;
     }
 }

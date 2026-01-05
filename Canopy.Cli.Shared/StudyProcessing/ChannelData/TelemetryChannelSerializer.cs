@@ -74,15 +74,16 @@ namespace Canopy.Cli.Shared.StudyProcessing.ChannelData
                 ? new HashSet<string>(channelNames)
                 : null;
 
+            var dataFields = channelNamesSet != null
+                    ? parquetReader.Schema.GetDataFields().Where(f => channelNamesSet.Contains(f.Name))
+                    : parquetReader.Schema.GetDataFields();
+
             for (int i = 0; i < parquetReader.RowGroupCount; i++)
             {
                 cancellationToken.ThrowIfCancellationRequested();
 
                 using var rowGroupReader = parquetReader.OpenRowGroupReader(i);
-
-                var dataFields = channelNamesSet != null
-                    ? parquetReader.Schema.GetDataFields().Where(f => channelNamesSet.Contains(f.Name))
-                    : parquetReader.Schema.GetDataFields();
+                
 
                 foreach (var field in dataFields)
                 {
@@ -111,14 +112,13 @@ namespace Canopy.Cli.Shared.StudyProcessing.ChannelData
                 : null;
 
             var channelData = new Dictionary<string, List<float>>();
+            var dataFields = channelNamesSet != null
+                    ? parquetReader.Schema.GetDataFields().Where(f => channelNamesSet.Contains(f.Name))
+                    : parquetReader.Schema.GetDataFields();
 
             for (int i = 0; i < parquetReader.RowGroupCount; i++)
             {
-                using var rowGroupReader = parquetReader.OpenRowGroupReader(i);
-
-                var dataFields = channelNamesSet != null
-                    ? parquetReader.Schema.GetDataFields().Where(f => channelNamesSet.Contains(f.Name))
-                    : parquetReader.Schema.GetDataFields();
+                using var rowGroupReader = parquetReader.OpenRowGroupReader(i);                
 
                 foreach (var field in dataFields)
                 {

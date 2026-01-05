@@ -1,5 +1,6 @@
 ﻿#nullable enable
 using System;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -40,17 +41,13 @@ namespace Canopy.Cli.Shared.StudyProcessing.ChannelData
                             // Read the parquet file containing all channels for this xDomain
                             var parquetBytes = await domain.File.GetContentAsBytesAsync();
 
-                            // Use shared converter to extract all channels
-                            var channelDataDict = await TelemetryChannelSerializer.ConvertChannelsAsync(parquetBytes);
-
-                            // Write each channel as a separate .bin file
-                            foreach (var kvp in channelDataDict)
+                            // Use streaming API to extract channels one at a time
+                            using var stream = new MemoryStream(parquetBytes);
+                            await foreach (var (channelName, byteArray) in 
+                                TelemetryChannelSerializer.ConvertChannelsStreamAsync(stream, null, default))
                             {
-                                var channelName = kvp.Key;
-                                var byteArray = kvp.Value;
-
                                 // Create filename with channel name
-                                var fileName = $"{simType}_{channelName}_1.bin";
+                                var fileName = $"{simType}_{channelName}.bin";
 
                                 Console.WriteLine($"Writing channel '{channelName}' to '{fileName}' in '{relativePathToFile}'.");
 
