@@ -16,109 +16,101 @@ namespace Canopy.Cli.Shared.StudyProcessing.ChannelData
     public static class TelemetryChannelSerializer
     {
         /// <summary>
-        /// Converts channels from Parquet bytes to a dictionary of channel name to binary data.
+        /// Converts channels from Parquet bytes to a dictionary of channel name to typed arrays using the provided converter.
         /// </summary>
-        /// <param name="parquetBytes">The Parquet file bytes.</param>
-        /// <param name="channelNames">Optional list of specific channel names to extract. If null or empty, extracts all channels.</param>
-        /// <returns>Dictionary mapping channel names to their binary data. Missing channels are excluded.</returns>
-        /// <exception cref="ArgumentNullException">Thrown when parquetBytes is null.</exception>
-        public static async Task<Dictionary<string, byte[]>> ConvertChannelsAsync(byte[] parquetBytes, IReadOnlyList<string>? channelNames = null)
+        public static async Task<Dictionary<string, T[]>> ConvertChannelsAsync<T>(
+            byte[] parquetBytes,
+            IChannelValueConverter<T> converter,
+            IReadOnlyList<string>? channelNames = null)
         {
             ArgumentNullException.ThrowIfNull(parquetBytes);
+            ArgumentNullException.ThrowIfNull(converter);
 
             using var memoryStream = new MemoryStream(parquetBytes);
-            return await ConvertChannelsAsync(memoryStream, channelNames).ConfigureAwait(false);
-        }
-
-        /// <summary>
-        /// Converts channels from a Parquet stream to a dictionary of channel name to binary data.
-        /// </summary>
-        /// <param name="parquetStream">The Parquet file stream.</param>
-        /// <param name="channelNames">Optional list of specific channel names to extract. If null or empty, extracts all channels.</param>
-        /// <returns>Dictionary mapping channel names to their binary data. Missing channels are excluded.</returns>
-        /// <exception cref="ArgumentNullException">Thrown when parquetStream is null.</exception>
-        public static async Task<Dictionary<string, byte[]>> ConvertChannelsAsync(Stream parquetStream, IReadOnlyList<string>? channelNames = null)
-        {
-            ArgumentNullException.ThrowIfNull(parquetStream);
-
-            var channelDataDict = await ExtractChannelsAsync(parquetStream, channelNames).ConfigureAwait(false);
-            var result = new Dictionary<string, byte[]>(channelDataDict.Count);
+            using var parquetReader = await ParquetReader.CreateAsync(memoryStream).ConfigureAwait(false);
+            var channelDataDict = await ExtractChannelsAsync(parquetReader, converter, channelNames).ConfigureAwait(false);
+            var result = new Dictionary<string, T[]>(channelDataDict.Count);
 
             foreach (var kvp in channelDataDict)
             {
-                result[kvp.Key] = ConvertFloatsToBinary(kvp.Value);
+                result[kvp.Key] = [.. kvp.Value];
             }
 
             return result;
         }
 
         /// <summary>
-        /// Converts channels from a Parquet stream, streaming each channel's binary data as it's converted.
-        /// This is more memory-efficient than ConvertChannelsAsync as channels are not held in memory simultaneously.
+        /// Converts channels from a Parquet stream, streaming each channel's typed data as it's converted.
         /// </summary>
-        /// <param name="parquetStream">The Parquet file stream.</param>
-        /// <param name="channelNames">Optional list of specific channel names to extract. If null or empty, extracts all channels.</param>
-        /// <param name="cancellationToken">Cancellation token to cancel the operation.</param>
-        /// <returns>Async enumerable of channel name and binary data pairs.</returns>
-        /// <exception cref="ArgumentNullException">Thrown when parquetStream is null.</exception>
-        public static async IAsyncEnumerable<(string Name, byte[] Data)> ConvertChannelsStreamAsync(
-            Stream parquetStream,
+        public static async IAsyncEnumerable<(string Name, T[] Data)> ConvertChannelsStreamAsync<T>(
+            byte[] parquetBytes,
+            IChannelValueConverter<T> converter,
             IReadOnlyList<string>? channelNames,
             [EnumeratorCancellation] CancellationToken cancellationToken)
         {
-            ArgumentNullException.ThrowIfNull(parquetStream);
+            ArgumentNullException.ThrowIfNull(parquetBytes);
+            ArgumentNullException.ThrowIfNull(converter);
 
-            using var parquetReader = await ParquetReader.CreateAsync(parquetStream, cancellationToken: cancellationToken).ConfigureAwait(false);
-
-            var channelNamesSet = channelNames != null && channelNames.Count > 0
+            using var memoryStream = new MemoryStream(parquetBytes);
+            using var parquetReader = await ParquetReader.CreateAsync(memoryStream, cancellationToken: cancellationToken).ConfigureAwait(false);
+     
+            // Optimization: For single row group, stream channels one at a time for better memory efficiency
+            if (parquetReader.RowGroupCount == 1)
+            {
+                var channelNamesSet = channelNames != null && channelNames.Count > 0
                 ? new HashSet<string>(channelNames)
                 : null;
 
-            var dataFields = channelNamesSet != null
-                    ? parquetReader.Schema.GetDataFields().Where(f => channelNamesSet.Contains(f.Name))
-                    : parquetReader.Schema.GetDataFields();
+                var dataFields = channelNamesSet != null
+                        ? parquetReader.Schema.GetDataFields().Where(f => channelNamesSet.Contains(f.Name))
+                        : parquetReader.Schema.GetDataFields();
 
-            for (int i = 0; i < parquetReader.RowGroupCount; i++)
-            {
-                cancellationToken.ThrowIfCancellationRequested();
-
-                using var rowGroupReader = parquetReader.OpenRowGroupReader(i);
-                
+                using var rowGroupReader = parquetReader.OpenRowGroupReader(0);
 
                 foreach (var field in dataFields)
                 {
                     cancellationToken.ThrowIfCancellationRequested();
 
                     var columnData = await rowGroupReader.ReadColumnAsync(field).ConfigureAwait(false);
+                    var channelValues = new List<T>(columnData.Data.Length);
+                    ConvertAndAddValues(columnData, converter, channelValues);
 
-                    var floatList = new List<float>();
-                    ConvertAndAddValues(columnData, floatList);
-
-                    var binaryData = ConvertFloatsToBinary(floatList);
-                    yield return (field.Name, binaryData);
+                    yield return (field.Name, channelValues.ToArray());
                 }
             }
+
+            else
+            {
+               var channelData = await ExtractChannelsAsync(parquetReader, converter, channelNames).ConfigureAwait(false);
+
+                foreach (var kvp in channelData)
+                {
+                    cancellationToken.ThrowIfCancellationRequested();
+                    yield return (kvp.Key, kvp.Value.ToArray());
+                }
+            }            
         }
 
         /// <summary>
         /// Extracts channels from a Parquet stream.
         /// </summary>
-        private static async Task<Dictionary<string, List<float>>> ExtractChannelsAsync(Stream parquetStream, IReadOnlyList<string>? channelNames)
+        private static async Task<Dictionary<string, List<T>>> ExtractChannelsAsync<T>(
+            ParquetReader parquetReader,
+            IChannelValueConverter<T> converter,
+            IReadOnlyList<string>? channelNames)
         {
-            using var parquetReader = await ParquetReader.CreateAsync(parquetStream).ConfigureAwait(false);
-
             var channelNamesSet = channelNames != null && channelNames.Count > 0
                 ? new HashSet<string>(channelNames)
                 : null;
 
-            var channelData = new Dictionary<string, List<float>>();
+            var channelData = new Dictionary<string, List<T>>();
             var dataFields = channelNamesSet != null
                     ? parquetReader.Schema.GetDataFields().Where(f => channelNamesSet.Contains(f.Name))
                     : parquetReader.Schema.GetDataFields();
 
             for (int i = 0; i < parquetReader.RowGroupCount; i++)
             {
-                using var rowGroupReader = parquetReader.OpenRowGroupReader(i);                
+                using var rowGroupReader = parquetReader.OpenRowGroupReader(i);
 
                 foreach (var field in dataFields)
                 {
@@ -126,11 +118,11 @@ namespace Canopy.Cli.Shared.StudyProcessing.ChannelData
 
                     if (!channelData.TryGetValue(field.Name, out var list))
                     {
-                        list = new List<float>();
+                        list = new List<T>();
                         channelData[field.Name] = list;
                     }
 
-                    ConvertAndAddValues(columnData, list);
+                    ConvertAndAddValues(columnData, converter, list);
                 }
             }
 
@@ -138,40 +130,16 @@ namespace Canopy.Cli.Shared.StudyProcessing.ChannelData
         }
 
         /// <summary>
-        /// Converts column data values to floats and adds them to the list.
+        /// Converts column data values using the converter and adds them to the list.
         /// </summary>
-        private static void ConvertAndAddValues(Parquet.Data.DataColumn columnData, List<float> targetList)
+        private static void ConvertAndAddValues<T>(Parquet.Data.DataColumn columnData, IChannelValueConverter<T> converter, List<T> targetList)
         {
-            var data = columnData.Data;        
+            var data = columnData.Data;
 
             for (int j = 0; j < data.Length; j++)
             {
-                var value = data.GetValue(j);
-                var floatValue = value switch
-                {
-                    float f => f,
-                    double d => (float)d,
-                    int n => (float)n,
-                    long l => (float)l,
-                    _ => float.NaN,
-                };
-                targetList.Add(floatValue);
+                targetList.Add(converter.Convert(data.GetValue(j)));
             }
-        }
-
-        /// <summary>
-        /// Converts a list of floats to a byte array.
-        /// </summary>
-        private static byte[] ConvertFloatsToBinary(List<float> floats)
-        {
-            if (floats.Count == 0)
-            {
-                return Array.Empty<byte>();
-            }
-
-            var byteArray = new byte[floats.Count * sizeof(float)];
-            Buffer.BlockCopy(floats.ToArray(), 0, byteArray, 0, byteArray.Length);
-            return byteArray;
         }
     }
 }

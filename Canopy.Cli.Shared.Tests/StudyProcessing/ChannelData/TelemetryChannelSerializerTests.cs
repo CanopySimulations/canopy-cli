@@ -85,13 +85,6 @@ namespace Canopy.Cli.Shared.StudyProcessing.ChannelData
             return memoryStream.ToArray();
         }
 
-        private static float[] BytesToFloatArray(byte[] bytes)
-        {
-            var floats = new float[bytes.Length / sizeof(float)];
-            Buffer.BlockCopy(bytes, 0, floats, 0, bytes.Length);
-            return floats;
-        }
-
         [TestMethod]
         public async Task ConvertChannelsAsync_WithSingleFloatChannel_ShouldReturnCorrectBinaryData()
         {
@@ -101,16 +94,29 @@ namespace Canopy.Cli.Shared.StudyProcessing.ChannelData
             };
             var parquetBytes = await CreateTestParquetFileAsync(testData);
 
-            var result = await TelemetryChannelSerializer.ConvertChannelsAsync(parquetBytes);
+            var result = await TelemetryChannelSerializer.ConvertChannelsAsync(parquetBytes, new FloatChannelValueConverter());
 
             Assert.AreEqual(1, result.Count);
             Assert.IsTrue(result.ContainsKey("Channel1"));
             
-            var binaryData = result["Channel1"];
-            Assert.AreEqual(3 * sizeof(float), binaryData.Length);
-            
-            var floats = BytesToFloatArray(binaryData);
-            CollectionAssert.AreEqual(new[] { 1.0f, 2.0f, 3.0f }, floats);
+            var floatData = result["Channel1"];           
+            CollectionAssert.AreEqual(new[] { 1.0f, 2.0f, 3.0f }, floatData);
+        }
+
+        public async Task ConvertChannelsFromStreamAsync_WithSingleFloatChannel_ShouldReturnCorrectBinaryData()
+        {
+            var testData = new Dictionary<string, List<object>>
+            {
+                { "Channel1", new List<object> { 1.0f, 2.0f, 3.0f } }
+            };
+            var parquetBytes = await CreateTestParquetFileAsync(testData);
+            var result = await TelemetryChannelSerializer.ConvertChannelsAsync(parquetBytes, new FloatChannelValueConverter());
+
+            Assert.AreEqual(1, result.Count);
+            Assert.IsTrue(result.ContainsKey("Channel1"));
+
+            var floatData = result["Channel1"];
+            CollectionAssert.AreEqual(new[] { 1.0f, 2.0f, 3.0f }, floatData);
         }
 
         [TestMethod]
@@ -124,7 +130,7 @@ namespace Canopy.Cli.Shared.StudyProcessing.ChannelData
             };
             var parquetBytes = await CreateTestParquetFileAsync(testData);
 
-            var result = await TelemetryChannelSerializer.ConvertChannelsAsync(parquetBytes);
+            var result = await TelemetryChannelSerializer.ConvertChannelsAsync(parquetBytes, new FloatChannelValueConverter());
 
             Assert.AreEqual(3, result.Count);
             Assert.IsTrue(result.ContainsKey("Channel1"));
@@ -144,7 +150,7 @@ namespace Canopy.Cli.Shared.StudyProcessing.ChannelData
             var parquetBytes = await CreateTestParquetFileAsync(testData);
             var requestedChannels = new List<string> { "Channel1", "Channel3" };
 
-            var result = await TelemetryChannelSerializer.ConvertChannelsAsync(parquetBytes, requestedChannels);
+            var result = await TelemetryChannelSerializer.ConvertChannelsAsync(parquetBytes, new FloatChannelValueConverter(), requestedChannels);
 
             Assert.AreEqual(2, result.Count);
             Assert.IsTrue(result.ContainsKey("Channel1"));
@@ -162,7 +168,7 @@ namespace Canopy.Cli.Shared.StudyProcessing.ChannelData
             var parquetBytes = await CreateTestParquetFileAsync(testData);
             var requestedChannels = new List<string> { "Channel1", "NonExistent" };
 
-            var result = await TelemetryChannelSerializer.ConvertChannelsAsync(parquetBytes, requestedChannels);
+            var result = await TelemetryChannelSerializer.ConvertChannelsAsync(parquetBytes, new FloatChannelValueConverter(), requestedChannels);
 
             Assert.AreEqual(1, result.Count);
             Assert.IsTrue(result.ContainsKey("Channel1"));
@@ -180,7 +186,7 @@ namespace Canopy.Cli.Shared.StudyProcessing.ChannelData
             var parquetBytes = await CreateTestParquetFileAsync(testData);
             var requestedChannels = new List<string>();
 
-            var result = await TelemetryChannelSerializer.ConvertChannelsAsync(parquetBytes, requestedChannels);
+            var result = await TelemetryChannelSerializer.ConvertChannelsAsync(parquetBytes, new FloatChannelValueConverter(), requestedChannels);
 
             Assert.AreEqual(2, result.Count);
         }
@@ -195,13 +201,13 @@ namespace Canopy.Cli.Shared.StudyProcessing.ChannelData
             };
             var parquetBytes = await CreateTestParquetFileAsync(testData);
 
-            var result = await TelemetryChannelSerializer.ConvertChannelsAsync(parquetBytes, null);
+            var result = await TelemetryChannelSerializer.ConvertChannelsAsync(parquetBytes, new FloatChannelValueConverter(), null);
 
             Assert.AreEqual(2, result.Count);
         }
 
         [TestMethod]
-        public async Task ConvertChannelsAsync_WithDoubleValues_ShouldConvertToFloat()
+        public async Task ConvertChannelsAsync_WithDoubleValuesAndFloatConverter_ShouldConvertToFloat()
         {
             var testData = new Dictionary<string, List<object>>
             {
@@ -209,10 +215,10 @@ namespace Canopy.Cli.Shared.StudyProcessing.ChannelData
             };
             var parquetBytes = await CreateTestParquetFileAsync(testData);
 
-            var result = await TelemetryChannelSerializer.ConvertChannelsAsync(parquetBytes);
+            var result = await TelemetryChannelSerializer.ConvertChannelsAsync(parquetBytes, new FloatChannelValueConverter());
 
             Assert.AreEqual(1, result.Count);
-            var floats = BytesToFloatArray(result["DoubleChannel"]);
+            var floats = result["DoubleChannel"];
             
             Assert.AreEqual(1.5f, floats[0], 0.0001f);
             Assert.AreEqual(2.5f, floats[1], 0.0001f);
@@ -220,7 +226,7 @@ namespace Canopy.Cli.Shared.StudyProcessing.ChannelData
         }
 
         [TestMethod]
-        public async Task ConvertChannelsAsync_WithIntValues_ShouldConvertToFloat()
+        public async Task ConvertChannelsAsync_WithIntValuesAndFloatConverter_ShouldConvertToFloat()
         {
             var testData = new Dictionary<string, List<object>>
             {
@@ -228,15 +234,15 @@ namespace Canopy.Cli.Shared.StudyProcessing.ChannelData
             };
             var parquetBytes = await CreateTestParquetFileAsync(testData);
 
-            var result = await TelemetryChannelSerializer.ConvertChannelsAsync(parquetBytes);
+            var result = await TelemetryChannelSerializer.ConvertChannelsAsync(parquetBytes, new FloatChannelValueConverter());
 
             Assert.AreEqual(1, result.Count);
-            var floats = BytesToFloatArray(result["IntChannel"]);
+            var floats = result["IntChannel"];
             CollectionAssert.AreEqual(new[] { 1.0f, 2.0f, 3.0f }, floats);
         }
 
         [TestMethod]
-        public async Task ConvertChannelsAsync_WithLongValues_ShouldConvertToFloat()
+        public async Task ConvertChannelsAsync_WithLongValuesAndFloatConverter_ShouldConvertToFloat()
         {
             var testData = new Dictionary<string, List<object>>
             {
@@ -244,15 +250,15 @@ namespace Canopy.Cli.Shared.StudyProcessing.ChannelData
             };
             var parquetBytes = await CreateTestParquetFileAsync(testData);
 
-            var result = await TelemetryChannelSerializer.ConvertChannelsAsync(parquetBytes);
+            var result = await TelemetryChannelSerializer.ConvertChannelsAsync(parquetBytes, new FloatChannelValueConverter());
 
             Assert.AreEqual(1, result.Count);
-            var floats = BytesToFloatArray(result["LongChannel"]);
+            var floats = result["LongChannel"];
             CollectionAssert.AreEqual(new[] { 1.0f, 2.0f, 3.0f }, floats);
         }
 
         [TestMethod]
-        public async Task ConvertChannelsAsync_WithMixedDataTypes_ShouldConvertAllToFloat()
+        public async Task ConvertChannelsAsync_WithMixedDataTypesAndFloatConverter_ShouldConvertAllToFloat()
         {
             var testData = new Dictionary<string, List<object>>
             {
@@ -263,12 +269,33 @@ namespace Canopy.Cli.Shared.StudyProcessing.ChannelData
             };
             var parquetBytes = await CreateTestParquetFileAsync(testData);
 
-            var result = await TelemetryChannelSerializer.ConvertChannelsAsync(parquetBytes);
+            var result = await TelemetryChannelSerializer.ConvertChannelsAsync(parquetBytes, new FloatChannelValueConverter());
 
             Assert.AreEqual(4, result.Count);
             foreach (var channel in result)
             {
-                Assert.AreEqual(2 * sizeof(float), channel.Value.Length);
+                Assert.AreEqual(2, channel.Value.Length);
+            }
+        }
+
+        [TestMethod]
+        public async Task ConvertChannelsAsync_WithMixedDataTypesAndDoubleConverter_ShouldConvertAllToFloat()
+        {
+            var testData = new Dictionary<string, List<object>>
+            {
+                { "FloatChannel", new List<object> { 1.0f, 2.0f } },
+                { "DoubleChannel", new List<object> { 3.0, 4.0 } },
+                { "IntChannel", new List<object> { 5, 6 } },
+                { "LongChannel", new List<object> { 7L, 8L } }
+            };
+            var parquetBytes = await CreateTestParquetFileAsync(testData);
+
+            var result = await TelemetryChannelSerializer.ConvertChannelsAsync(parquetBytes, new DoubleChannelValueConverter());
+
+            Assert.AreEqual(4, result.Count);
+            foreach (var channel in result)
+            {
+                Assert.AreEqual(2, channel.Value.Length);
             }
         }
 
@@ -282,23 +309,23 @@ namespace Canopy.Cli.Shared.StudyProcessing.ChannelData
             };
             var parquetBytes = await CreateTestParquetFileAsync(testData);
 
-            var result = await TelemetryChannelSerializer.ConvertChannelsAsync(parquetBytes);
+            var result = await TelemetryChannelSerializer.ConvertChannelsAsync(parquetBytes, new FloatChannelValueConverter());
 
             Assert.AreEqual(1, result.Count);
-            var binaryData = result["LargeChannel"];
-            Assert.AreEqual(10000 * sizeof(float), binaryData.Length);
+            var floats = result["LargeChannel"];
+            Assert.AreEqual(10000, floats.Length);
             
-            var floats = BytesToFloatArray(binaryData);
             Assert.AreEqual(0.0f, floats[0]);
             Assert.AreEqual(9999.0f, floats[9999]);
         }
+
 
         [TestMethod]
         public async Task ConvertChannelsAsync_WithNullParquetBytes_ShouldThrowArgumentNullException()
         {
             await Assert.ThrowsExceptionAsync<ArgumentNullException>(async () =>
             {
-                await TelemetryChannelSerializer.ConvertChannelsAsync((byte[])null!);
+                await TelemetryChannelSerializer.ConvertChannelsAsync((byte[])null!, new FloatChannelValueConverter());
             });
         }
 
@@ -309,7 +336,7 @@ namespace Canopy.Cli.Shared.StudyProcessing.ChannelData
             
             var exception = await Assert.ThrowsExceptionAsync<IOException>(async () =>
             {
-                await TelemetryChannelSerializer.ConvertChannelsAsync(invalidBytes);
+                await TelemetryChannelSerializer.ConvertChannelsAsync(invalidBytes, new FloatChannelValueConverter());
             });
             
             Assert.IsTrue(
@@ -320,17 +347,17 @@ namespace Canopy.Cli.Shared.StudyProcessing.ChannelData
 
         #region ConvertChannelsStreamAsync Tests
 
-        private async Task<List<(string Name, byte[] Data)>> ConvertChannelsStreamToList(
+        private async Task<List<(string Name, float[] Data)>> ConvertChannelsStreamToList(
             byte[] parquetBytes,
             IReadOnlyList<string>? channelNames = null,
             CancellationToken cancellationToken = default)
         {
-            var results = new List<(string Name, byte[] Data)>();
-            using var stream = new MemoryStream(parquetBytes);
+            var typeConverter = new FloatChannelValueConverter();
+            var results = new List<(string Name, float[] Data)>();
             await foreach (var item in TelemetryChannelSerializer.ConvertChannelsStreamAsync(
-                stream, channelNames, cancellationToken))
+                parquetBytes, typeConverter, channelNames, cancellationToken))
             {
-                results.Add(item);
+                results.Add((item.Name, item.Data));
             }
             return results;
         }
@@ -348,9 +375,8 @@ namespace Canopy.Cli.Shared.StudyProcessing.ChannelData
 
             Assert.AreEqual(1, results.Count);
             Assert.AreEqual("Channel1", results[0].Name);
-            Assert.AreEqual(3 * sizeof(float), results[0].Data.Length);
 
-            var floats = BytesToFloatArray(results[0].Data);
+            var floats = results[0].Data;
             CollectionAssert.AreEqual(new[] { 1.0f, 2.0f, 3.0f }, floats);
         }
 
@@ -443,7 +469,7 @@ namespace Canopy.Cli.Shared.StudyProcessing.ChannelData
             Assert.AreEqual(4, results.Count);
             foreach (var result in results)
             {
-                Assert.AreEqual(2 * sizeof(float), result.Data.Length);
+                Assert.AreEqual(2, result.Data.Length);
             }
         } 
 
@@ -459,10 +485,9 @@ namespace Canopy.Cli.Shared.StudyProcessing.ChannelData
             using var cts = new CancellationTokenSource();
             cts.Cancel();
 
-            using var stream = new MemoryStream(parquetBytes);
             await Assert.ThrowsExceptionAsync<OperationCanceledException>(async () =>
             {
-                await foreach (var item in TelemetryChannelSerializer.ConvertChannelsStreamAsync(stream, null, cts.Token))
+                await foreach (var item in TelemetryChannelSerializer.ConvertChannelsStreamAsync(parquetBytes, new FloatChannelValueConverter(), null, cts.Token))
                 {
                     Assert.Fail("Should not yield any items with cancelled token");
                 }
@@ -474,7 +499,7 @@ namespace Canopy.Cli.Shared.StudyProcessing.ChannelData
         {
             await Assert.ThrowsExceptionAsync<ArgumentNullException>(async () =>
             {
-                await foreach (var item in TelemetryChannelSerializer.ConvertChannelsStreamAsync(null!, null, CancellationToken.None))
+                await foreach (var item in TelemetryChannelSerializer.ConvertChannelsStreamAsync(null!, new FloatChannelValueConverter(), null, CancellationToken.None))
                 {
                     Assert.Fail("Should not yield any items");
                 }
@@ -494,9 +519,9 @@ namespace Canopy.Cli.Shared.StudyProcessing.ChannelData
             var results = await ConvertChannelsStreamToList(parquetBytes);
 
             Assert.AreEqual(1, results.Count);
-            Assert.AreEqual(10000 * sizeof(float), results[0].Data.Length);
+            Assert.AreEqual(10000, results[0].Data.Length);
 
-            var floats = BytesToFloatArray(results[0].Data);
+            var floats = results[0].Data;
             Assert.AreEqual(0.0f, floats[0]);
             Assert.AreEqual(9999.0f, floats[9999]);
         }
@@ -513,8 +538,7 @@ namespace Canopy.Cli.Shared.StudyProcessing.ChannelData
             var parquetBytes = await CreateTestParquetFileAsync(testData);
 
             var yieldCount = 0;
-            using var stream = new MemoryStream(parquetBytes);
-            await foreach (var item in TelemetryChannelSerializer.ConvertChannelsStreamAsync(stream, null, CancellationToken.None))
+            await foreach (var item in TelemetryChannelSerializer.ConvertChannelsStreamAsync(parquetBytes, new FloatChannelValueConverter(), null, CancellationToken.None))
             {
                 yieldCount++;
                 Assert.IsNotNull(item.Name);
@@ -527,4 +551,4 @@ namespace Canopy.Cli.Shared.StudyProcessing.ChannelData
 
         #endregion
     }
-} 
+}

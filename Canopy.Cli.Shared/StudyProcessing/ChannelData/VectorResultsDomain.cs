@@ -18,6 +18,6 @@ namespace Canopy.Cli.Shared.StudyProcessing.ChannelData
         public string Domain { get; }
         public string SimType { get; }
 
-        public IFile File { get; }    
+        public IFile File { get; }
     }
 }

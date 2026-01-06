@@ -29,5 +29,5 @@ namespace Canopy.Cli.Shared.StudyProcessing.ChannelData
             result = new BlobChannelMetadata(simType, channelName);
             return true;
         }
-    }    
+    }
 }

@@ -14,8 +14,7 @@ namespace Canopy.Cli.Shared.StudyProcessing.ChannelData
 
         public void Add(VectorResultsDomain domain)
         {
-            List<VectorResultsDomain> domains = null;
-            if (!this.items.TryGetValue(domain.SimType, out domains))
+            if (!this.items.TryGetValue(domain.SimType, out var domains))
             {
                 domains = new List<VectorResultsDomain>();
                 this.items[domain.SimType] = domains;
@@ -26,7 +25,7 @@ namespace Canopy.Cli.Shared.StudyProcessing.ChannelData
 
         public IReadOnlyList<VectorResultsDomain> GetColumns(string simType)
         {
-            return Enumerable.ToList(this.items[simType]);
+            return this.items[simType];
         }
 
         public int Count() => items.Count;
