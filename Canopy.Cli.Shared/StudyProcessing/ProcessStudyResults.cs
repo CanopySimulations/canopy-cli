@@ -21,7 +21,6 @@ namespace Canopy.Cli.Shared.StudyProcessing
             bool channelsAsCsv,
             bool deleteProcessedFiles,
             int parallelism,
-            string? simTypeFilter = null,
             string? xDomainFilter = null)
         {
             var studyScalarFiles = new StudyScalarFiles();

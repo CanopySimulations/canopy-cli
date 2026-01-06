@@ -47,7 +47,6 @@ namespace Canopy.Cli.Shared.StudyProcessing.ChannelData
 
             return result;
         }
-
         /// <summary>
         /// Converts channels from a Parquet stream, streaming each channel's typed data as it's converted.
         /// </summary>
@@ -67,8 +66,34 @@ namespace Canopy.Cli.Shared.StudyProcessing.ChannelData
             ArgumentNullException.ThrowIfNull(parquetBytes);
             ArgumentNullException.ThrowIfNull(converter);
 
+
             using var memoryStream = new MemoryStream(parquetBytes);
-            using var parquetReader = await ParquetReader.CreateAsync(memoryStream, cancellationToken: cancellationToken).ConfigureAwait(false);
+            await foreach (var item in ConvertChannelsStreamAsync(memoryStream, converter, channelNames, cancellationToken).ConfigureAwait(false))
+            {
+                yield return item;
+            }
+        }
+
+        /// <summary>
+        /// Converts channels from a Parquet stream, streaming each channel's typed data as it's converted.
+        /// </summary>
+        /// <typeparam name="T">The target element type for channel values.</typeparam>
+        /// <param name="parquetStream">The Parquet file contents as Stream.</param>
+        /// <param name="converter">A converter that maps raw Parquet values to <typeparamref name="T"/>.</param>
+        /// <param name="channelNames">Optional list of channel names to include. If <c>null</c> or empty, all channels are streamed.</param>
+        /// <param name="cancellationToken">Cancellation token to cancel streaming.</param>
+        /// <returns>An async stream of tuples containing the channel name and the converted values array.</returns>
+        /// <exception cref="ArgumentNullException">Thrown when <paramref name="parquetStream"/> or <paramref name="converter"/> is <c>null</c>.</exception>
+        public static async IAsyncEnumerable<(string Name, T[] Data)> ConvertChannelsStreamAsync<T>(
+            Stream parquetStream,
+            IChannelValueConverter<T> converter,
+            IReadOnlyList<string>? channelNames,
+            [EnumeratorCancellation] CancellationToken cancellationToken)
+        {
+            ArgumentNullException.ThrowIfNull(parquetStream);
+            ArgumentNullException.ThrowIfNull(converter);
+
+            using var parquetReader = await ParquetReader.CreateAsync(parquetStream, cancellationToken: cancellationToken).ConfigureAwait(false);
      
             // Optimization: For single row group, stream channels one at a time for better memory efficiency
             if (parquetReader.RowGroupCount == 1)

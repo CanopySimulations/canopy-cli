@@ -499,7 +499,7 @@ namespace Canopy.Cli.Shared.StudyProcessing.ChannelData
         {
             await Assert.ThrowsExceptionAsync<ArgumentNullException>(async () =>
             {
-                await foreach (var _ in TelemetryChannelSerializer.ConvertChannelsStreamAsync(null!, new FloatChannelValueConverter(), null, CancellationToken.None))
+                await foreach (var _ in TelemetryChannelSerializer.ConvertChannelsStreamAsync((byte[]?)null!, new FloatChannelValueConverter(), null, CancellationToken.None))
                 {
                     Assert.Fail("Should not yield any items");
                 }

@@ -10,7 +10,6 @@
             bool channelsAsCsv,
             bool deleteProcessedFiles,
             int parallelism,
-            string? simTypeFilter = null,
             string? xDomainFilter = null);
     }
 }
