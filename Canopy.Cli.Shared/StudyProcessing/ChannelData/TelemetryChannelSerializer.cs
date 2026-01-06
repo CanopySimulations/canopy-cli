@@ -18,6 +18,15 @@ namespace Canopy.Cli.Shared.StudyProcessing.ChannelData
         /// <summary>
         /// Converts channels from Parquet bytes to a dictionary of channel name to typed arrays using the provided converter.
         /// </summary>
+        /// <typeparam name="T">The target element type for channel values (e.g. <c>float</c> or <c>double</c>).</typeparam>
+        /// <param name="parquetBytes">The Parquet file contents as a byte array.</param>
+        /// <param name="converter">A converter that maps raw Parquet values to <typeparamref name="T"/>.</param>
+        /// <param name="channelNames">Optional list of channel names to include. If <c>null</c> or empty, all channels are returned.</param>
+        /// <returns>
+        /// A dictionary mapping channel name to an array of converted values of type <typeparamref name="T"/>.
+        /// The returned arrays contain the converted element values (element count = array.Length).
+        /// </returns>
+        /// <exception cref="ArgumentNullException">Thrown when <paramref name="parquetBytes"/> or <paramref name="converter"/> is <c>null</c>.</exception>
         public static async Task<Dictionary<string, T[]>> ConvertChannelsAsync<T>(
             byte[] parquetBytes,
             IChannelValueConverter<T> converter,
@@ -42,6 +51,13 @@ namespace Canopy.Cli.Shared.StudyProcessing.ChannelData
         /// <summary>
         /// Converts channels from a Parquet stream, streaming each channel's typed data as it's converted.
         /// </summary>
+        /// <typeparam name="T">The target element type for channel values.</typeparam>
+        /// <param name="parquetBytes">The Parquet file contents as a byte array.</param>
+        /// <param name="converter">A converter that maps raw Parquet values to <typeparamref name="T"/>.</param>
+        /// <param name="channelNames">Optional list of channel names to include. If <c>null</c> or empty, all channels are streamed.</param>
+        /// <param name="cancellationToken">Cancellation token to cancel streaming.</param>
+        /// <returns>An async stream of tuples containing the channel name and the converted values array.</returns>
+        /// <exception cref="ArgumentNullException">Thrown when <paramref name="parquetBytes"/> or <paramref name="converter"/> is <c>null</c>.</exception>
         public static async IAsyncEnumerable<(string Name, T[] Data)> ConvertChannelsStreamAsync<T>(
             byte[] parquetBytes,
             IChannelValueConverter<T> converter,
@@ -92,8 +108,15 @@ namespace Canopy.Cli.Shared.StudyProcessing.ChannelData
         }
 
         /// <summary>
-        /// Extracts channels from a Parquet stream.
+        /// Extracts channels from an open <see cref="ParquetReader"/> across all row groups.
         /// </summary>
+        /// <typeparam name="T">The target element type produced by the <paramref name="converter"/>.</typeparam>
+        /// <param name="parquetReader">An initialized Parquet reader for the source data.</param>
+        /// <param name="converter">Converter used to transform raw Parquet values to <typeparamref name="T"/>.</param>
+        /// <param name="channelNames">Optional list of channel names to include; if <c>null</c> or empty all data fields are processed.</param>
+        /// <returns>
+        /// A dictionary mapping channel name to a <see cref="List{T}"/> containing converted values accumulated from all row groups.
+        /// </returns>
         private static async Task<Dictionary<string, List<T>>> ExtractChannelsAsync<T>(
             ParquetReader parquetReader,
             IChannelValueConverter<T> converter,
@@ -130,8 +153,13 @@ namespace Canopy.Cli.Shared.StudyProcessing.ChannelData
         }
 
         /// <summary>
-        /// Converts column data values using the converter and adds them to the list.
+        /// Converts values from a Parquet <see cref="Parquet.Data.DataColumn"/> using the provided converter
+        /// and appends the converted values to <paramref name="targetList"/>.
         /// </summary>
+        /// <typeparam name="T">Type of the converted values.</typeparam>
+        /// <param name="columnData">The source column data from a Parquet row group.</param>
+        /// <param name="converter">Converter used to transform raw values to <typeparamref name="T"/>.</param>
+        /// <param name="targetList">List to append converted values to.</param>
         private static void ConvertAndAddValues<T>(Parquet.Data.DataColumn columnData, IChannelValueConverter<T> converter, List<T> targetList)
         {
             var data = columnData.Data;

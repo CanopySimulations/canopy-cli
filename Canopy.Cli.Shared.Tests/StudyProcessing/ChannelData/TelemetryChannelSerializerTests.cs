@@ -487,7 +487,7 @@ namespace Canopy.Cli.Shared.StudyProcessing.ChannelData
 
             await Assert.ThrowsExceptionAsync<OperationCanceledException>(async () =>
             {
-                await foreach (var item in TelemetryChannelSerializer.ConvertChannelsStreamAsync(parquetBytes, new FloatChannelValueConverter(), null, cts.Token))
+                await foreach (var _ in TelemetryChannelSerializer.ConvertChannelsStreamAsync(parquetBytes, new FloatChannelValueConverter(), null, cts.Token))
                 {
                     Assert.Fail("Should not yield any items with cancelled token");
                 }
@@ -499,7 +499,7 @@ namespace Canopy.Cli.Shared.StudyProcessing.ChannelData
         {
             await Assert.ThrowsExceptionAsync<ArgumentNullException>(async () =>
             {
-                await foreach (var item in TelemetryChannelSerializer.ConvertChannelsStreamAsync(null!, new FloatChannelValueConverter(), null, CancellationToken.None))
+                await foreach (var _ in TelemetryChannelSerializer.ConvertChannelsStreamAsync(null!, new FloatChannelValueConverter(), null, CancellationToken.None))
                 {
                     Assert.Fail("Should not yield any items");
                 }
