@@ -24,7 +24,7 @@ namespace Canopy.Cli.Shared.StudyProcessing
             string? xDomainFilter = null)
         {
             var studyScalarFiles = new StudyScalarFiles();
-            var channelDataFiles = new ChannelDataFiles();
+            var channelDataFiles = new DomainChannelFiles();
             var channelDataColumns = new ChannelDataColumns();
 
             var allFiles = await root.GetFilesAsync();

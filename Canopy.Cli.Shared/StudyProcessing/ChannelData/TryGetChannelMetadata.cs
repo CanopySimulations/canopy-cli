@@ -1,6 +1,4 @@
-﻿using System.Linq;
-
-namespace Canopy.Cli.Shared.StudyProcessing.ChannelData
+﻿namespace Canopy.Cli.Shared.StudyProcessing.ChannelData
 {
     public static class TryGetChannelMetadata
     {

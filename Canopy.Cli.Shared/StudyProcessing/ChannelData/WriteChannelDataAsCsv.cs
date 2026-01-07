@@ -104,28 +104,21 @@ namespace Canopy.Cli.Shared.StudyProcessing.ChannelData
             IFileWriter writer,
             bool deleteProcessedFiles,
             int parallelism,
-            ChannelDataFiles channelDataColumns,
-            string? simTypeFilter = null,
+            DomainChannelFiles domainChannelFiles,
             string? xDomainFilter = null)
         {
-            foreach (var simType in channelDataColumns.SimTypes)
+            foreach (var simType in domainChannelFiles.SimTypes)
             {
-                // early exit to avoid unnecessary processing
-                // else all sim types would be processed and only writer.WriteNewFile (line 322) actually filters out which file is written
-                if (!string.IsNullOrEmpty(simTypeFilter) && !simType.Equals(simTypeFilter, StringComparison.InvariantCultureIgnoreCase))
-                {
-                    continue;
-                }
-
-                var columns = channelDataColumns.GetColumns(simType);
-                var folderGroups = columns.GroupBy(v => v.File.RelativePathToFile);
+                var domains = domainChannelFiles.GetDomains(simType);
+                var folderGroups = domains.GroupBy(v => v.File.RelativePathToFile);
 
                 foreach (var folderGroup in folderGroups)
                 {
                     var relativePathToFile = folderGroup.Key;
                     var metadata = await GetSimTypeMetadataAsync(root, relativePathToFile, simType);
 
-                    foreach (var domain in folderGroup)
+                    // Process each domain in parallel with the requested degree of parallelism
+                    await folderGroup.ForEachAsync(parallelism, async domain =>
                     {
                         var xDomain = domain.Domain.Trim();
 
@@ -133,7 +126,7 @@ namespace Canopy.Cli.Shared.StudyProcessing.ChannelData
                         if (!string.IsNullOrEmpty(xDomainFilter) &&
                             !string.Equals(xDomain, xDomainFilter, StringComparison.OrdinalIgnoreCase))
                         {
-                            continue;
+                            return;
                         }
 
                         var fileSuffix = "_" + (string.IsNullOrWhiteSpace(xDomain) ? "Unspecified" : xDomain);
@@ -160,8 +153,9 @@ namespace Canopy.Cli.Shared.StudyProcessing.ChannelData
                             writer.ReportError(
                                 "Failed to parse parquet file: " + domain.File.FullPath,
                                 t);
-                            continue;
+                            return;
                         }
+
                         if (data.Count > 0)
                         {
                             await WriteVectorResultsCsvAsync(
@@ -174,7 +168,7 @@ namespace Canopy.Cli.Shared.StudyProcessing.ChannelData
                                 metadata,
                                 data);
                         }
-                    }
+                    });
                 }
             }
         }

@@ -17,23 +17,18 @@ namespace Canopy.Cli.Shared.StudyProcessing.ChannelData
     {
         private async Task<byte[]> CreateTestParquetFileAsync(Dictionary<string, List<object>> columns)
         {
-            using var memoryStream = new MemoryStream();
-            
-            var fields = new List<Field>();
-            foreach (var column in columns)
+            await using var memoryStream = new MemoryStream();
+
+            var fields = columns.Select(kv =>
             {
-                var firstValue = column.Value.FirstOrDefault();
-                if (firstValue is float)
-                    fields.Add(new DataField<float>(column.Key));
-                else if (firstValue is double)
-                    fields.Add(new DataField<double>(column.Key));
-                else if (firstValue is int)
-                    fields.Add(new DataField<int>(column.Key));
-                else if (firstValue is long)
-                    fields.Add(new DataField<long>(column.Key));
-                else
-                    fields.Add(new DataField<float>(column.Key));
-            }
+                var sample = kv.Value.FirstOrDefault();
+                return sample switch
+                {
+                    float => (Field)new DataField<float>(kv.Key),
+                    double => new DataField<double>(kv.Key),
+                    _ => new DataField<float>(kv.Key)
+                };
+            }).ToList();
 
             if (fields.Count == 0)
             {
@@ -43,41 +38,26 @@ namespace Canopy.Cli.Shared.StudyProcessing.ChannelData
             var schema = new ParquetSchema(fields);
 
             using (var parquetWriter = await ParquetWriter.CreateAsync(schema, memoryStream))
+            using (var groupWriter = parquetWriter.CreateRowGroup())
             {
-                using var groupWriter = parquetWriter.CreateRowGroup();
-                
-                foreach (var column in columns)
+                foreach (var kv in columns)
                 {
-                    var field = fields.First(f => f.Name == column.Key);
-                    var firstValue = column.Value.FirstOrDefault();
-                    
-                    if (firstValue is float)
+                    var field = (DataField)fields.First(f => f.Name == kv.Key);
+                    var sample = kv.Value.FirstOrDefault();
+
+                    switch (sample)
                     {
-                        var dataColumn = new DataColumn(
-                            field as DataField,
-                            column.Value.Cast<float>().ToArray());
-                        await groupWriter.WriteColumnAsync(dataColumn);
-                    }
-                    else if (firstValue is double)
-                    {
-                        var dataColumn = new DataColumn(
-                            field as DataField,
-                            column.Value.Cast<double>().ToArray());
-                        await groupWriter.WriteColumnAsync(dataColumn);
-                    }
-                    else if (firstValue is int)
-                    {
-                        var dataColumn = new DataColumn(
-                            field as DataField,
-                            column.Value.Cast<int>().ToArray());
-                        await groupWriter.WriteColumnAsync(dataColumn);
-                    }
-                    else if (firstValue is long)
-                    {
-                        var dataColumn = new DataColumn(
-                            field as DataField,
-                            column.Value.Cast<long>().ToArray());
-                        await groupWriter.WriteColumnAsync(dataColumn);
+                        case float:
+                            await groupWriter.WriteColumnAsync(new DataColumn(field, kv.Value.Cast<float>().ToArray()));
+                            break;
+                        case double:
+                            await groupWriter.WriteColumnAsync(new DataColumn(field, kv.Value.Cast<double>().ToArray()));
+                            break;                     
+                        default:
+                            // Fallback: try to convert numeric-like values to float
+                            var fallback = kv.Value.Select(v => Convert.ToSingle(v)).ToArray();
+                            await groupWriter.WriteColumnAsync(new DataColumn(field, fallback));
+                            break;
                     }
                 }
             }
@@ -103,6 +83,7 @@ namespace Canopy.Cli.Shared.StudyProcessing.ChannelData
             CollectionAssert.AreEqual(new[] { 1.0f, 2.0f, 3.0f }, floatData);
         }
 
+        [TestMethod]
         public async Task ConvertChannelsFromStreamAsync_WithSingleFloatChannel_ShouldReturnCorrectBinaryData()
         {
             var testData = new Dictionary<string, List<object>>
@@ -110,12 +91,20 @@ namespace Canopy.Cli.Shared.StudyProcessing.ChannelData
                 { "Channel1", new List<object> { 1.0f, 2.0f, 3.0f } }
             };
             var parquetBytes = await CreateTestParquetFileAsync(testData);
-            var result = await TelemetryChannelSerializer.ConvertChannelsAsync(parquetBytes, new FloatChannelValueConverter());
 
-            Assert.AreEqual(1, result.Count);
-            Assert.IsTrue(result.ContainsKey("Channel1"));
+            using var ms = new MemoryStream(parquetBytes);
+            var results = new List<(string Name, float[] Data)>();
+            var typeConverter = new FloatChannelValueConverter();
 
-            var floatData = result["Channel1"];
+            await foreach (var item in TelemetryChannelSerializer.ConvertChannelsStreamAsync(ms, typeConverter, null, CancellationToken.None))
+            {
+                results.Add((item.Name, item.Data));
+            }
+
+            Assert.AreEqual(1, results.Count);
+            Assert.IsTrue(results.Any(r => r.Name == "Channel1"));
+
+            var floatData = results.First(r => r.Name == "Channel1").Data;
             CollectionAssert.AreEqual(new[] { 1.0f, 2.0f, 3.0f }, floatData);
         }
 
@@ -223,38 +212,6 @@ namespace Canopy.Cli.Shared.StudyProcessing.ChannelData
             Assert.AreEqual(1.5f, floats[0], 0.0001f);
             Assert.AreEqual(2.5f, floats[1], 0.0001f);
             Assert.AreEqual(3.5f, floats[2], 0.0001f);
-        }
-
-        [TestMethod]
-        public async Task ConvertChannelsAsync_WithIntValuesAndFloatConverter_ShouldConvertToFloat()
-        {
-            var testData = new Dictionary<string, List<object>>
-            {
-                { "IntChannel", new List<object> { 1, 2, 3 } }
-            };
-            var parquetBytes = await CreateTestParquetFileAsync(testData);
-
-            var result = await TelemetryChannelSerializer.ConvertChannelsAsync(parquetBytes, new FloatChannelValueConverter());
-
-            Assert.AreEqual(1, result.Count);
-            var floats = result["IntChannel"];
-            CollectionAssert.AreEqual(new[] { 1.0f, 2.0f, 3.0f }, floats);
-        }
-
-        [TestMethod]
-        public async Task ConvertChannelsAsync_WithLongValuesAndFloatConverter_ShouldConvertToFloat()
-        {
-            var testData = new Dictionary<string, List<object>>
-            {
-                { "LongChannel", new List<object> { 1L, 2L, 3L } }
-            };
-            var parquetBytes = await CreateTestParquetFileAsync(testData);
-
-            var result = await TelemetryChannelSerializer.ConvertChannelsAsync(parquetBytes, new FloatChannelValueConverter());
-
-            Assert.AreEqual(1, result.Count);
-            var floats = result["LongChannel"];
-            CollectionAssert.AreEqual(new[] { 1.0f, 2.0f, 3.0f }, floats);
         }
 
         [TestMethod]

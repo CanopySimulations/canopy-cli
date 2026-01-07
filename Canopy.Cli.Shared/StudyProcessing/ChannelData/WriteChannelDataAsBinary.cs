@@ -13,19 +13,20 @@ namespace Canopy.Cli.Shared.StudyProcessing.ChannelData
             IFileWriter writer,
             bool deleteProcessedFiles,
             int parallelism,
-            ChannelDataFiles channelDataFiles,
+            DomainChannelFiles domainChannelFiles,
             string? xDomainFilter = null)
         {
-            foreach (var simType in channelDataFiles.SimTypes)
+            foreach (var simType in domainChannelFiles.SimTypes)
             {
-                var columns = channelDataFiles.GetColumns(simType);
-                var folderGroups = columns.GroupBy(v => v.File.RelativePathToFile);
+                var domains = domainChannelFiles.GetDomains(simType);
+                var folderGroups = domains.GroupBy(v => v.File.RelativePathToFile);
 
                 foreach (var folderGroup in folderGroups)
                 {
                     var relativePathToFile = folderGroup.Key;
 
-                    foreach (var domain in folderGroup)
+                    // Process each domain in parallel using the provided degree of parallelism
+                    await folderGroup.ForEachAsync(parallelism, async domain =>
                     {
                         var xDomain = domain.Domain.Trim();
 
@@ -33,7 +34,7 @@ namespace Canopy.Cli.Shared.StudyProcessing.ChannelData
                         if (!string.IsNullOrEmpty(xDomainFilter) &&
                             !string.Equals(xDomain, xDomainFilter, StringComparison.OrdinalIgnoreCase))
                         {
-                            continue;
+                            return;
                         }
 
                         try
@@ -42,11 +43,9 @@ namespace Canopy.Cli.Shared.StudyProcessing.ChannelData
                             var parquetBytes = await domain.File.GetContentAsBytesAsync();
 
                             var typeConverter = new FloatChannelValueConverter();
-                            // Use streaming API to extract channels one at a time
                             await foreach (var (channelName, dataArray) in 
                                 TelemetryChannelSerializer.ConvertChannelsStreamAsync(parquetBytes, typeConverter, null, default))
                             {
-                                // Create filename with channel name
                                 var fileName = $"{simType}_{channelName}.bin";
 
                                 Console.WriteLine($"Writing channel '{channelName}' to '{fileName}' in '{relativePathToFile}'.");
@@ -65,7 +64,7 @@ namespace Canopy.Cli.Shared.StudyProcessing.ChannelData
                                 "Failed to process parquet file: " + domain.File.FullPath,
                                 t);
                         }
-                    }
+                    });
                 }
             }
         }

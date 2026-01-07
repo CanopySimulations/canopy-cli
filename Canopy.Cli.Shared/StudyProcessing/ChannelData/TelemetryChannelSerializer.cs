@@ -1,5 +1,6 @@
 #nullable enable
 using Parquet;
+using Parquet.Data;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -185,7 +186,7 @@ namespace Canopy.Cli.Shared.StudyProcessing.ChannelData
         /// <param name="columnData">The source column data from a Parquet row group.</param>
         /// <param name="converter">Converter used to transform raw values to <typeparamref name="T"/>.</param>
         /// <param name="targetList">List to append converted values to.</param>
-        private static void ConvertAndAddValues<T>(Parquet.Data.DataColumn columnData, IChannelValueConverter<T> converter, List<T> targetList)
+        private static void ConvertAndAddValues<T>(DataColumn columnData, IChannelValueConverter<T> converter, List<T> targetList)
         {
             var data = columnData.Data;
 

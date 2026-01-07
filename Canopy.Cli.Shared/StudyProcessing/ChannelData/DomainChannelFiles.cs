@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Canopy.Cli.Shared.StudyProcessing.ChannelData
 {
-    public class ChannelDataFiles
+    public class DomainChannelFiles
     {
         private readonly Dictionary<string, List<VectorResultsDomain>> items = new Dictionary<string, List<VectorResultsDomain>>();
 
@@ -23,7 +23,7 @@ namespace Canopy.Cli.Shared.StudyProcessing.ChannelData
             domains.Add(domain);
         }
 
-        public IReadOnlyList<VectorResultsDomain> GetColumns(string simType)
+        public IReadOnlyList<VectorResultsDomain> GetDomains(string simType)
         {
             return this.items[simType];
         }
