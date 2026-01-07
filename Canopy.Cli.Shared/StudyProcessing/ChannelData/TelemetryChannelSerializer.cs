@@ -95,7 +95,7 @@ namespace Canopy.Cli.Shared.StudyProcessing.ChannelData
             ArgumentNullException.ThrowIfNull(converter);
 
             using var parquetReader = await ParquetReader.CreateAsync(parquetStream, cancellationToken: cancellationToken).ConfigureAwait(false);
-     
+
             // Optimization: For single row group, stream channels one at a time for better memory efficiency
             if (parquetReader.RowGroupCount == 1)
             {
@@ -123,14 +123,14 @@ namespace Canopy.Cli.Shared.StudyProcessing.ChannelData
 
             else
             {
-               var channelData = await ExtractChannelsAsync(parquetReader, converter, channelNames).ConfigureAwait(false);
+                var channelData = await ExtractChannelsAsync(parquetReader, converter, channelNames).ConfigureAwait(false);
 
                 foreach (var kvp in channelData)
                 {
                     cancellationToken.ThrowIfCancellationRequested();
                     yield return (kvp.Key, kvp.Value.ToArray());
                 }
-            }            
+            }
         }
 
         /// <summary>

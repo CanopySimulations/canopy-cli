@@ -34,7 +34,7 @@ namespace Canopy.Cli.Shared.StudyProcessing.ChannelData
     {
         public double Convert(object rawValue) => rawValue switch
         {
-            double d => (double)d,
+            double d => d,
             float f => (double)f,
             int n => (double)n,
             long l => (double)l,

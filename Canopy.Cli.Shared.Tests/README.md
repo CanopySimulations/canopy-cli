@@ -8,10 +8,12 @@ This test project follows the same directory structure as the main project for e
 
 ```
 Canopy.Cli.Shared.Tests/
-??? StudyProcessing/
-?   ??? ChannelData/
-?       ??? ParquetChannelConverterTests.cs
-??? Canopy.Cli.Shared.Tests.csproj
+  StudyProcessing/
+    ChannelData/
+      TryGetVectorResultsDomainTests.cs
+      TelemetryChannelSerializerTests.cs
+      DomainChannelFilesTests.cs
+  Canopy.Cli.Shared.Tests.csproj
 ```
 
 ## Running Tests
