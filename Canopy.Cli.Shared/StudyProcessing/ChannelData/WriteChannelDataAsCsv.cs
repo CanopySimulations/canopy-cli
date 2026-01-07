@@ -1,4 +1,5 @@
-﻿namespace Canopy.Cli.Shared.StudyProcessing.ChannelData
+﻿#nullable enable
+namespace Canopy.Cli.Shared.StudyProcessing.ChannelData
 {
     using System;
     using System.Collections.Concurrent;
@@ -43,7 +44,7 @@
 
                         var fileSuffix = "_" + (string.IsNullOrWhiteSpace(xDomain) ? "Unspecified" : xDomain);
 
-                        var resolvedData = new ConcurrentQueue<ResolvedCsvColumn>(); 
+                        var resolvedData = new ConcurrentQueue<ResolvedCsvColumn>();
                         await xDomainGroup.ForEachAsync(
                             parallelism,
                             async column =>
@@ -59,7 +60,7 @@
                                         var values = new double[floatValues.Length];
                                         for (int i = 0; i < floatValues.Length; i++)
                                         {
-                                            values[i] = (double) floatValues[i];
+                                            values[i] = (double)floatValues[i];
                                         }
                                         resolvedData.Enqueue(
                                             new ResolvedCsvColumn(column.File, column.Metadata.ChannelName, values));
@@ -83,79 +84,98 @@
                         var data = resolvedData.ToList();
                         if (data.Count > 0)
                         {
-                            // Always put sLap at the start for ATLAS compatibility.
-                            const string AtlasPrimaryChannel = "tRun";
-                            data.Sort((a, b) =>
-                            {
-                                if (a == b)
-                                {
-                                    return 0;
-                                }
-
-                                if (a.ChannelName == AtlasPrimaryChannel)
-                                {
-                                    return -1;
-                                }
-
-                                if (b.ChannelName == AtlasPrimaryChannel)
-                                {
-                                    return 1;
-                                }
-
-                                return String.Compare(a.ChannelName, b.ChannelName, StringComparison.OrdinalIgnoreCase);
-                            });
-
-                            var maxDataLength = data.Select(v => v.Data.Length).Max();
-                            var csv = new StringBuilder();
-                            csv.AppendLine(relativePathToFile + simType);
-                            csv.AppendLine(string.Join(",", data.Select(v => v.ChannelName)));
-                            csv.AppendLine(string.Join(",", data.Select(v =>
-                            {
-                                var units = metadata.GetChannelUnits(v.ChannelName);
-                                if (string.IsNullOrWhiteSpace(units))
-                                {
-                                    return "\"()\"";
-                                }
-
-                                return "\"" + units + "\"";
-                            })));
-
-                            for (int i = 0; i < maxDataLength; i++)
-                            {
-                                csv.AppendLine(
-                                    string.Join(
-                                        ",",
-                                        data.Select(v => v.Data.Length > i ? v.Data[i].NumericOrNaN().ToString(CultureInfo.InvariantCulture) : "").ToList()));
-                            }
-
-                            var bytes = Encoding.UTF8.GetBytes(csv.ToString());
-                            var fileName = simType + "_VectorResults" + fileSuffix + ".csv";
-                            if(string.IsNullOrWhiteSpace(relativePathToFile))
-                            {
-                                Console.WriteLine($"Writing '{fileName}'.");
-                            }
-                            else
-                            {
-                                Console.WriteLine($"Writing '{fileName}' to '{relativePathToFile}'.");
-                            }
-                            await writer.WriteNewFile(root, relativePathToFile, simType + "_VectorResults" + fileSuffix +  ".csv", bytes);
-
-                            if (deleteProcessedFiles)
-                            {
-                                foreach (var column in data)
-                                {
-                                    await writer.DeleteProcessedFile(root, column.File);
-                                }
-                            }
+                            await WriteVectorResultsCsvAsync(
+                                root,
+                                writer,
+                                deleteProcessedFiles,
+                                relativePathToFile,
+                                simType,
+                                fileSuffix,
+                                metadata,
+                                data);
                         }
                     }
                 }
             }
         }
 
+        public static async Task ExecuteAsync(
+            IRootFolder root,
+            IFileWriter writer,
+            bool deleteProcessedFiles,
+            int parallelism,
+            DomainChannelFiles domainChannelFiles,
+            string? xDomainFilter = null)
+        {
+            foreach (var simType in domainChannelFiles.SimTypes)
+            {
+                var domains = domainChannelFiles.GetDomains(simType);
+                var folderGroups = domains.GroupBy(v => v.File.RelativePathToFile);
+
+                foreach (var folderGroup in folderGroups)
+                {
+                    var relativePathToFile = folderGroup.Key;
+                    var metadata = await GetSimTypeMetadataAsync(root, relativePathToFile, simType);
+
+                    // Process each domain in parallel with the requested degree of parallelism
+                    await folderGroup.ForEachAsync(parallelism, async domain =>
+                    {
+                        var xDomain = domain.Domain.Trim();
+
+                        // Filter by X-domain if specified
+                        if (!string.IsNullOrEmpty(xDomainFilter) &&
+                            !string.Equals(xDomain, xDomainFilter, StringComparison.OrdinalIgnoreCase))
+                        {
+                            return;
+                        }
+
+                        var fileSuffix = "_" + (string.IsNullOrWhiteSpace(xDomain) ? "Unspecified" : xDomain);
+
+                        var data = new List<ResolvedCsvColumn>();
+                        try
+                        {
+                            var parquetBytes = await domain.File.GetContentAsBytesAsync();
+
+                            var channelData = await TelemetryChannelSerializer.ConvertChannelsAsync(
+                                parquetBytes,
+                                new DoubleChannelValueConverter());
+
+                            foreach (var kvp in channelData)
+                            {
+                                data.Add(new ResolvedCsvColumn(
+                                    domain.File,
+                                    kvp.Key,
+                                    kvp.Value));
+                            }
+                        }
+                        catch (Exception t)
+                        {
+                            writer.ReportError(
+                                "Failed to parse parquet file: " + domain.File.FullPath,
+                                t);
+                            return;
+                        }
+
+                        if (data.Count > 0)
+                        {
+                            await WriteVectorResultsCsvAsync(
+                                root,
+                                writer,
+                                deleteProcessedFiles,
+                                relativePathToFile,
+                                simType,
+                                fileSuffix,
+                                metadata,
+                                data);
+                        }
+                    });
+                }
+            }
+        }
+
         private static async Task<SimTypeMetadataResult> GetSimTypeMetadataAsync(
             IRootFolder baseDirectory,
-            string relativePathToFile, 
+            string relativePathToFile,
             string simType)
         {
             var lookup = new Dictionary<string, SimTypeMetadataRow>();
@@ -240,5 +260,83 @@
             public string XDomain { get; }
             public int PointsInChannel { get; }
         }
+
+        private static async Task WriteVectorResultsCsvAsync(
+            IRootFolder root,
+            IFileWriter writer,
+            bool deleteProcessedFiles,
+            string relativePathToFile,
+            string simType,
+            string fileSuffix,
+            SimTypeMetadataResult metadata,
+            List<ResolvedCsvColumn> data)
+        {
+            const string AtlasPrimaryChannel = "tRun";
+            data.Sort((a, b) =>
+            {
+                if (a == b)
+                {
+                    return 0;
+                }
+
+                if (a.ChannelName == AtlasPrimaryChannel)
+                {
+                    return -1;
+                }
+
+                if (b.ChannelName == AtlasPrimaryChannel)
+                {
+                    return 1;
+                }
+
+                return String.Compare(a.ChannelName, b.ChannelName, StringComparison.OrdinalIgnoreCase);
+            });
+
+            var maxDataLength = data.Select(v => v.Data.Length).Max();
+            var csv = new StringBuilder();
+            csv.AppendLine(relativePathToFile + simType);
+            csv.AppendLine(string.Join(",", data.Select(v => v.ChannelName)));
+            csv.AppendLine(string.Join(",", data.Select(v =>
+            {
+                var units = metadata.GetChannelUnits(v.ChannelName);
+                if (string.IsNullOrWhiteSpace(units))
+                {
+                    return "\"()\"";
+                }
+
+                return "\"" + units + "\"";
+            })));
+            Console.WriteLine($"MaxDataLength={maxDataLength}");
+
+            for (int i = 0; i < maxDataLength; i++)
+            {
+                csv.AppendLine(
+                    string.Join(
+                        ",",
+                        data.Select(v => v.Data.Length > i ? v.Data[i].NumericOrNaN().ToString(CultureInfo.InvariantCulture) : "").ToList()));
+            }
+
+            var bytes = Encoding.UTF8.GetBytes(csv.ToString());
+            var fileName = simType + "_VectorResults" + fileSuffix + ".csv";
+            if (string.IsNullOrWhiteSpace(relativePathToFile))
+            {
+                Console.WriteLine($"Writing '{fileName}'. Path is empty.");
+            }
+            else
+            {
+                Console.WriteLine($"Writing '{fileName}' to '{relativePathToFile}'.");
+            }
+
+            await writer.WriteNewFile(root, relativePathToFile, fileName, bytes);
+
+            if (deleteProcessedFiles)
+            {
+                foreach (var column in data)
+                {
+                    await writer.DeleteProcessedFile(root, column.File);
+                }
+            }
+        }
+
     }
 }

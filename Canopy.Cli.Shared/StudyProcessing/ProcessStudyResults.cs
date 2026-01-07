@@ -1,4 +1,5 @@
-﻿using System;
+﻿#nullable enable
+using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,6 +13,8 @@ namespace Canopy.Cli.Shared.StudyProcessing
 
     public class ProcessStudyResults : IProcessStudyResults
     {
+        private const string BinaryFileExtension = ".bin";
+
         public async Task ExecuteAsync(
             IRootFolder root,
             IFileWriter writer,
@@ -21,19 +24,33 @@ namespace Canopy.Cli.Shared.StudyProcessing
             string? xDomainFilter = null)
         {
             var studyScalarFiles = new StudyScalarFiles();
+            var channelDataFiles = new DomainChannelFiles();
             var channelDataColumns = new ChannelDataColumns();
 
             var allFiles = await root.GetFilesAsync();
             var filesToWrite = new List<IFile>();
+            var binFiles = new List<IFile>();
+
             foreach (var file in allFiles)
             {
                 try
                 {
                     TryAddFileToStudyScalarResults.Execute(file, studyScalarFiles);
 
-                    if (channelsAsCsv && TryGetChannelMetadata.Execute(file, out var channelMetadata))
+                    if (TryGetVectorResultsDomain.Execute(file, out var resultsDomain))
                     {
-                        channelDataColumns.Add(new CsvColumn(channelMetadata, file));
+                        // Parquet file path
+                        channelDataFiles.Add(resultsDomain);
+                    }
+                    else if (file.FileName.EndsWith(BinaryFileExtension, StringComparison.InvariantCultureIgnoreCase))
+                    {
+                        binFiles.Add(file);
+
+                        if (channelsAsCsv && TryGetChannelMetadata.Execute(file, out var channelMetadata))
+                        {
+                            // legacy bin path
+                            channelDataColumns.Add(new CsvColumn(channelMetadata, file));
+                        }
                     }
                     else
                     {
@@ -58,7 +75,33 @@ namespace Canopy.Cli.Shared.StudyProcessing
                 await writer.WriteExistingFile(root, file);
             });
 
-            await WriteChannelDataAsCsv.ExecuteAsync(root, writer, deleteProcessedFiles, parallelism, channelDataColumns, xDomainFilter);
+            if (writer.Writes(ResultsFile.VectorResultsCsv))
+            {
+                if (channelDataFiles.Any())
+                {
+                    await WriteChannelDataAsCsv.ExecuteAsync(root, writer, deleteProcessedFiles, parallelism, channelDataFiles, xDomainFilter);
+                }
+                else
+                {
+                    await WriteChannelDataAsCsv.ExecuteAsync(root, writer, deleteProcessedFiles, parallelism, channelDataColumns, xDomainFilter);
+                }
+            }
+
+            if (writer.Writes(ResultsFile.BinaryFiles))
+            {
+                if (binFiles.Any())
+                {
+                    await binFiles.ForEachAsync(parallelism, async file =>
+                    {
+                        await writer.WriteExistingFile(root, file);
+                    });
+                }
+                else
+                {
+                    await WriteChannelDataAsBinary.ExecuteAsync(root, writer, deleteProcessedFiles, parallelism, channelDataFiles, xDomainFilter);
+                }
+            }
+
             await WriteCombinedStudyScalarData.ExecuteAsync(root, writer, studyScalarFiles);
         }
     }
