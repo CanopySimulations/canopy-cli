@@ -59,7 +59,7 @@
 
                 var cts = CommandUtilities.CreateCommandCancellationTokenSource();
 
-                await this.processLocalStudyResults.ExecuteAsync(parameters.Target.FullName, !parameters.KeepOriginal, cts.Token);
+                await this.processLocalStudyResults.ExecuteAsync(parameters.Target.FullName, !parameters.KeepOriginal, channelsAsCsv: true, channelsAsBinary: false, cts.Token);
             }
         }
     }

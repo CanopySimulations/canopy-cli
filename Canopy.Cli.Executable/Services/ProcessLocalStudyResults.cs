@@ -26,6 +26,8 @@ namespace Canopy.Cli.Executable.Services
         public async Task ExecuteAsync(
             string targetFolder,
             bool deleteProcessedFiles,
+            bool channelsAsCsv,
+            bool channelsAsBinary,
             CancellationToken cancellationToken)
         {
             foreach (var folder in Directory.EnumerateDirectories(targetFolder, "*", SearchOption.AllDirectories).Concat(new[] { targetFolder }))
@@ -39,7 +41,7 @@ namespace Canopy.Cli.Executable.Services
                 {
                     this.logger.LogInformation("Processing {0}", folder);
                     var root = new LocalFolder(folder);
-                    var fileWriter = new FileWriter();
+                    var fileWriter = new FileWriter(channelsAsCsv, channelsAsBinary);
                     await this.processStudyResults.ExecuteAsync(
                         root,
                         fileWriter,
@@ -54,7 +56,7 @@ namespace Canopy.Cli.Executable.Services
             }
         }
 
-        public class FileWriter : IFileWriter
+        public class FileWriter(bool channelsAsCsv, bool channelsAsBinary) : IFileWriter
         {
             public Task WriteExistingFile(IRootFolder root, IFile file)
             {
@@ -90,7 +92,12 @@ namespace Canopy.Cli.Executable.Services
 
             public bool Writes(ResultsFile fileType)
             {
-                return true;
+                return fileType switch
+                {
+                    ResultsFile.VectorResultsCsv => channelsAsCsv,
+                    ResultsFile.BinaryFiles => channelsAsBinary,
+                    _ => true,
+                };
             }
         }
 
