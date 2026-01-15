@@ -105,30 +105,6 @@
                                 return String.Compare(a.ChannelName, b.ChannelName, StringComparison.OrdinalIgnoreCase);
                             });
 
-                            var maxDataLength = data.Select(v => v.Data.Length).Max();
-                            var csv = new StringBuilder();
-                            csv.AppendLine(relativePathToFile + simType);
-                            csv.AppendLine(string.Join(",", data.Select(v => v.ChannelName)));
-                            csv.AppendLine(string.Join(",", data.Select(v =>
-                            {
-                                var units = metadata.GetChannelUnits(v.ChannelName);
-                                if (string.IsNullOrWhiteSpace(units))
-                                {
-                                    return "\"()\"";
-                                }
-
-                                return "\"" + units + "\"";
-                            })));
-
-                            for (int i = 0; i < maxDataLength; i++)
-                            {
-                                csv.AppendLine(
-                                    string.Join(
-                                        ",",
-                                        data.Select(v => v.Data.Length > i ? v.Data[i].NumericOrNaN().ToString(CultureInfo.InvariantCulture) : "").ToList()));
-                            }
-
-                            var bytes = Encoding.UTF8.GetBytes(csv.ToString());
                             var fileName = simType + "_VectorResults" + fileSuffix + ".csv";
                             if(string.IsNullOrWhiteSpace(relativePathToFile))
                             {
@@ -138,7 +114,8 @@
                             {
                                 Console.WriteLine($"Writing '{fileName}' to '{relativePathToFile}'.");
                             }
-                            await writer.WriteNewFile(root, relativePathToFile, simType + "_VectorResults" + fileSuffix +  ".csv", bytes);
+
+                            await writer.WriteNewFile(root, relativePathToFile, fileName, GetCsvLineBytes(relativePathToFile, simType, metadata, data));
 
                             if (deleteProcessedFiles)
                             {
@@ -239,6 +216,48 @@
             public string Units { get; }
             public string XDomain { get; }
             public int PointsInChannel { get; }
+        }
+
+        private static IEnumerable<byte[]> GetCsvLineBytes(
+            string relativePathToFile,
+            string simType,
+            SimTypeMetadataResult metadata,
+            List<ResolvedCsvColumn> data)
+        {
+            foreach(var line in GetCsvLines(relativePathToFile, simType, metadata, data))
+            {
+                yield return Encoding.UTF8.GetBytes(line + Environment.NewLine);
+            }
+        }
+
+        private static IEnumerable<string> GetCsvLines(
+            string relativePathToFile,
+            string simType,
+            SimTypeMetadataResult metadata,
+            List<ResolvedCsvColumn> data)
+        {
+            var maxDataLength = data.Select(v => v.Data.Length).Max();
+            yield return relativePathToFile + simType;
+            yield return string.Join(",", data.Select(v => v.ChannelName));
+            yield return string.Join(",", data.Select(v =>
+            {
+                var units = metadata.GetChannelUnits(v.ChannelName);
+                if (string.IsNullOrWhiteSpace(units))
+                {
+                    return "\"()\"";
+                }
+
+                return "\"" + units + "\"";
+            }));
+            Console.WriteLine($"MaxDataLength={maxDataLength}");
+
+            for (int i = 0; i < maxDataLength; i++)
+            {
+                yield return
+                    string.Join(
+                        ",",
+                        data.Select(v => v.Data.Length > i ? v.Data[i].NumericOrNaN().ToString(CultureInfo.InvariantCulture) : "").ToList());
+            }
         }
     }
 }
