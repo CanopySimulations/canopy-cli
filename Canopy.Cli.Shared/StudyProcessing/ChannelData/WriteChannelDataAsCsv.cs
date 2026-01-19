@@ -115,7 +115,7 @@
                                 Console.WriteLine($"Writing '{fileName}' to '{relativePathToFile}'.");
                             }
 
-                            await writer.WriteNewFile(root, relativePathToFile, fileName, GetCsvLineBytes(relativePathToFile, simType, metadata, data));
+                            await writer.WriteNewFile(root, relativePathToFile, fileName, GetCsvLinesBytes(relativePathToFile, simType, metadata, data));
 
                             if (deleteProcessedFiles)
                             {
@@ -218,7 +218,7 @@
             public int PointsInChannel { get; }
         }
 
-        private static IEnumerable<byte[]> GetCsvLineBytes(
+        private static IEnumerable<byte> GetCsvLinesBytes(
             string relativePathToFile,
             string simType,
             SimTypeMetadataResult metadata,
@@ -226,7 +226,10 @@
         {
             foreach(var line in GetCsvLines(relativePathToFile, simType, metadata, data))
             {
-                yield return Encoding.UTF8.GetBytes(line + Environment.NewLine);
+                foreach(var @byte in Encoding.UTF8.GetBytes(line + Environment.NewLine))
+                {
+                    yield return @byte;
+                }
             }
         }
 

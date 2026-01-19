@@ -10,7 +10,7 @@ namespace Canopy.Cli.Shared
 
             Task WriteNewFile(IRootFolder root, string relativePathToFile, string fileName, byte[] data);
 
-            Task WriteNewFile(IRootFolder root, string relativePathToFile, string fileName, IEnumerable<byte[]> data);
+            Task WriteNewFile(IRootFolder root, string relativePathToFile, string fileName, IEnumerable<byte> data);
 
             void ReportError(string message, Exception exception);
 
