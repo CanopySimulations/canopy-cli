@@ -45,7 +45,7 @@ namespace Canopy.Cli.Executable.Services
                     await this.processStudyResults.ExecuteAsync(
                         root,
                         fileWriter,
-                        true,
+                        channelsAsCsv,
                         deleteProcessedFiles,
                         1);
                 }
