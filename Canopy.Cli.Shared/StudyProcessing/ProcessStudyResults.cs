@@ -89,16 +89,16 @@ namespace Canopy.Cli.Shared.StudyProcessing
 
             if (writer.Writes(ResultsFile.BinaryFiles))
             {
-                if (binFiles.Any())
+                if (channelDataFiles.Any())
+                {
+                    await WriteChannelDataAsBinary.ExecuteAsync(root, writer, deleteProcessedFiles, parallelism, channelDataFiles, xDomainFilter);
+                }
+                else
                 {
                     await binFiles.ForEachAsync(parallelism, async file =>
                     {
                         await writer.WriteExistingFile(root, file);
                     });
-                }
-                else
-                {
-                    await WriteChannelDataAsBinary.ExecuteAsync(root, writer, deleteProcessedFiles, parallelism, channelDataFiles, xDomainFilter);
                 }
             }
 
