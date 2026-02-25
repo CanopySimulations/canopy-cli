@@ -5,6 +5,6 @@ namespace Canopy.Cli.Executable.Services
 
     public interface IProcessLocalStudyResults
     {
-        Task ExecuteAsync(string targetFolder, bool deleteProcessedFiles, CancellationToken cancellationToken);
+        Task ExecuteAsync(string targetFolder, bool deleteProcessedFiles, bool channelsAsCsv, bool channelsAsBinary, CancellationToken cancellationToken);
     }
 }
