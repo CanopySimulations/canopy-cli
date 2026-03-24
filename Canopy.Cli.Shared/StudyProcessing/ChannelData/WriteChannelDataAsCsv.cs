@@ -7,6 +7,7 @@ namespace Canopy.Cli.Shared.StudyProcessing.ChannelData
     using System.Globalization;
     using System.Linq;
     using System.Text;
+    using System.Threading;
     using System.Threading.Tasks;
 
     public static class WriteChannelDataAsCsv
@@ -17,7 +18,8 @@ namespace Canopy.Cli.Shared.StudyProcessing.ChannelData
             bool deleteProcessedFiles,
             int parallelism,
             ChannelDataColumns channelDataColumns,
-            string? xDomainFilter = null)
+            string? xDomainFilter = null,
+            CancellationToken cancellationToken = default)
         {
             foreach (var simType in channelDataColumns.SimTypes)
             {
@@ -52,7 +54,7 @@ namespace Canopy.Cli.Shared.StudyProcessing.ChannelData
                                 try
                                 {
                                     var pointsInChannel = metadata.GetPointsInChannel(column.Metadata.ChannelName);
-                                    var buffer = await column.File.GetContentAsBytesAsync();
+                                    var buffer = await column.File.GetContentAsBytesAsync(cancellationToken);
                                     if (buffer.Length == pointsInChannel * 4)
                                     {
                                         var floatValues = new float[buffer.Length / sizeof(float)];
@@ -82,7 +84,7 @@ namespace Canopy.Cli.Shared.StudyProcessing.ChannelData
                             });
 
                         var data = resolvedData.ToList();
-                        if (data.Count > 0)
+                        if (data.Count > 0 && !cancellationToken.IsCancellationRequested)
                         {
                             await WriteVectorResultsCsvAsync(
                                 root,
@@ -92,7 +94,8 @@ namespace Canopy.Cli.Shared.StudyProcessing.ChannelData
                                 simType,
                                 fileSuffix,
                                 metadata,
-                                data);
+                                data,
+                                cancellationToken);
                         }
                     }
                 }
@@ -105,7 +108,8 @@ namespace Canopy.Cli.Shared.StudyProcessing.ChannelData
             bool deleteProcessedFiles,
             int parallelism,
             DomainChannelFiles domainChannelFiles,
-            string? xDomainFilter = null)
+            string? xDomainFilter = null,
+            CancellationToken cancellationToken = default)
         {
             foreach (var simType in domainChannelFiles.SimTypes)
             {
@@ -134,18 +138,19 @@ namespace Canopy.Cli.Shared.StudyProcessing.ChannelData
                         var data = new List<ResolvedCsvColumn>();
                         try
                         {
-                            var parquetBytes = await domain.File.GetContentAsBytesAsync();
+                            var parquetBytes = await domain.File.GetContentAsBytesAsync(cancellationToken);
 
-                            var channelData = await TelemetryChannelSerializer.ConvertChannelsAsync(
+                            var channelData = TelemetryChannelSerializer.ConvertChannelsStreamAsync(
                                 parquetBytes,
-                                new DoubleChannelValueConverter());
+                                new DoubleChannelValueConverter(),
+                                null);
 
-                            foreach (var kvp in channelData)
+                            await foreach(var kvp in channelData)
                             {
                                 data.Add(new ResolvedCsvColumn(
                                     domain.File,
-                                    kvp.Key,
-                                    kvp.Value));
+                                    kvp.Name,
+                                    kvp.Data));
                             }
                         }
                         catch (Exception t)
@@ -156,7 +161,7 @@ namespace Canopy.Cli.Shared.StudyProcessing.ChannelData
                             return;
                         }
 
-                        if (data.Count > 0)
+                        if (data.Count > 0 && !cancellationToken.IsCancellationRequested)
                         {
                             await WriteVectorResultsCsvAsync(
                                 root,
@@ -269,7 +274,8 @@ namespace Canopy.Cli.Shared.StudyProcessing.ChannelData
             string simType,
             string fileSuffix,
             SimTypeMetadataResult metadata,
-            List<ResolvedCsvColumn> data)
+            List<ResolvedCsvColumn> data,
+            CancellationToken cancellationToken = default)
         {
             const string AtlasPrimaryChannel = "tRun";
             data.Sort((a, b) =>
@@ -302,7 +308,7 @@ namespace Canopy.Cli.Shared.StudyProcessing.ChannelData
                 Console.WriteLine($"Writing '{fileName}' to '{relativePathToFile}'.");
             }
 
-            await writer.WriteNewFile(root, relativePathToFile, fileName, GetCsvLinesBytes(relativePathToFile, simType, metadata, data));
+            await writer.WriteNewFile(root, relativePathToFile, fileName, GetCsvLinesBytes(relativePathToFile, simType, metadata, data, cancellationToken));
 
             if (deleteProcessedFiles)
             {
@@ -317,10 +323,15 @@ namespace Canopy.Cli.Shared.StudyProcessing.ChannelData
             string relativePathToFile,
             string simType,
             SimTypeMetadataResult metadata,
-            List<ResolvedCsvColumn> data)
+            List<ResolvedCsvColumn> data,
+            CancellationToken cancellationToken = default)
         {
             foreach (var line in GetCsvLines(relativePathToFile, simType, metadata, data))
             {
+                if (cancellationToken.IsCancellationRequested)
+                {
+                    yield break;
+                }
                 foreach (var @byte in Encoding.UTF8.GetBytes(line + Environment.NewLine))
                 {
                     yield return @byte;

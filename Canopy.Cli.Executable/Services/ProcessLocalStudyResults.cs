@@ -47,7 +47,8 @@ namespace Canopy.Cli.Executable.Services
                         fileWriter,
                         channelsAsCsv,
                         deleteProcessedFiles,
-                        1);
+                        1,
+                        cancellationToken: cancellationToken);
                 }
                 catch (Exception t)
                 {
@@ -58,16 +59,15 @@ namespace Canopy.Cli.Executable.Services
 
         public class FileWriter(bool channelsAsCsv, bool channelsAsBinary) : IFileWriter
         {
-            public Task WriteExistingFile(IRootFolder root, IFile file)
+            public Task WriteExistingFile(IRootFolder root, IFile file, CancellationToken cancellationToken = default)
             {
                 return Task.CompletedTask;
             }
 
-            public Task WriteNewFile(IRootFolder root, string relativePathToFile, string fileName, byte[] data)
+            public async Task WriteNewFile(IRootFolder root, string relativePathToFile, string fileName, byte[] data, CancellationToken cancellationToken = default)
             {
                 LocalFolder.AssertRelativePathNotSupplied(relativePathToFile);
-                File.WriteAllBytes(Path.Combine(((LocalFolder)root).FolderPath, fileName), data);
-                return Task.CompletedTask;
+                await File.WriteAllBytesAsync(Path.Combine(((LocalFolder)root).FolderPath, fileName), data, cancellationToken);
             }
 
             public void ReportError(string message, Exception exception)
@@ -84,7 +84,7 @@ namespace Canopy.Cli.Executable.Services
                 }
             }
 
-            public Task DeleteProcessedFile(IRootFolder root, IFile file)
+            public Task DeleteProcessedFile(IRootFolder root, IFile file, CancellationToken cancellationToken = default)
             {
                 File.Delete(file.FullPath);
                 return Task.CompletedTask;
@@ -114,14 +114,14 @@ namespace Canopy.Cli.Executable.Services
             public string FullPath { get; }
             public string RelativePathToFile { get; }
 
-            public Task<byte[]> GetContentAsBytesAsync()
+            public Task<byte[]> GetContentAsBytesAsync(CancellationToken cancellationToken = default)
             {
-                return Task.FromResult(File.ReadAllBytes(this.FullPath));
+                return File.ReadAllBytesAsync(this.FullPath, cancellationToken);
             }
 
-            public Task<string> GetContentAsTextAsync()
+            public Task<string> GetContentAsTextAsync(CancellationToken cancellationToken = default)
             {
-                return Task.FromResult(File.ReadAllText(this.FullPath));
+                return File.ReadAllTextAsync(this.FullPath, cancellationToken);
             }
         }
 

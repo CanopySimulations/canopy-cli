@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System.Threading;
+using System.Threading.Tasks;
 
 namespace Canopy.Cli.Shared
 {
@@ -10,9 +11,9 @@ namespace Canopy.Cli.Shared
 
         string RelativePathToFile { get; }
 
-        Task<byte[]> GetContentAsBytesAsync();
+        Task<byte[]> GetContentAsBytesAsync(CancellationToken cancellationToken = default);
 
-        Task<string> GetContentAsTextAsync();
+        Task<string> GetContentAsTextAsync(CancellationToken cancellationToken = default);
     }
     
 }

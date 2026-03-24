@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using Canopy.Cli.Shared.StudyProcessing;
 
@@ -15,15 +15,15 @@ namespace Canopy.Cli.Shared
         /// <returns>True if this writer will write files of the specified type.</returns>
         bool Writes(ResultsFile fileType);
 
-        Task WriteExistingFile(IRootFolder root, IFile file);
+        Task WriteExistingFile(IRootFolder root, IFile file, CancellationToken cancellationToken  = default);
 
-        Task WriteNewFile(IRootFolder root, string relativePathToFile, string fileName, byte[] data);
+        Task WriteNewFile(IRootFolder root, string relativePathToFile, string fileName, byte[] data, CancellationToken cancellationToken = default);
 
-        Task WriteNewFile(IRootFolder root, string relativePathToFile, string fileName, IEnumerable<byte> data)
-            => WriteNewFile(root, relativePathToFile, fileName, [.. data]);
+        Task WriteNewFile(IRootFolder root, string relativePathToFile, string fileName, IEnumerable<byte> data, CancellationToken cancellationToken = default)
+            => WriteNewFile(root, relativePathToFile, fileName, [.. data], cancellationToken);
 
         void ReportError(string message, Exception exception);
 
-        Task DeleteProcessedFile(IRootFolder root, IFile file);
+        Task DeleteProcessedFile(IRootFolder root, IFile file, CancellationToken cancellationToken = default);
     }
 }

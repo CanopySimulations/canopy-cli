@@ -2,6 +2,7 @@
 using System;
 using System.IO;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Canopy.Cli.Shared.StudyProcessing.ChannelData
@@ -14,7 +15,8 @@ namespace Canopy.Cli.Shared.StudyProcessing.ChannelData
             bool deleteProcessedFiles,
             int parallelism,
             DomainChannelFiles domainChannelFiles,
-            string? xDomainFilter = null)
+            string? xDomainFilter = null,
+            CancellationToken cancellationToken = default)
         {
             foreach (var simType in domainChannelFiles.SimTypes)
             {
@@ -40,17 +42,17 @@ namespace Canopy.Cli.Shared.StudyProcessing.ChannelData
                         try
                         {
                             // Read the parquet file containing all channels for this xDomain
-                            var parquetBytes = await domain.File.GetContentAsBytesAsync();
+                            var parquetBytes = await domain.File.GetContentAsBytesAsync(cancellationToken);
 
                             var typeConverter = new FloatChannelValueConverter();
                             await foreach (var (channelName, dataArray) in 
-                                TelemetryChannelSerializer.ConvertChannelsStreamAsync(parquetBytes, typeConverter, null, default))
+                                TelemetryChannelSerializer.ConvertChannelsStreamAsync(parquetBytes, typeConverter, null, cancellationToken))
                             {
                                 var fileName = $"{simType}_{channelName}.bin";
 
                                 Console.WriteLine($"Writing channel '{channelName}' to '{fileName}' in '{relativePathToFile}'.");
 
-                                await writer.WriteNewFile(root, relativePathToFile, fileName, typeConverter.Serialize(dataArray));
+                                await writer.WriteNewFile(root, relativePathToFile, fileName, typeConverter.Serialize(dataArray), cancellationToken);
                             }
 
                             if (deleteProcessedFiles)
