@@ -99,12 +99,12 @@ namespace Canopy.Cli.Executable.Commands
                 this.content = content;
             }
 
-            public Task<byte[]> GetContentAsBytesAsync(CancellationToken cancellationToken = default)
+            public Task<byte[]> GetContentAsBytesAsync()
             {
                 throw new NotImplementedException();
             }
 
-            public Task<string> GetContentAsTextAsync(CancellationToken cancellationToken = default)
+            public Task<string> GetContentAsTextAsync()
             {
                 return Task.FromResult(this.content);
             }

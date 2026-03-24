@@ -59,15 +59,15 @@ namespace Canopy.Cli.Executable.Services
 
         public class FileWriter(bool channelsAsCsv, bool channelsAsBinary) : IFileWriter
         {
-            public Task WriteExistingFile(IRootFolder root, IFile file, CancellationToken cancellationToken = default)
+            public Task WriteExistingFile(IRootFolder root, IFile file)
             {
                 return Task.CompletedTask;
             }
 
-            public async Task WriteNewFile(IRootFolder root, string relativePathToFile, string fileName, byte[] data, CancellationToken cancellationToken = default)
+            public async Task WriteNewFile(IRootFolder root, string relativePathToFile, string fileName, byte[] data)
             {
                 LocalFolder.AssertRelativePathNotSupplied(relativePathToFile);
-                await File.WriteAllBytesAsync(Path.Combine(((LocalFolder)root).FolderPath, fileName), data, cancellationToken);
+                await File.WriteAllBytesAsync(Path.Combine(((LocalFolder)root).FolderPath, fileName), data);
             }
 
             public void ReportError(string message, Exception exception)
@@ -84,7 +84,7 @@ namespace Canopy.Cli.Executable.Services
                 }
             }
 
-            public Task DeleteProcessedFile(IRootFolder root, IFile file, CancellationToken cancellationToken = default)
+            public Task DeleteProcessedFile(IRootFolder root, IFile file)
             {
                 File.Delete(file.FullPath);
                 return Task.CompletedTask;
@@ -114,14 +114,14 @@ namespace Canopy.Cli.Executable.Services
             public string FullPath { get; }
             public string RelativePathToFile { get; }
 
-            public Task<byte[]> GetContentAsBytesAsync(CancellationToken cancellationToken = default)
+            public Task<byte[]> GetContentAsBytesAsync()
             {
-                return File.ReadAllBytesAsync(this.FullPath, cancellationToken);
+                return File.ReadAllBytesAsync(this.FullPath);
             }
 
-            public Task<string> GetContentAsTextAsync(CancellationToken cancellationToken = default)
+            public Task<string> GetContentAsTextAsync()
             {
-                return File.ReadAllTextAsync(this.FullPath, cancellationToken);
+                return File.ReadAllTextAsync(this.FullPath);
             }
         }
 

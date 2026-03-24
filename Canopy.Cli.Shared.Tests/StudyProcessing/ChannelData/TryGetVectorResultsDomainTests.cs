@@ -21,8 +21,8 @@ namespace Canopy.Cli.Shared.StudyProcessing.ChannelData
             public string FullPath { get; }
             public string RelativePathToFile { get; }
 
-            public Task<byte[]> GetContentAsBytesAsync(CancellationToken cancellationToken = default) => Task.FromResult(new byte[0]);
-            public Task<string> GetContentAsTextAsync(CancellationToken cancellationToken = default) => Task.FromResult(string.Empty);
+            public Task<byte[]> GetContentAsBytesAsync() => Task.FromResult(new byte[0]);
+            public Task<string> GetContentAsTextAsync() => Task.FromResult(string.Empty);
         }
 
         [TestMethod]

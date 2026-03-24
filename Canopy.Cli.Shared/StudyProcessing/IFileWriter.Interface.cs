@@ -15,15 +15,27 @@ namespace Canopy.Cli.Shared
         /// <returns>True if this writer will write files of the specified type.</returns>
         bool Writes(ResultsFile fileType);
 
-        Task WriteExistingFile(IRootFolder root, IFile file, CancellationToken cancellationToken  = default);
+        Task WriteExistingFile(IRootFolder root, IFile file, CancellationToken cancellationToken  = default) =>
+            cancellationToken.IsCancellationRequested ? throw new OperationCanceledException() : WriteExistingFile(root, file);
 
-        Task WriteNewFile(IRootFolder root, string relativePathToFile, string fileName, byte[] data, CancellationToken cancellationToken = default);
+        Task WriteExistingFile(IRootFolder root, IFile file);
 
-        Task WriteNewFile(IRootFolder root, string relativePathToFile, string fileName, IEnumerable<byte> data, CancellationToken cancellationToken = default)
-            => WriteNewFile(root, relativePathToFile, fileName, [.. data], cancellationToken);
+        Task WriteNewFile(IRootFolder root, string relativePathToFile, string fileName, byte[] data, CancellationToken cancellationToken = default) =>
+            cancellationToken.IsCancellationRequested ? throw new OperationCanceledException() : WriteNewFile(root, relativePathToFile, fileName, data);
+
+        Task WriteNewFile(IRootFolder root, string relativePathToFile, string fileName, byte[] data);
+
+        Task WriteNewFile(IRootFolder root, string relativePathToFile, string fileName, IEnumerable<byte> data, CancellationToken cancellationToken = default) =>
+            WriteNewFile(root, relativePathToFile, fileName, [.. data], cancellationToken);
+
+        Task WriteNewFile(IRootFolder root, string relativePathToFile, string fileName, IEnumerable<byte> data) =>
+            WriteNewFile(root, relativePathToFile, fileName, [.. data]);
 
         void ReportError(string message, Exception exception);
 
-        Task DeleteProcessedFile(IRootFolder root, IFile file, CancellationToken cancellationToken = default);
+        Task DeleteProcessedFile(IRootFolder root, IFile file, CancellationToken cancellationToken = default)
+            => cancellationToken.IsCancellationRequested ? throw new OperationCanceledException() : DeleteProcessedFile(root, file);
+
+        Task DeleteProcessedFile(IRootFolder root, IFile file);
     }
 }
