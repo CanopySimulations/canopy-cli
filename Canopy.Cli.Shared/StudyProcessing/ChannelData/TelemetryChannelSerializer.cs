@@ -57,8 +57,10 @@ namespace Canopy.Cli.Shared.StudyProcessing.ChannelData
             Stream parquetStream,
             IChannelValueConverter<T> converter,
             IReadOnlyList<string>? channelNames,
-            [EnumeratorCancellation] CancellationToken cancellationToken)
+            [EnumeratorCancellation] CancellationToken cancellationToken = default)
         {
+            cancellationToken.ThrowIfCancellationRequested();
+
             ArgumentNullException.ThrowIfNull(parquetStream);
             ArgumentNullException.ThrowIfNull(converter);
 
@@ -75,6 +77,8 @@ namespace Canopy.Cli.Shared.StudyProcessing.ChannelData
 
             foreach (var field in dataFields)
             {
+                cancellationToken.ThrowIfCancellationRequested();
+
                 var columnData = await rowGroupReader.ReadColumnAsync(field, cancellationToken).ConfigureAwait(false);
                 var channelValues = new List<T>(columnData.Data.Length);
                 ConvertAndAddValues(columnData, converter, channelValues);

@@ -1,4 +1,5 @@
-﻿namespace Canopy.Cli.Shared.StudyProcessing
+﻿#nullable enable
+namespace Canopy.Cli.Shared.StudyProcessing
 {
     using System.Threading;
     using System.Threading.Tasks;

@@ -1,5 +1,6 @@
 #nullable enable
 using System;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -21,8 +22,8 @@ namespace Canopy.Cli.Shared.StudyProcessing.ChannelData
             public string FullPath { get; }
             public string RelativePathToFile { get; }
 
-            public Task<byte[]> GetContentAsBytesAsync() => Task.FromResult(Array.Empty<byte>());
-            public Task<string> GetContentAsTextAsync() => Task.FromResult(string.Empty);
+            public Task<byte[]> GetContentAsBytesAsync(CancellationToken cancellationToken = default) => Task.FromResult(Array.Empty<byte>());
+            public Task<string> GetContentAsTextAsync(CancellationToken cancellationToken = default) => Task.FromResult(string.Empty);
         }
 
         [TestMethod]
