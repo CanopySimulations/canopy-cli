@@ -1,6 +1,5 @@
 ﻿#nullable enable
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using System.Threading;
 using System.Threading.Tasks;
 
 namespace Canopy.Cli.Shared.StudyProcessing.ChannelData
