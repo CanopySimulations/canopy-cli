@@ -73,16 +73,16 @@ namespace Canopy.Cli.Shared.StudyProcessing.ChannelData
                     ? parquetReader.Schema.DataFields.Where(f => channelNamesSet.Contains(f.Name))
                     : parquetReader.Schema.DataFields;
 
-            using var rowGroupReader = parquetReader.OpenRowGroupReader(0);
-
             foreach (var field in dataFields)
             {
                 cancellationToken.ThrowIfCancellationRequested();
 
-                var columnData = await rowGroupReader.ReadColumnAsync(field, cancellationToken).ConfigureAwait(false);
-                var channelValues = new List<T>(columnData.Data.Length);
-                ConvertAndAddValues(columnData, converter, channelValues);
-
+                var channelValues = new List<T>((int)(parquetReader.Metadata?.NumRows ?? 0));
+                foreach (var rg in parquetReader.RowGroups)
+                {
+                    var partialColumnData = await rg.ReadColumnAsync(field, cancellationToken);
+                    ConvertAndAddValues(partialColumnData, converter, channelValues);
+                }
                 yield return (field.Name, channelValues.ToArray());
             }
         }
