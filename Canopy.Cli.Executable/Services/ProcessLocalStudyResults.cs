@@ -47,7 +47,8 @@ namespace Canopy.Cli.Executable.Services
                         fileWriter,
                         channelsAsCsv,
                         deleteProcessedFiles,
-                        1);
+                        1,
+                        cancellationToken: cancellationToken);
                 }
                 catch (Exception t)
                 {
@@ -63,11 +64,10 @@ namespace Canopy.Cli.Executable.Services
                 return Task.CompletedTask;
             }
 
-            public Task WriteNewFile(IRootFolder root, string relativePathToFile, string fileName, byte[] data)
+            public async Task WriteNewFile(IRootFolder root, string relativePathToFile, string fileName, byte[] data)
             {
                 LocalFolder.AssertRelativePathNotSupplied(relativePathToFile);
-                File.WriteAllBytes(Path.Combine(((LocalFolder)root).FolderPath, fileName), data);
-                return Task.CompletedTask;
+                await File.WriteAllBytesAsync(Path.Combine(((LocalFolder)root).FolderPath, fileName), data);
             }
 
             public void ReportError(string message, Exception exception)
@@ -116,12 +116,12 @@ namespace Canopy.Cli.Executable.Services
 
             public Task<byte[]> GetContentAsBytesAsync()
             {
-                return Task.FromResult(File.ReadAllBytes(this.FullPath));
+                return File.ReadAllBytesAsync(this.FullPath);
             }
 
             public Task<string> GetContentAsTextAsync()
             {
-                return Task.FromResult(File.ReadAllText(this.FullPath));
+                return File.ReadAllTextAsync(this.FullPath);
             }
         }
 

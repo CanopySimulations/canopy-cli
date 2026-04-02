@@ -1,5 +1,7 @@
-﻿namespace Canopy.Cli.Shared.StudyProcessing
+﻿#nullable enable
+namespace Canopy.Cli.Shared.StudyProcessing
 {
+    using System.Threading;
     using System.Threading.Tasks;
 
     public interface IProcessStudyResults
@@ -10,6 +12,7 @@
             bool channelsAsCsv,
             bool deleteProcessedFiles,
             int parallelism,
-            string? xDomainFilter = null);
+            string? xDomainFilter = null,
+            CancellationToken cancellationToken = default);
     }
 }

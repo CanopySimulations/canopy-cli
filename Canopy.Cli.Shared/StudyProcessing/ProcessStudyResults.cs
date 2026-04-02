@@ -1,9 +1,7 @@
 ﻿#nullable enable
 using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Canopy.Cli.Shared.StudyProcessing
@@ -21,7 +19,8 @@ namespace Canopy.Cli.Shared.StudyProcessing
             bool channelsAsCsv,
             bool deleteProcessedFiles,
             int parallelism,
-            string? xDomainFilter = null)
+            string? xDomainFilter = null,
+            CancellationToken cancellationToken = default)
         {
             var studyScalarFiles = new StudyScalarFiles();
             var channelDataFiles = new DomainChannelFiles();
@@ -72,18 +71,18 @@ namespace Canopy.Cli.Shared.StudyProcessing
 
             await filesToWrite.ForEachAsync(parallelism, async file =>
             {
-                await writer.WriteExistingFile(root, file);
+                await writer.WriteExistingFile(root, file, cancellationToken);
             });
 
             if (writer.Writes(ResultsFile.VectorResultsCsv))
             {
                 if (channelDataFiles.Any())
                 {
-                    await WriteChannelDataAsCsv.ExecuteAsync(root, writer, deleteProcessedFiles, parallelism, channelDataFiles, xDomainFilter);
+                    await WriteChannelDataAsCsv.ExecuteAsync(root, writer, deleteProcessedFiles, parallelism, channelDataFiles, xDomainFilter, cancellationToken);
                 }
                 else
                 {
-                    await WriteChannelDataAsCsv.ExecuteAsync(root, writer, deleteProcessedFiles, parallelism, channelDataColumns, xDomainFilter);
+                    await WriteChannelDataAsCsv.ExecuteAsync(root, writer, deleteProcessedFiles, parallelism, channelDataColumns, xDomainFilter, cancellationToken);
                 }
             }
 
@@ -91,13 +90,13 @@ namespace Canopy.Cli.Shared.StudyProcessing
             {
                 if (channelDataFiles.Any())
                 {
-                    await WriteChannelDataAsBinary.ExecuteAsync(root, writer, deleteProcessedFiles, parallelism, channelDataFiles, xDomainFilter);
+                    await WriteChannelDataAsBinary.ExecuteAsync(root, writer, deleteProcessedFiles, parallelism, channelDataFiles, xDomainFilter, cancellationToken);
                 }
                 else
                 {
                     await binFiles.ForEachAsync(parallelism, async file =>
                     {
-                        await writer.WriteExistingFile(root, file);
+                        await writer.WriteExistingFile(root, file, cancellationToken);
                     });
                 }
             }

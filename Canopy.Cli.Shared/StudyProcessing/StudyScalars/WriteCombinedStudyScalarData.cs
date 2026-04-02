@@ -12,7 +12,7 @@
             IFileWriter writer,
             StudyScalarFiles studyScalarFiles)
         {
-            var content = await GetCombinedStudyScalarDataCsv(root, writer, studyScalarFiles);
+            var content = await GetCombinedStudyScalarDataCsv(studyScalarFiles);
 
             if(content != null)
             {
@@ -22,8 +22,6 @@
         }
 
         public static async Task<string> GetCombinedStudyScalarDataCsv(
-            IRootFolder root,
-            IFileWriter writer,
             StudyScalarFiles studyScalarFiles)
         {
             if (studyScalarFiles.ScalarResults == null || studyScalarFiles.ScalarInputs == null)

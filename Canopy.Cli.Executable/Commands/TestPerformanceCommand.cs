@@ -1,15 +1,16 @@
-using System.Diagnostics;
-using System;
-using System.CommandLine;
-using System.CommandLine.Invocation;
-using System.IO;
-using System.Threading.Tasks;
 using Canopy.Cli.Shared;
 using Canopy.Cli.Shared.StudyProcessing.StudyScalars;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using System;
+using System.CommandLine;
+using System.CommandLine.Invocation;
+using System.Diagnostics;
+using System.IO;
 using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace Canopy.Cli.Executable.Commands
 {
