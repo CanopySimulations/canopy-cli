@@ -1,4 +1,5 @@
 using System.IO;
+using System.Threading;
 using System.Threading.Tasks;
 using Canopy.Cli.Executable.Services;
 using Microsoft.Extensions.Logging;
@@ -39,7 +40,7 @@ namespace Canopy.Cli.Executable.IntegrationTests
                 await this.getSchemas.ExecuteAsync(new Commands.GetSchemasCommand.Parameters(
                     outputFolder,
                     simVersion,
-                    authenticationUser.TenantId));
+                    authenticationUser.TenantId), CancellationToken.None);
 
                 Assert.True(this.writeFileMock.Count > 0, "No files were written.");
 

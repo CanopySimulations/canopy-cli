@@ -1,5 +1,5 @@
 ﻿using System.CommandLine;
-using System.CommandLine.Invocation;
+using System.Threading;
 using System.Threading.Tasks;
 using Canopy.Api.Client;
 using Microsoft.Extensions.DependencyInjection;
@@ -15,32 +15,28 @@ namespace Canopy.Cli.Executable.Commands
             string ClientId,
             string ClientSecret);
 
-        public override Command Create()
+        public override Command Create(IHost host)
         {
             var command = new Command("connect", "Connects to an API endpoint.");
 
-            command.AddOption(new Option<string>(
-                new[] { "--endpoint", "-e" },
-                description: $"The API endpoint to connect to (defaults to {ConnectionManager.DefaultApiEndpoint}).",
-                getDefaultValue: () => ConnectionManager.DefaultApiEndpoint));
+            var endpoint = command.AddOption("--endpoint", "-e", ConnectionManager.DefaultApiEndpoint, $"The API endpoint to connect to (defaults to {ConnectionManager.DefaultApiEndpoint}).");
+            var clientId = command.AddOption("--client-id", "-c", string.Empty, "Your client ID, as provided by Canopy Simulations.");
+            var clientSecret = command.AddOption("--client-secret", "-s", string.Empty, "Your client secret, as provided by Canopy Simulations.");
 
-            command.AddOption(new Option<string>(
-                new[] { "--client-id", "-c" },
-                description: $"Your client ID, as provided by Canopy Simulations.",
-                getDefaultValue: () => string.Empty));
-
-            command.AddOption(new Option<string>(
-                new[] { "--client-secret", "-s" },
-                description: $"Your client secret, as provided by Canopy Simulations.",
-                getDefaultValue: () => string.Empty));
-
-            command.Handler = CommandHandler.Create((IHost host, Parameters parameters) =>
-                host.Services.GetRequiredService<CommandRunner>().ExecuteAsync(
+            command.SetAction((ParseResult parseResult, CancellationToken cancellationToken) =>
+            {
+                var parameters = new Parameters(
+                    parseResult.GetValue(endpoint),
+                    parseResult.GetValue(clientId),
+                    parseResult.GetValue(clientSecret));
+                return host.Services.GetRequiredService<CommandRunner>().ExecuteAsync(
                     parameters with
                     {
                         ClientId = CommandUtilities.ValueOrPrompt(parameters.ClientId, "Client ID: ", "Client ID is required.", false),
                         ClientSecret = CommandUtilities.ValueOrPrompt(parameters.ClientSecret, "Client Secret: ", "Client Secret is required.", true),
-                    }));
+                    },
+                    cancellationToken);
+            });
 
             return command;
         }
@@ -61,7 +57,7 @@ namespace Canopy.Cli.Executable.Commands
                 this.connectionManager = connectionManager;
             }
 
-            public async Task ExecuteAsync(Parameters parameters)
+            public async Task ExecuteAsync(Parameters parameters, CancellationToken cancellationToken)
             {
                 this.connectionManager.SetConnectionInformation(
                     new ConnectionInformation(parameters.Endpoint, parameters.ClientId, parameters.ClientSecret));

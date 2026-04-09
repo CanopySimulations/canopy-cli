@@ -1,5 +1,4 @@
 ﻿using System.CommandLine;
-using System.CommandLine.Invocation;
 using System.Reflection;
 using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
@@ -10,10 +9,10 @@ namespace Canopy.Cli.Executable.Commands
 {
     public class VersionCommand : CanopyCommandBase
     {
-        public override Command Create()
+        public override Command Create(IHost host)
         {
             var command = new Command("version", "Displays the current canopy-cli version.");
-            command.Handler = CommandHandler.Create((IHost host) => 
+            command.SetAction((ParseResult parseResult) => 
                 host.Services.GetRequiredService<CommandRunner>().Execute());
             return command;
         }

@@ -1,5 +1,5 @@
 using System.CommandLine;
-using System.CommandLine.Invocation;
+using System.Threading;
 using System.Threading.Tasks;
 using Canopy.Api.Client;
 using Canopy.Cli.Executable.Services;
@@ -16,33 +16,29 @@ namespace Canopy.Cli.Executable.Commands
             string Email,
             string Password);
 
-        public override Command Create()
+        public override Command Create(IHost host)
         {
             var command = new Command("create-user", "Creates a new user for the current tenant.");
 
-            command.AddOption(new Option<string>(
-                new[] { "--username", "-u" },
-                description: "New username.",
-                getDefaultValue: () => string.Empty));
+            var username = command.AddOption("--username", "-u", string.Empty, "New username.");
+            var email = command.AddOption("--email", "-e", string.Empty, "User's email address.");
+            var password = command.AddOption("--password", "-p", string.Empty, "User's password.");
 
-            command.AddOption(new Option<string>(
-                new[] { "--email", "-e" },
-                description: "User's email address.",
-                getDefaultValue: () => string.Empty));
-
-            command.AddOption(new Option<string>(
-                new[] { "--password", "-p" },
-                description: "User's password.",
-                getDefaultValue: () => string.Empty));
-
-            command.Handler = CommandHandler.Create((IHost host, Parameters parameters) =>
-                host.Services.GetRequiredService<CommandRunner>().ExecuteAsync(
+            command.SetAction((ParseResult parseResult, CancellationToken cancellationToken) =>
+            {
+                var parameters = new Parameters(
+                    parseResult.GetValue(username),
+                    parseResult.GetValue(email),
+                    parseResult.GetValue(password));
+                return host.Services.GetRequiredService<CommandRunner>().ExecuteAsync(
                     parameters with
                     {
                         Username = CommandUtilities.ValueOrPrompt(parameters.Username, "Username: ", "Username is required.", false),
                         Email = CommandUtilities.ValueOrPrompt(parameters.Email, "Email: ", "Email is required.", false),
                         Password = CommandUtilities.ValueOrPrompt(parameters.Password, "Password: ", "Password is required.", true),
-                    }));
+                    },
+                    cancellationToken);
+            });
 
             return command;
         }
@@ -63,7 +59,7 @@ namespace Canopy.Cli.Executable.Commands
                 this.logger = logger;
             }
 
-            public async Task ExecuteAsync(Parameters parameters)
+            public async Task ExecuteAsync(Parameters parameters, CancellationToken cancellationToken)
             {
                 var authenticatedUser = await this.ensureAuthenticated.ExecuteAsync();
 

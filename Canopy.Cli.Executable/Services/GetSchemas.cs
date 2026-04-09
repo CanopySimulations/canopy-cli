@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using Canopy.Api.Client;
 using Canopy.Cli.Executable.Commands;
@@ -33,7 +34,7 @@ namespace Canopy.Cli.Executable.Services
             this.logger = logger;
         }
 
-        public async Task ExecuteAsync(GetSchemasCommand.Parameters parameters)
+        public async Task ExecuteAsync(GetSchemasCommand.Parameters parameters, CancellationToken cancellationToken)
         {
             var authenticatedUser = await this.ensureAuthenticated.ExecuteAsync();
 

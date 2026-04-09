@@ -47,7 +47,7 @@ namespace Canopy.Cli.Executable.Services
         }
 
         public async Task ExecuteAsync(
-            GetConfigsCommand.Parameters parameters)
+            GetConfigsCommand.Parameters parameters, CancellationToken cancellationToken)
         {
             var configType = parameters.ConfigType;
             var username = parameters.Username;
@@ -117,7 +117,7 @@ namespace Canopy.Cli.Executable.Services
                                 content.ToString(Formatting.None),
                                 parameters.DecryptingTenantShortName,
                                 simVersion,
-                                CancellationToken.None);
+                                cancellationToken);
                             content = JObject.Parse(reEncryptedContent);
                         }
 

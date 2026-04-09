@@ -62,7 +62,7 @@ namespace Canopy.Cli.Executable.Services.DownloadMonitoring
                 Arg.Any<PostProcessingParameters>(),
                 Arg.Any<CancellationToken>()).Returns(Task.CompletedTask);
 
-            await this.target.ExecuteAsync(parameters);
+            await this.target.ExecuteAsync(parameters, CancellationToken.None);
             
             await this.monitorDownloads.Received(1).ExecuteAsync(
                 Arg.Any<ChannelWriter<QueuedDownloadToken>>(),

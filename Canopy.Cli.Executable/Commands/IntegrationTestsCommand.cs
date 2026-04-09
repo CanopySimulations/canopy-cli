@@ -1,9 +1,9 @@
 using System;
 using System.Collections.Generic;
 using System.CommandLine;
-using System.CommandLine.Invocation;
 using System.Linq;
 using System.Reflection;
+using System.Threading;
 using System.Threading.Tasks;
 using Canopy.Api.Client;
 using Microsoft.Extensions.DependencyInjection;
@@ -23,17 +23,18 @@ namespace Canopy.Cli.Executable.Commands
             string Name
         );
 
-        public override Command Create()
+        public override Command Create(IHost host)
         {
             var command = new Command(Name, "Runs the CLI integration tests.");
 
-            command.AddOption(new Option<string>(
-                new[] { "--name", "-n" },
-                description: "The name of the integration test to run.",
-                getDefaultValue: () => string.Empty));
+            var name = command.AddOption("--name", "-n", string.Empty, "The name of the integration test to run.");
 
-            command.Handler = CommandHandler.Create((IHost host, Parameters parameters) =>
-                host.Services.GetRequiredService<CommandRunner>().ExecuteAsync(host, parameters));
+            command.SetAction((ParseResult parseResult, CancellationToken cancellationToken) =>
+            {
+                var parameters = new Parameters(
+                    parseResult.GetValue(name));
+                return host.Services.GetRequiredService<CommandRunner>().ExecuteAsync(host, parameters, cancellationToken);
+            });
 
             return command;
         }
@@ -51,7 +52,7 @@ namespace Canopy.Cli.Executable.Commands
                 this.logger = logger;
             }
 
-            public async Task ExecuteAsync(IHost host, Parameters parameters)
+            public async Task ExecuteAsync(IHost host, Parameters parameters, CancellationToken cancellationToken)
             {
                 var integrationTests = GetIntegrationTestClasses(parameters.Name);
 

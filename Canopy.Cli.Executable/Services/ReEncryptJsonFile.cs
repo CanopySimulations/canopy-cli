@@ -33,13 +33,11 @@ namespace Canopy.Cli.Executable.Services
             this.logger = logger;
         }
 
-        public async Task ExecuteAsync(ReEncryptJsonFileCommand.Parameters parameters)
+        public async Task ExecuteAsync(ReEncryptJsonFileCommand.Parameters parameters, CancellationToken cancellationToken)
         {
             var simVersion = await this.simVersionCache.GetOrSet(parameters.SimVersion);
 
             await this.ensureAuthenticated.ExecuteAsync();
-
-            var cts = CommandUtilities.CreateCommandCancellationTokenSource();
 
             var filePath = parameters.Target.FullName;
             if (!this.fileOperations.Exists(filePath))
@@ -47,13 +45,13 @@ namespace Canopy.Cli.Executable.Services
                 throw new FileNotFoundException("File not found: " + filePath);
             }
 
-            var content = await this.fileOperations.ReadAllTextAsync(filePath, cts.Token);
+            var content = await this.fileOperations.ReadAllTextAsync(filePath, cancellationToken);
 
             if (this.containsEncryptedToken.Execute(content))
             {
                 this.logger.LogInformation("File contains encrypted tokens. Re-encrypting.");
-                var newContent = await this.reEncryptFile.ExecuteAsync(content, parameters.DecryptingTenantShortName, simVersion, cts.Token);
-                await this.fileOperations.WriteAllTextAsync(filePath, newContent, cts.Token);
+                var newContent = await this.reEncryptFile.ExecuteAsync(content, parameters.DecryptingTenantShortName, simVersion, cancellationToken);
+                await this.fileOperations.WriteAllTextAsync(filePath, newContent, cancellationToken);
             }
             else
             {

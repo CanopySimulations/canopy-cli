@@ -1,7 +1,5 @@
 ﻿using System;
 using System.CommandLine;
-using System.CommandLine.Invocation;
-using System.Threading.Tasks;
 using Canopy.Api.Client;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -11,12 +9,12 @@ namespace Canopy.Cli.Executable.Commands
 {
     public class DisconnectCommand : CanopyCommandBase
     {
-        public override Command Create()
+        public override Command Create(IHost host)
         {
             var command = new Command("disconnect", "Disconnects from the API endpoint, and removes any authentication information.");
 
-            command.Handler = CommandHandler.Create((IHost host) =>
-                host.Services.GetRequiredService<CommandRunner>().ExecuteAsync());
+            command.SetAction((ParseResult parseResult) =>
+                host.Services.GetRequiredService<CommandRunner>().Execute());
 
             return command;
         }
@@ -37,14 +35,12 @@ namespace Canopy.Cli.Executable.Commands
                 this.logger = logger;
             }
 
-            public Task ExecuteAsync()
+            public void Execute()
             {
                 this.authenticationManager.ClearAuthenticatedUser();
                 this.connectionManager.ClearConnectionInformation();
 
                 this.logger.LogInformation("Disconnected.");
-
-                return Task.CompletedTask;
             }
         }
     }

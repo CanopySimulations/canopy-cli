@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using System.Threading;
 using System.Threading.Tasks;
 using Canopy.Api.Client;
 using Canopy.Cli.Executable.Services;
@@ -97,7 +98,7 @@ namespace Canopy.Cli.Executable.IntegrationTests
                     simVersion,
                     Unwrap: true,
                     Format: false,
-                    DecryptingTenantShortName: string.Empty));
+                    DecryptingTenantShortName: string.Empty), CancellationToken.None);
 
                 Assert.True(this.writeFileMock.Count > 0, "No files were written.");
 

@@ -1,6 +1,5 @@
 using System.CommandLine;
-using System.CommandLine.Invocation;
-using System.IO;
+using System.Threading;
 using Canopy.Cli.Executable.Services;
 using Canopy.Cli.Executable.Services.DownloadMonitoring;
 using Canopy.Cli.Shared;
@@ -33,47 +32,30 @@ namespace Canopy.Cli.Executable.Commands
             }
         };
 
-        public override Command Create()
+        public override Command Create(IHost host)
         {
             var command = new Command("download-monitor", "Monitor a folder for study download requests.");
 
-            command.AddOption(new Option<string>(
-                new [] { "--input-folder", "-i" }, 
-                getDefaultValue: () => "./", 
-                description: "The input folder to monitor."));
+            var inputFolder = command.AddOption("--input-folder", "-i", "./", "The input folder to monitor.");
+            var outputFolder = command.AddOption("--output-folder", "-o", "./", "The output folder in which to download studies.");
+            var generateCsv = command.AddOption("--generate-csv", "-csv", false, "Generate CSV files from binary files.");
+            var keepBinary = command.AddOption("--keep-binary", "-bin", true, "Do not delete binary files which have been processed into CSV files (faster).");
+            var postProcessor = command.AddOption("--post-processor", "-pp", string.Empty, "The post processor to run on each downloaded study. The path to the study will be passed as the first argument.");
+            var postProcessorArguments = command.AddOption("--post-processor-arguments", "-ppa", string.Empty, "The arguments to pass to the post-processor. The string {0} will be replaced with the unquoted study path.");
+            var decryptingTenant = command.AddOption("--decrypting-tenant-short-name", "-d", string.Empty, "If specified the job files will be re-encrypted using the specified decrypting tenant's key.");
 
-            command.AddOption(new Option<string>(
-                new [] { "--output-folder", "-o" }, 
-                getDefaultValue: () => "./", 
-                description: "The output folder in which to download studies."));
-
-            command.AddOption(new Option<bool>(
-                new [] { "--generate-csv", "-csv" }, 
-                getDefaultValue: () => false, 
-                description: "Generate CSV files from binary files."));
-
-            command.AddOption(new Option<bool>(
-                new [] { "--keep-binary", "-bin" }, 
-                getDefaultValue: () => true, 
-                description: "Do not delete binary files which have been processed into CSV files (faster)."));
-
-            command.AddOption(new Option<string>(
-                new [] { "--post-processor", "-pp" }, 
-                getDefaultValue: () => string.Empty, 
-                description: "The post processor to run on each downloaded study. The path to the study will be passed as the first argument."));
-
-            command.AddOption(new Option<string>(
-                new [] { "--post-processor-arguments", "-ppa" }, 
-                getDefaultValue: () => string.Empty, 
-                description: "The arguments to pass to the post-processor. The string {0} will be replaced with the unquoted study path."));
-
-            command.AddOption(new Option<string>(
-                new [] { "--decrypting-tenant-short-name", "-d" }, 
-                getDefaultValue: () => string.Empty, 
-                description: "If specified the job files will be re-encrypted using the specified decrypting tenant's key."));
-
-            command.Handler = CommandHandler.Create((IHost host, Parameters parameters) =>
-                host.Services.GetRequiredService<IRunDownloader>().ExecuteAsync(parameters));
+            command.SetAction((ParseResult parseResult, CancellationToken cancellationToken) =>
+            {
+                var parameters = new Parameters(
+                    parseResult.GetValue(inputFolder),
+                    parseResult.GetValue(outputFolder),
+                    parseResult.GetValue(generateCsv),
+                    parseResult.GetValue(keepBinary),
+                    parseResult.GetValue(postProcessor),
+                    parseResult.GetValue(postProcessorArguments),
+                    parseResult.GetValue(decryptingTenant));
+                return host.Services.GetRequiredService<IRunDownloader>().ExecuteAsync(parameters, cancellationToken);
+            });
 
             return command;
         }
