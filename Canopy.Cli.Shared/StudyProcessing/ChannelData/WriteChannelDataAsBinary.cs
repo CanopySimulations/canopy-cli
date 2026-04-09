@@ -50,8 +50,6 @@ namespace Canopy.Cli.Shared.StudyProcessing.ChannelData
                             {
                                 var fileName = $"{simType}_{channelName}.bin";
 
-                                Console.WriteLine($"Writing channel '{channelName}' to '{fileName}' in '{relativePathToFile}'.");
-
                                 await writer.WriteNewFile(root, relativePathToFile, fileName, typeConverter.Serialize(dataArray), cancellationToken);
                             }
 
