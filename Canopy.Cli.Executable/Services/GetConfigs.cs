@@ -56,7 +56,7 @@ namespace Canopy.Cli.Executable.Services
             var format = parameters.Format;
             var unwrap = parameters.Unwrap;
 
-            var simVersion = await this.simVersionCache.GetOrSet(parameters.SimVersion);
+            var simVersion = await this.simVersionCache.GetOrSet(parameters.SimVersion, cancellationToken);
 
             var authenticatedUser = await this.ensureAuthenticated.ExecuteAsync();
 
@@ -88,7 +88,8 @@ namespace Canopy.Cli.Executable.Services
                     configType,
                     filter.ToString(Formatting.None),
                     null,
-                    null);
+                    null,
+                    cancellationToken);
 
                 if (outputFolder != null)
                 {
@@ -105,7 +106,8 @@ namespace Canopy.Cli.Executable.Services
                             configMetadata.DocumentId,
                             null,
                             simVersion,
-                            null);
+                            null,
+                            cancellationToken);
 
                         var content = JObject.FromObject(config.Config.Data);
 
@@ -134,7 +136,8 @@ namespace Canopy.Cli.Executable.Services
 
                         await this.writeFile.ExecuteAsync(
                             Path.Combine(outputFolderPath, FileNameUtilities.Sanitize(config.Config.Name) + ".json"),
-                            contentString);
+                            contentString,
+                            cancellationToken);
 
                         sizes.Add(contentString.Length);
                     }

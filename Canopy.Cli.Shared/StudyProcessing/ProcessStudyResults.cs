@@ -101,7 +101,7 @@ namespace Canopy.Cli.Shared.StudyProcessing
                 }
             }
 
-            await WriteCombinedStudyScalarData.ExecuteAsync(root, writer, studyScalarFiles);
+            await WriteCombinedStudyScalarData.ExecuteAsync(root, writer, studyScalarFiles, cancellationToken);
         }
     }
 }

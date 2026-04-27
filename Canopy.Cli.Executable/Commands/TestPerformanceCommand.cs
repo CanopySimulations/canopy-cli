@@ -7,7 +7,6 @@ using System;
 using System.CommandLine;
 using System.Diagnostics;
 using System.IO;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -15,7 +14,7 @@ namespace Canopy.Cli.Executable.Commands
 {
     public class TestPerformanceCommand : CanopyCommandBase
     {
-        public record Parameters(FileInfo ScalarResults, FileInfo ScalarResultsMetadata);
+        public record Parameters(FileInfo? ScalarResults, FileInfo? ScalarResultsMetadata);
 
         public override Command Create(IHost host)
         {
@@ -27,8 +26,8 @@ namespace Canopy.Cli.Executable.Commands
             command.SetAction((ParseResult parseResult, CancellationToken cancellationToken) =>
             {
                 var parameters = new Parameters(
-                    parseResult.GetValue(scalarResults)!,
-                    parseResult.GetValue(scalarResultsMetadata)!);
+                    parseResult.GetValue(scalarResults),
+                    parseResult.GetValue(scalarResultsMetadata));
                 return host.Services.GetRequiredService<CommandRunner>().ExecuteAsync(parameters, cancellationToken);
             });
 
@@ -49,12 +48,12 @@ namespace Canopy.Cli.Executable.Commands
             {
                 if (parameters.ScalarResults != null && parameters.ScalarResultsMetadata != null)
                 {
-                    await this.TestScalarResultsProcessing(parameters.ScalarResults, parameters.ScalarResultsMetadata);
+                    await this.TestScalarResultsProcessing(parameters.ScalarResults, parameters.ScalarResultsMetadata, cancellationToken);
                 }
 
             }
 
-            private async Task TestScalarResultsProcessing(FileInfo scalarResults, FileInfo scalarResultsMetadata)
+            private async Task TestScalarResultsProcessing(FileInfo scalarResults, FileInfo scalarResultsMetadata, CancellationToken cancellationToken)
             {
                 if (!scalarResults.Exists)
                 {
@@ -68,8 +67,8 @@ namespace Canopy.Cli.Executable.Commands
                     return;
                 }
 
-                var scalarResultsContent = File.ReadAllText(scalarResults.FullName);
-                var scalarResultsMetadataContent = File.ReadAllText(scalarResultsMetadata.FullName);
+                var scalarResultsContent = await File.ReadAllTextAsync(scalarResults.FullName, cancellationToken);
+                var scalarResultsMetadataContent = await File.ReadAllTextAsync(scalarResultsMetadata.FullName, cancellationToken);
 
                 this.logger.LogInformation("ScalarResultsProcessing Started");
                 

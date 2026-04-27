@@ -46,10 +46,10 @@ namespace Canopy.Cli.Executable.Services
                 tenantId = authenticatedUser.TenantId;
             }
 
-            var simVersion = await this.simVersionCache.GetOrSet(parameters.SimVersion);
+            var simVersion = await this.simVersionCache.GetOrSet(parameters.SimVersion, cancellationToken);
 
             this.logger.LogInformation("Requesting schemas...");
-            var result = await this.simVersionClient.GetDocumentsAsync(simVersion, tenantId);
+            var result = await this.simVersionClient.GetDocumentsAsync(simVersion, tenantId, cancellationToken);
 
             this.logger.LogInformation("Saving schemas...");
             var writtenFiles = new List<TextDocumentOptionalContent>();
@@ -65,7 +65,7 @@ namespace Canopy.Cli.Executable.Services
                     continue;
                 }
 
-                await this.writeFile.ExecuteAsync(Path.Combine(outputFolder, document.Name), document.Content);
+                await this.writeFile.ExecuteAsync(Path.Combine(outputFolder, document.Name), document.Content, cancellationToken);
                 writtenFiles.Add(document);
             }
 

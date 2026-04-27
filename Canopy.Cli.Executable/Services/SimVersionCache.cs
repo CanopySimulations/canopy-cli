@@ -1,3 +1,4 @@
+using System.Threading;
 using System.Threading.Tasks;
 using Canopy.Api.Client;
 using Microsoft.Extensions.Logging;
@@ -23,7 +24,7 @@ namespace Canopy.Cli.Executable.Services
             this.logger = logger;
         }
 
-        public async Task<string> Get()
+        public async Task<string> Get(CancellationToken cancellationToken = default)
         {
             string? tenantId = null;
             if (this.simVersionTask == null)
@@ -39,18 +40,18 @@ namespace Canopy.Cli.Executable.Services
                     Guard.Operation(tenantId != null, "Tenant ID was not populated.");
                     
                     this.logger.LogInformation("Requesting tenant sim version.");
-                    this.simVersionTask = this.simVersionClient.GetSimVersionAsync(tenantId);
+                    this.simVersionTask = this.simVersionClient.GetSimVersionAsync(tenantId, cancellationToken);
                 }
             }
 
             return await this.simVersionTask;
         }
 
-        public Task<string> GetOrSet(string? requestedSimVersion)
+        public Task<string> GetOrSet(string? requestedSimVersion, CancellationToken cancellationToken = default)
         {
             if (string.IsNullOrWhiteSpace(requestedSimVersion))
             {
-                return this.Get();
+                return this.Get(cancellationToken);
             }
 
             this.Set(requestedSimVersion);

@@ -4,20 +4,22 @@
     using System.Threading.Tasks;
     using System.Linq;
     using System.Text;
+    using System.Threading;
 
     public static class WriteCombinedStudyScalarData
     {
         public static async Task ExecuteAsync(
             IRootFolder root,
             IFileWriter writer,
-            StudyScalarFiles studyScalarFiles)
+            StudyScalarFiles studyScalarFiles,
+            CancellationToken cancellationToken = default)
         {
             var content = await GetCombinedStudyScalarDataCsv(studyScalarFiles);
 
             if(content != null)
             {
                 var bytes = Encoding.UTF8.GetBytes(content.ToString());
-                await writer.WriteNewFile(root, string.Empty, "scalar-results-merged.csv", bytes);
+                await writer.WriteNewFile(root, string.Empty, "scalar-results-merged.csv", bytes, cancellationToken);
             }
         }
 
