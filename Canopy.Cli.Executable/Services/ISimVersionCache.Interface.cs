@@ -1,12 +1,11 @@
-using System.Threading;
 using System.Threading.Tasks;
 
 namespace Canopy.Cli.Executable.Services
 {
     public interface ISimVersionCache
     {
-        Task<string> Get(CancellationToken cancellationToken = default);
-        Task<string> GetOrSet(string? requestedSimVersion, CancellationToken cancellationToken = default);
+        Task<string> Get();
+        Task<string> GetOrSet(string? requestedSimVersion);
         void Set(string simVersion);
     }
 }

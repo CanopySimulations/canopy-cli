@@ -46,7 +46,7 @@ namespace Canopy.Cli.Executable.Services
                 tenantId = authenticatedUser.TenantId;
             }
 
-            var simVersion = await this.simVersionCache.GetOrSet(parameters.SimVersion, cancellationToken);
+            var simVersion = await this.simVersionCache.GetOrSet(parameters.SimVersion);
 
             this.logger.LogInformation("Requesting schemas...");
             var result = await this.simVersionClient.GetDocumentsAsync(simVersion, tenantId, cancellationToken);

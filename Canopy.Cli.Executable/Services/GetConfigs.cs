@@ -56,7 +56,7 @@ namespace Canopy.Cli.Executable.Services
             var format = parameters.Format;
             var unwrap = parameters.Unwrap;
 
-            var simVersion = await this.simVersionCache.GetOrSet(parameters.SimVersion, cancellationToken);
+            var simVersion = await this.simVersionCache.GetOrSet(parameters.SimVersion);
 
             var authenticatedUser = await this.ensureAuthenticated.ExecuteAsync();
 
