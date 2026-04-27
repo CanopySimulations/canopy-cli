@@ -110,14 +110,14 @@ steps:
   displayName: 'Build Win'
 
 - task: DotNetCoreCLI@2
-  inputs:
-    command: 'publish'
-    projects: 'Canopy.Cli.Executable'
-    publishWebProjects: false
-    arguments: '-c $(buildConfiguration) -r win-x64'
-    zipAfterPublish: false
-    modifyOutputPath: false
-  displayName: 'Publish Win'
+inputs:
+  command: 'publish'
+  projects: 'Canopy.Cli.Executable'
+  publishWebProjects: false
+  arguments: '-c $(buildConfiguration) -r win-x64 -o $(Build.BinariesDirectory)/win-x64'
+  zipAfterPublish: false
+  modifyOutputPath: false
+displayName: 'Publish Win'
     
 - task: DotNetCoreCLI@2
   inputs:
@@ -135,18 +135,18 @@ steps:
   displayName: 'Build OSX'
 
 - task: DotNetCoreCLI@2
-  inputs:
-    command: 'publish'
-    projects: 'Canopy.Cli.Executable'
-    publishWebProjects: false
-    arguments: '-c $(buildConfiguration) -r osx-arm64'
-    zipAfterPublish: false
-    modifyOutputPath: false
-  displayName: 'Publsh OSX'
+inputs:
+  command: 'publish'
+  projects: 'Canopy.Cli.Executable'
+  publishWebProjects: false
+  arguments: '-c $(buildConfiguration) -r osx-arm64 -o $(Build.BinariesDirectory)/osx-arm64'
+  zipAfterPublish: false
+  modifyOutputPath: false
+displayName: 'Publsh OSX'
 
 - task: ArchiveFiles@2
   inputs:
-    rootFolderOrFile: '$(Build.SourcesDirectory)/Canopy.Cli.Executable/bin/$(buildConfiguration)/net8.0/win-x64/publish'
+    rootFolderOrFile: '$(Build.BinariesDirectory)/win-x64'
     includeRootFolder: false
     archiveType: 'zip'
     archiveFile: '$(Build.ArtifactStagingDirectory)/canopy-cli-windows.zip'
@@ -155,7 +155,7 @@ steps:
 
 - task: ArchiveFiles@2
   inputs:
-    rootFolderOrFile: '$(Build.SourcesDirectory)/Canopy.Cli.Executable/bin/$(buildConfiguration)/net8.0/osx-arm64/publish'
+    rootFolderOrFile: '$(Build.BinariesDirectory)/osx-arm64'
     includeRootFolder: false
     archiveType: 'zip'
     archiveFile: '$(Build.ArtifactStagingDirectory)/canopy-cli-mac.zip'
