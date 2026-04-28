@@ -1,25 +1,25 @@
-using System.Threading;
+using Azure.Storage.DataMovement;
+using Canopy.Cli.Executable.Azure;
 using System;
 using System.Collections.Concurrent;
+using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.Azure.Storage.Blob;
-using Microsoft.Azure.Storage.DataMovement;
 
 namespace Canopy.Cli.Executable.Services
 {
     public class DownloadBlobDirectoryMock : IDownloadBlobDirectory, IDownloadBlobDirectoryMock
     {
-        public record Request(CloudBlobDirectory BlobDirectory, string outputDirectoryPath);
+        public record Request(BlobDirectory BlobDirectory, string OutputDirectoryPath);
 
         private bool isRecording = false;
 
         private readonly ConcurrentBag<Request> requests = new();
 
-        public Task<TransferStatus?> ExecuteAsync(
-            CloudBlobDirectory blobDirectory,
+        public Task<TransferOperation?> ExecuteAsync(
+            BlobDirectory blobDirectory,
             string outputDirectoryPath,
-            DownloadDirectoryOptions options,
-            DirectoryTransferContext context,
+            bool isRetry,
+            TransferProgressHandlerOptions progressHandlerOptions,
             CancellationToken cancellationToken)
         {
             if (!this.isRecording)
@@ -29,7 +29,7 @@ namespace Canopy.Cli.Executable.Services
 
             this.requests.Add(new Request(blobDirectory, outputDirectoryPath));
 
-            return Task.FromResult<TransferStatus?>(null);
+            return Task.FromResult<TransferOperation?>(null);
         }
 
         public IDisposable Record()

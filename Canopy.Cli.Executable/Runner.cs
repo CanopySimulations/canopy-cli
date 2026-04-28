@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.IO;
 using System.CommandLine;
 using System.Linq;
 using System.Reflection;
@@ -12,6 +14,9 @@ using Canopy.Cli.Executable.Services;
 using Canopy.Api.Client;
 using Canopy.Cli.Executable.Commands;
 using Canopy.Cli.Executable.Services.DownloadMonitoring;
+using Azure.Storage.DataMovement;
+using Azure.Storage.DataMovement.Blobs;
+using Canopy.Cli.Executable.Azure;
 using Canopy.Cli.Executable.Services.GetStudies;
 
 namespace Canopy.Cli.Executable
@@ -135,6 +140,24 @@ namespace Canopy.Cli.Executable
             {
                 services.AddTransient<IWriteFile, WriteFile>();
                 services.AddTransient<IGetCreatedOutputFolder, GetCreatedOutputFolder>();
+
+                var localAppData = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
+                if (string.IsNullOrEmpty(localAppData))
+                {
+                    localAppData = Path.GetTempPath();
+                }
+
+                var checkpointPath = Path.Combine(localAppData, "CanopyCli", "Checkpoints");
+                Directory.CreateDirectory(checkpointPath);
+                var transferManagerOptions = new TransferManagerOptions
+                {
+                    MaximumConcurrency = Environment.ProcessorCount * 16,
+                    CheckpointStoreOptions = TransferCheckpointStoreOptions.CreateLocalStore(checkpointPath),
+                    ProvidersForResuming = new List<StorageResourceProvider> { new BlobsStorageResourceProvider()}
+                };
+                services.AddSingleton(new CheckpointDirectory(checkpointPath));
+                services.AddSingleton(transferManagerOptions);
+                services.AddSingleton(new TransferManager(transferManagerOptions));
                 services.AddTransient<IDownloadBlobDirectory, DownloadBlobDirectory>();
             }
         }
