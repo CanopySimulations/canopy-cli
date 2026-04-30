@@ -18,8 +18,7 @@ namespace Canopy.Cli.Executable.Services
         public Task<TransferOperation?> ExecuteAsync(
             BlobDirectory blobDirectory,
             string outputDirectoryPath,
-            bool isRetry,
-            TransferProgressHandlerOptions progressHandlerOptions,
+            TransferOptions transferOptions,
             CancellationToken cancellationToken)
         {
             if (!this.isRecording)

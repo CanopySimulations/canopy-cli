@@ -1,9 +1,9 @@
 using Azure.Storage.DataMovement;
 using Canopy.Api.Client;
+using Canopy.Cli.Executable.Azure;
 using Humanizer;
 using Microsoft.Extensions.Logging;
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -13,6 +13,7 @@ namespace Canopy.Cli.Executable.Services.GetStudies
     public class DownloadStudy : IDownloadStudy
     {
         private const string FileQuantityWord = "file";
+        private const long MaximumTransferChunkSize = 20_971_520;
         private static readonly TimeSpan ProgressLogRateLimit = TimeSpan.FromSeconds(5);
 
         private readonly IStudyClient studyClient;
@@ -56,114 +57,80 @@ namespace Canopy.Cli.Executable.Services.GetStudies
             bool isRetry = false;
             await this.retryPolicies.DownloadPolicy.ExecuteAsync(async () =>
             {
-                var options = CreateOptions();
+                var counters = new TransferCounters();
+                var bytesPerTransfer = new long[directories.Count];
 
-                var tasks = new List<Task<TransferOperation?>>();
+                var totalBytesProgress = new RateLimitedProgress<long>(
+                    ProgressLogRateLimit,
+                    new Progress<long>(totalBytes => LogTransferProgress(totalBytes, counters.Completed)));
 
-                foreach (var item in directories)
-                {
-                    this.logger.LogInformation("Adding {0}", item.Directory.Container.Uri.Host);
-
-                    tasks.Add(this.downloadBlobDirectory.ExecuteAsync(
-                        item.Directory,
-                        item.OutputFolder,
-                        isRetry,
-                        options,
-                        cancellationToken));
-                }
+                var tasks = directories
+                    .Select((item, idx) =>
+                    {
+                        this.logger.LogInformation("Adding {0}", item.Directory.Container.Uri.Host);
+                        return this.downloadBlobDirectory.ExecuteAsync(
+                            item.Directory,
+                            item.OutputFolder,
+                            CreateTransferOptions(idx, bytesPerTransfer, totalBytesProgress, counters, isRetry),
+                            cancellationToken);
+                    })
+                    .ToList();
 
                 isRetry = true;
-
                 this.logger.LogInformation("Processing added storage servers...");
 
+                await Task.WhenAll(tasks);
 
-                // Wait for all transfers to finish
-                var transferOperations = await Task.WhenAll(tasks.Where(t => t != null));
-                await Task.WhenAll(
-                    transferOperations
-                        .Where(op => op != null)
-                        .Select(op => op!.WaitForCompletionAsync(cancellationToken))
-                );
+                if (!cancellationToken.IsCancellationRequested)
+                {
+                    LogTransferProgress(bytesPerTransfer.Sum(), counters.Completed);
 
+                    if (counters.Failed > 0)
+                        this.logger.LogWarning("Failed downloading {0}", FileQuantityWord.ToQuantity(counters.Failed, "N0"));
 
-                //var filesTransferred =
-                //    transferOperations.Sum(t => t?.Status.CompletedTransfers ?? 0);
-
-                //var filesFailed =
-                //    transfers.Sum(t => t?.Status.FailedTransfers ?? 0);
-
-                //var filesSkipped =
-                //    transfers.Sum(t => t?.Status.SkippedTransfers ?? 0);
-
-                //var bytesTransferred = results.Sum(v => v?.BytesTransferred ?? 0);
-
-                //if (!cancellationToken.IsCancellationRequested)
-                //{
-                //    LogTransferProgress(bytesTransferred, filesTransferred);
-
-                //    if (filesFailed > 0)
-                //    {
-                //        this.logger.LogWarning("Failed downloading {0}", FileQuantityWord.ToQuantity(filesFailed, "N0"));
-                //    }
-
-                //    if (filesSkipped > 0)
-                //    {
-                //        this.logger.LogWarning("Skipped downloading {0}", FileQuantityWord.ToQuantity(filesSkipped, "N0"));
-                //    }
-                //}
+                    if (counters.Skipped > 0)
+                        this.logger.LogWarning("Skipped downloading {0}", FileQuantityWord.ToQuantity(counters.Skipped, "N0"));
+                }
             });
 
             return studyMetadata;
         }
 
-        private TransferProgressHandlerOptions CreateOptions()
+        private TransferOptions CreateTransferOptions(
+            int idx,
+            long[] bytesPerTransfer,
+            IProgress<long> totalBytesProgress,
+            TransferCounters counters,
+            bool isRetry)
         {
-            var progressRateLimit = TimeSpan.FromSeconds(5);
-            var context = new TransferProgressHandlerOptions();
-            context.ProgressHandler = new RateLimitedProgress<TransferProgress>(
-                progressRateLimit,
-                new Progress<TransferProgress>(progress =>
+            var options = new TransferOptions
+            {
+                CreationMode = isRetry
+                    ? StorageResourceCreationMode.SkipIfExists
+                    : StorageResourceCreationMode.OverwriteIfExists,
+                MaximumTransferChunkSize = MaximumTransferChunkSize,
+                ProgressHandlerOptions = new TransferProgressHandlerOptions
                 {
-                    var bytesTransferred = progress.BytesTransferred ?? 0;
-                    var filesTransferred = progress.CompletedCount;
-                    LogTransferProgress(bytesTransferred, filesTransferred);
-                }));
+                    TrackBytesTransferred = true,
+                    ProgressHandler = new Progress<TransferProgress>(p =>
+                    {
+                        Interlocked.Exchange(ref bytesPerTransfer[idx], p.BytesTransferred ?? 0);
+                        totalBytesProgress.Report(bytesPerTransfer.Sum());
+                    })
+                }
+            };
 
-            //context.FileFailed += (s, e) => this.logger.LogWarning("Failed to download {0}", e.Destination);
-            context.TrackBytesTransferred = true;
-            //context.ShouldOverwriteCallbackAsync = TransferContext.ForceOverwrite;
+            options.ItemTransferCompleted += _ => { counters.IncrementCompleted(); return Task.CompletedTask; };
+            options.ItemTransferFailed    += _ => { counters.IncrementFailed();    return Task.CompletedTask; };
+            options.ItemTransferSkipped   += _ => { counters.IncrementSkipped();   return Task.CompletedTask; };
 
-            return context;
+            return options;
         }
+
         private void LogTransferProgress(long bytesTransferred, long filesTransferred)
         {
             this.logger.LogInformation("Copied: {0}, {1}", bytesTransferred.Bytes().Humanize("0.0"), FileQuantityWord.ToQuantity(filesTransferred, "N0"));
         }
 
-        public class RateLimitedProgress<T> : IProgress<T>
-        {
-            private readonly IProgress<T> inner;
-            private readonly TimeSpan rate;
-
-            private DateTimeOffset lastReport = DateTimeOffset.MinValue;
-
-            public RateLimitedProgress(TimeSpan rate, IProgress<T> inner)
-            {
-                this.inner = inner;
-                this.rate = rate;
-            }
-
-            public void Report(T value)
-            {
-                var now = DateTimeOffset.UtcNow;
-                if ((now - this.lastReport) < this.rate)
-                {
-                    return;
-                }
-
-                this.lastReport = now;
-                this.inner.Report(value);
-            }
-        }
     }
 }
