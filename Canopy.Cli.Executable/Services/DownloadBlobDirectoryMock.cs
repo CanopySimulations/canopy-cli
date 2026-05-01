@@ -1,4 +1,3 @@
-using Azure.Storage.DataMovement;
 using Canopy.Cli.Executable.Azure;
 using System;
 using System.Collections.Concurrent;
@@ -18,7 +17,7 @@ namespace Canopy.Cli.Executable.Services
         public Task ExecuteAsync(
             BlobDirectory blobDirectory,
             string outputDirectoryPath,
-            TransferOptions transferOptions,
+            BlobDirectoryDownloadOptions options,
             CancellationToken cancellationToken)
         {
             if (!this.isRecording)

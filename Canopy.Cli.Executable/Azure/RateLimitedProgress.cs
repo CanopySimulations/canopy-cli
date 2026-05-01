@@ -2,16 +2,16 @@ using System;
 
 namespace Canopy.Cli.Executable.Azure
 {
-    public class RateLimitedProgress<T> : IProgress<T>
+    public class RateLimitedProgress<T>
     {
-        private readonly IProgress<T> inner;
+        private readonly Action<T> callback;
         private readonly TimeSpan rate;
 
         private DateTimeOffset lastReport = DateTimeOffset.MinValue;
 
-        public RateLimitedProgress(TimeSpan rate, IProgress<T> inner)
+        public RateLimitedProgress(TimeSpan rate, Action<T> callback)
         {
-            this.inner = inner;
+            this.callback = callback;
             this.rate = rate;
         }
 
@@ -24,7 +24,7 @@ namespace Canopy.Cli.Executable.Azure
             }
 
             this.lastReport = now;
-            this.inner.Report(value);
+            this.callback(value);
         }
     }
 }

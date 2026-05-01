@@ -12,7 +12,6 @@ using Canopy.Cli.Executable.Services;
 using Canopy.Api.Client;
 using Canopy.Cli.Executable.Commands;
 using Canopy.Cli.Executable.Services.DownloadMonitoring;
-using Azure.Storage.DataMovement;
 using Canopy.Cli.Executable.Services.GetStudies;
 
 namespace Canopy.Cli.Executable
@@ -137,11 +136,6 @@ namespace Canopy.Cli.Executable
                 services.AddTransient<IWriteFile, WriteFile>();
                 services.AddTransient<IGetCreatedOutputFolder, GetCreatedOutputFolder>();
 
-                var transferManagerOptions = new TransferManagerOptions
-                {
-                    MaximumConcurrency = Environment.ProcessorCount * 16,
-                };
-                services.AddSingleton(transferManagerOptions);
                 services.AddTransient<IDownloadBlobDirectory, DownloadBlobDirectory>();
             }
         }

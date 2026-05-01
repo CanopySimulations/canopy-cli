@@ -1,6 +1,6 @@
-using Azure.Storage.DataMovement;
 using Canopy.Api.Client;
 using Canopy.Cli.Executable.Azure;
+using Canopy.Cli.Executable.Services;
 using Humanizer;
 using Microsoft.Extensions.Logging;
 using System;
@@ -14,7 +14,6 @@ namespace Canopy.Cli.Executable.Services.GetStudies
     public class DownloadStudy : IDownloadStudy
     {
         private const string FileQuantityWord = "file";
-        private const long MaximumTransferChunkSize = 20_971_520;
         private static readonly TimeSpan ProgressLogRateLimit = TimeSpan.FromSeconds(5);
 
         private readonly IStudyClient studyClient;
@@ -22,7 +21,6 @@ namespace Canopy.Cli.Executable.Services.GetStudies
         private readonly IRetryPolicies retryPolicies;
         private readonly IGetAllRequiredDirectoryMetadata getAllRequiredDirectoryMetadata;
         private readonly IGetStudyBlobDirectory getStudyBlobDirectory;
-        private readonly TransferManagerOptions transferManagerOptions;
         private readonly ILogger<DownloadStudy> logger;
 
         public DownloadStudy(
@@ -31,7 +29,6 @@ namespace Canopy.Cli.Executable.Services.GetStudies
             IRetryPolicies retryPolicies,
             IGetAllRequiredDirectoryMetadata getAllRequiredDirectoryMetadata,
             IGetStudyBlobDirectory getStudyBlobDirectory,
-            TransferManagerOptions transferManagerOptions,
             ILogger<DownloadStudy> logger)
         {
             this.studyClient = studyClient;
@@ -40,7 +37,6 @@ namespace Canopy.Cli.Executable.Services.GetStudies
             this.getAllRequiredDirectoryMetadata = getAllRequiredDirectoryMetadata;
             this.getStudyBlobDirectory = getStudyBlobDirectory;
             this.logger = logger;
-            this.transferManagerOptions = transferManagerOptions;
         }
 
         public async Task<GetStudyQueryResult> ExecuteAsync(string outputFolder, string tenantId, string studyId, int? jobIndex, CancellationToken cancellationToken)
@@ -53,8 +49,6 @@ namespace Canopy.Cli.Executable.Services.GetStudies
                 this.getStudyBlobDirectory.Execute(v.AccessInformation),
                 v.OutputFolder)).ToList();
 
-            this.logger.LogInformation("Using {0} parallel operations.", this.transferManagerOptions.MaximumConcurrency);
-
             bool isRetry = false;
             await this.retryPolicies.DownloadPolicy.ExecuteAsync(async () =>
             {
@@ -63,7 +57,12 @@ namespace Canopy.Cli.Executable.Services.GetStudies
 
                 var totalBytesProgress = new RateLimitedProgress<long>(
                     ProgressLogRateLimit,
-                    new Progress<long>(totalBytes => LogTransferProgress(totalBytes, counters.Completed)));
+                    totalBytes => LogTransferProgress(totalBytes, counters.Completed));
+
+                var totalStopwatch = Stopwatch.StartNew();
+
+                using var globalSemaphore = new SemaphoreSlim(Environment.ProcessorCount * 16);
+
                 var tasks = directories
                     .Select((item, idx) =>
                     {
@@ -71,7 +70,7 @@ namespace Canopy.Cli.Executable.Services.GetStudies
                         return this.downloadBlobDirectory.ExecuteAsync(
                             item.Directory,
                             item.OutputFolder,
-                            CreateTransferOptions(idx, bytesPerTransfer, totalBytesProgress, counters, isRetry),
+                            CreateDownloadOptions(idx, bytesPerTransfer, totalBytesProgress, counters, isRetry, globalSemaphore),
                             cancellationToken);
                     })
                     .ToList();
@@ -82,6 +81,7 @@ namespace Canopy.Cli.Executable.Services.GetStudies
                 var startStopwatch = Stopwatch.StartNew();
                 await Task.WhenAll(tasks);
                 this.logger.LogInformation("Transfer phase: {0:0.0}s", startStopwatch.Elapsed.TotalSeconds);
+                this.logger.LogInformation("Total transfer time: {0:0.0}s", totalStopwatch.Elapsed.TotalSeconds);
 
                 if (!cancellationToken.IsCancellationRequested)
                 {
@@ -98,36 +98,27 @@ namespace Canopy.Cli.Executable.Services.GetStudies
             return studyMetadata;
         }
 
-        private TransferOptions CreateTransferOptions(
+        private BlobDirectoryDownloadOptions CreateDownloadOptions(
             int idx,
             long[] bytesPerTransfer,
-            IProgress<long> totalBytesProgress,
+            RateLimitedProgress<long> totalBytesProgress,
             TransferCounters counters,
-            bool isRetry)
+            bool isRetry,
+            SemaphoreSlim globalSemaphore)
         {
-            var options = new TransferOptions
+            return new BlobDirectoryDownloadOptions
             {
-                CreationMode = isRetry
-                   ? StorageResourceCreationMode.SkipIfExists
-                   : StorageResourceCreationMode.OverwriteIfExists,
-                MaximumTransferChunkSize = MaximumTransferChunkSize,
-                
-                ProgressHandlerOptions = new TransferProgressHandlerOptions
+                SkipExistingFiles = isRetry,
+                ConcurrencySemaphore = globalSemaphore,
+                BytesProgress = totalForDir =>
                 {
-                    TrackBytesTransferred = true,
-                    ProgressHandler = new Progress<TransferProgress>(p =>
-                    {
-                        Interlocked.Exchange(ref bytesPerTransfer[idx], p.BytesTransferred ?? 0);
-                        totalBytesProgress.Report(bytesPerTransfer.Sum());
-                    })
-                }
+                    Interlocked.Exchange(ref bytesPerTransfer[idx], totalForDir);
+                    totalBytesProgress.Report(bytesPerTransfer.Sum());
+                },
+                OnFileCompleted = counters.IncrementCompleted,
+                OnFileFailed = counters.IncrementFailed,
+                OnFileSkipped = counters.IncrementSkipped,
             };
-
-            options.ItemTransferCompleted += _ => { counters.IncrementCompleted(); return Task.CompletedTask; };
-            options.ItemTransferFailed += _ => { counters.IncrementFailed(); return Task.CompletedTask; };
-            options.ItemTransferSkipped += _ => { counters.IncrementSkipped(); return Task.CompletedTask; };
-
-            return options;
         }
 
         private void LogTransferProgress(long bytesTransferred, long filesTransferred)
