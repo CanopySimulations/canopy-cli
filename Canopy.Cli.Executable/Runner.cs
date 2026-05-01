@@ -142,7 +142,6 @@ namespace Canopy.Cli.Executable
                     MaximumConcurrency = Environment.ProcessorCount * 16,
                 };
                 services.AddSingleton(transferManagerOptions);
-                services.AddSingleton(new TransferManager(transferManagerOptions));
                 services.AddTransient<IDownloadBlobDirectory, DownloadBlobDirectory>();
             }
         }

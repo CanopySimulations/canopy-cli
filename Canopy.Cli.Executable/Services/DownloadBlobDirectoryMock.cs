@@ -15,7 +15,7 @@ namespace Canopy.Cli.Executable.Services
 
         private readonly ConcurrentBag<Request> requests = new();
 
-        public Task<TransferOperation?> ExecuteAsync(
+        public Task ExecuteAsync(
             BlobDirectory blobDirectory,
             string outputDirectoryPath,
             TransferOptions transferOptions,
@@ -28,7 +28,7 @@ namespace Canopy.Cli.Executable.Services
 
             this.requests.Add(new Request(blobDirectory, outputDirectoryPath));
 
-            return Task.FromResult<TransferOperation?>(null);
+            return Task.CompletedTask;
         }
 
         public IDisposable Record()

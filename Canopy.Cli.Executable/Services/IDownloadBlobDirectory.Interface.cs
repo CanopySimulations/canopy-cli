@@ -7,7 +7,7 @@ namespace Canopy.Cli.Executable.Services
 {
     public interface IDownloadBlobDirectory
     {
-        Task<TransferOperation?> ExecuteAsync(
+        Task ExecuteAsync(
             BlobDirectory blobDirectory,
             string outputDirectoryPath,
             TransferOptions transferOptions,

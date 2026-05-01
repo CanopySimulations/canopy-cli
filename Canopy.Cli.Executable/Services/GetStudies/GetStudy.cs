@@ -1,4 +1,5 @@
 using Canopy.Cli.Executable.Commands;
+using Humanizer;
 using Microsoft.Extensions.Logging;
 using System;
 using System.IO;

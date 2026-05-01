@@ -4,6 +4,7 @@ using Canopy.Cli.Executable.Azure;
 using Humanizer;
 using Microsoft.Extensions.Logging;
 using System;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -63,7 +64,6 @@ namespace Canopy.Cli.Executable.Services.GetStudies
                 var totalBytesProgress = new RateLimitedProgress<long>(
                     ProgressLogRateLimit,
                     new Progress<long>(totalBytes => LogTransferProgress(totalBytes, counters.Completed)));
-
                 var tasks = directories
                     .Select((item, idx) =>
                     {
@@ -79,7 +79,9 @@ namespace Canopy.Cli.Executable.Services.GetStudies
                 isRetry = true;
                 this.logger.LogInformation("Processing added storage servers...");
 
+                var startStopwatch = Stopwatch.StartNew();
                 await Task.WhenAll(tasks);
+                this.logger.LogInformation("Transfer phase: {0:0.0}s", startStopwatch.Elapsed.TotalSeconds);
 
                 if (!cancellationToken.IsCancellationRequested)
                 {
@@ -106,9 +108,10 @@ namespace Canopy.Cli.Executable.Services.GetStudies
             var options = new TransferOptions
             {
                 CreationMode = isRetry
-                    ? StorageResourceCreationMode.SkipIfExists
-                    : StorageResourceCreationMode.OverwriteIfExists,
+                   ? StorageResourceCreationMode.SkipIfExists
+                   : StorageResourceCreationMode.OverwriteIfExists,
                 MaximumTransferChunkSize = MaximumTransferChunkSize,
+                
                 ProgressHandlerOptions = new TransferProgressHandlerOptions
                 {
                     TrackBytesTransferred = true,
@@ -121,8 +124,8 @@ namespace Canopy.Cli.Executable.Services.GetStudies
             };
 
             options.ItemTransferCompleted += _ => { counters.IncrementCompleted(); return Task.CompletedTask; };
-            options.ItemTransferFailed    += _ => { counters.IncrementFailed();    return Task.CompletedTask; };
-            options.ItemTransferSkipped   += _ => { counters.IncrementSkipped();   return Task.CompletedTask; };
+            options.ItemTransferFailed += _ => { counters.IncrementFailed(); return Task.CompletedTask; };
+            options.ItemTransferSkipped += _ => { counters.IncrementSkipped(); return Task.CompletedTask; };
 
             return options;
         }
@@ -131,6 +134,5 @@ namespace Canopy.Cli.Executable.Services.GetStudies
         {
             this.logger.LogInformation("Copied: {0}, {1}", bytesTransferred.Bytes().Humanize("0.0"), FileQuantityWord.ToQuantity(filesTransferred, "N0"));
         }
-
     }
 }

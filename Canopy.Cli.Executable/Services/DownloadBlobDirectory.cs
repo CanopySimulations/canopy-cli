@@ -8,9 +8,9 @@ using System.Threading.Tasks;
 namespace Canopy.Cli.Executable.Services
 {
     public class DownloadBlobDirectory(
-        TransferManager transferManager) : IDownloadBlobDirectory
+        TransferManagerOptions transferManagerOptions) : IDownloadBlobDirectory
     {
-        public async Task<TransferOperation?> ExecuteAsync(
+        public async Task ExecuteAsync(
             BlobDirectory blobDirectory,
             string outputDirectoryPath,
             TransferOptions transferOptions,
@@ -18,6 +18,8 @@ namespace Canopy.Cli.Executable.Services
         {
             try
             {
+                await using var transferManager = new TransferManager(transferManagerOptions);
+
                 var source = BlobsStorageResourceProvider.FromClient(
                     blobDirectory.Container,
                     new BlobStorageResourceContainerOptions { BlobPrefix = blobDirectory.Prefix });
@@ -26,11 +28,9 @@ namespace Canopy.Cli.Executable.Services
 
                 var operation = await transferManager.StartTransferAsync(source, destination, transferOptions, cancellationToken);
                 await operation.WaitForCompletionAsync(cancellationToken);
-                return operation;
             }
             catch (Exception t) when (ExceptionUtilities.IsFromCancellation(t))
             {
-                return null;
             }
         }
 
