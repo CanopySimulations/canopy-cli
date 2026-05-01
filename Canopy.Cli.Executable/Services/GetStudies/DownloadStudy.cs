@@ -15,6 +15,7 @@ namespace Canopy.Cli.Executable.Services.GetStudies
     {
         private const string FileQuantityWord = "file";
         private static readonly TimeSpan ProgressLogRateLimit = TimeSpan.FromSeconds(5);
+        private static readonly int ConnectionLimit = Environment.ProcessorCount * 16;
 
         private readonly IStudyClient studyClient;
         private readonly IDownloadBlobDirectory downloadBlobDirectory;
@@ -61,7 +62,7 @@ namespace Canopy.Cli.Executable.Services.GetStudies
 
                 var totalStopwatch = Stopwatch.StartNew();
 
-                using var globalSemaphore = new SemaphoreSlim(Environment.ProcessorCount * 16);
+                using var globalSemaphore = new SemaphoreSlim(ConnectionLimit);
 
                 var tasks = directories
                     .Select((item, idx) =>

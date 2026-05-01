@@ -1,5 +1,3 @@
-using Azure.Storage;
-using Azure.Storage.Blobs;
 using Azure.Storage.Blobs.Models;
 using Canopy.Cli.Executable.Azure;
 using System;
@@ -10,10 +8,8 @@ using System.Threading.Tasks;
 
 namespace Canopy.Cli.Executable.Services
 {
-    public class DownloadBlobDirectory : IDownloadBlobDirectory
+    public class DownloadBlobDirectory(IDownloadBlob downloadBlob) : IDownloadBlobDirectory
     {
-        private const long MaximumTransferSize = 20_971_520;
-
         public async Task ExecuteAsync(
             BlobDirectory blobDirectory,
             string outputDirectoryPath,
@@ -22,7 +18,7 @@ namespace Canopy.Cli.Executable.Services
         {
             try
             {
-                var totalBytesTransferred = new long[1];
+                long[] totalBytesTransferred = [0];
                 var prefix = blobDirectory.Prefix.TrimEnd('/') + '/';
                 var semaphore = options.ConcurrencySemaphore;
                 var tasks = new List<Task>();
@@ -44,10 +40,19 @@ namespace Canopy.Cli.Executable.Services
                         continue;
                     }
 
+                    // Wait for the semaphore before starting the download, and release it when the download completes
+                    // (successfully or with failure, inside downloadBlob.ExecuteAsync()).
+                    // This is to control how many download tasks run concurrently
                     await semaphore.WaitAsync(cancellationToken);
-                    tasks.Add(DownloadBlobAsync(
-                        blobDirectory.Container, blobName, localPath,
-                        options, totalBytesTransferred, semaphore, cancellationToken));
+                    tasks.Add(downloadBlob.ExecuteAsync(
+                        blobDirectory.Container,
+                        blobName,
+                        localPath,
+                        CreateBytesProgress(options.BytesProgress, totalBytesTransferred),
+                        options.OnFileCompleted,
+                        options.OnFileFailed,
+                        semaphore,
+                        cancellationToken));
                 }
 
                 await Task.WhenAll(tasks);
@@ -57,56 +62,27 @@ namespace Canopy.Cli.Executable.Services
             }
         }
 
-        private static async Task DownloadBlobAsync(
-            BlobContainerClient container,
-            string blobName,
-            string localPath,
-            BlobDirectoryDownloadOptions options,
-            long[] totalBytesTransferred,
-            SemaphoreSlim semaphore,
-            CancellationToken cancellationToken)
+        private static IProgress<long>? CreateBytesProgress(Action<long>? bytesProgress, long[] totalBytesTransferred)
         {
-            try
+            if (bytesProgress == null)
             {
-                Directory.CreateDirectory(Path.GetDirectoryName(localPath)!);
+                return null;
+            }
 
-                long filePreviousBytes = 0;
-                await container.GetBlobClient(blobName).DownloadToAsync(
-                    localPath,
-                    new BlobDownloadToOptions
-                    {
-                        TransferOptions = new StorageTransferOptions
-                        {
-                            MaximumTransferSize = MaximumTransferSize,
-                        },
-                        ProgressHandler = options.BytesProgress == null ? null : new SyncProgress(bytes =>
-                        {
-                            var prev = Interlocked.Exchange(ref filePreviousBytes, bytes);
-                            var delta = bytes - prev;
-                            if (delta > 0)
-                                options.BytesProgress(Interlocked.Add(ref totalBytesTransferred[0], delta));
-                        }),
-                    },
-                    cancellationToken);
-
-                options.OnFileCompleted?.Invoke();
-            }
-            catch (Exception t) when (ExceptionUtilities.IsFromCancellation(t))
+            long[] filePreviousBytes = [0];
+            return new SyncProgress<long>(bytes =>
             {
-            }
-            catch
-            {
-                options.OnFileFailed?.Invoke();
-            }
-            finally
-            {
-                semaphore.Release();
-            }
+                var prev = Interlocked.Exchange(ref filePreviousBytes[0], bytes);
+                var delta = bytes - prev;
+                if (delta > 0)
+                    bytesProgress(Interlocked.Add(ref totalBytesTransferred[0], delta));
+            });
         }
 
-        private sealed class SyncProgress(Action<long> callback) : IProgress<long>
+        private sealed class SyncProgress<T>(Action<T> callback) : IProgress<T>
         {
-            public void Report(long value) => callback(value);
+            public void Report(T value) => callback(value);
         }
     }
 }
+
