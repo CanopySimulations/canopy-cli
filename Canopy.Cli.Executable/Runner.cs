@@ -135,7 +135,9 @@ namespace Canopy.Cli.Executable
             {
                 services.AddTransient<IWriteFile, WriteFile>();
                 services.AddTransient<IGetCreatedOutputFolder, GetCreatedOutputFolder>();
+
                 services.AddTransient<IDownloadBlobDirectory, DownloadBlobDirectory>();
+                services.AddTransient<IDownloadBlob, DownloadBlob>();
             }
         }
 

@@ -8622,7 +8622,7 @@ namespace Canopy.Api.Client
                         await ProcessResponseAsync(client_, response_, cancellationToken).ConfigureAwait(false);
 
                         var status_ = (int)response_.StatusCode;
-                        if (status_ == 200)
+                         if (status_ == 200)
                         {
                             var objectResponse_ = await ReadObjectResponseAsync<GetStudyQueryResult>(response_, headers_, cancellationToken).ConfigureAwait(false);
                             if (objectResponse_.Object == null)

@@ -1,18 +1,21 @@
 using Canopy.Api.Client;
-using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
-using Microsoft.Azure.Storage.DataMovement;
-using System.Linq;
-using Microsoft.Extensions.Logging;
+using Canopy.Cli.Executable.Azure;
+using Canopy.Cli.Executable.Services;
 using Humanizer;
+using Microsoft.Extensions.Logging;
+using System;
+using System.Diagnostics;
+using System.Linq;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace Canopy.Cli.Executable.Services.GetStudies
 {
     public class DownloadStudy : IDownloadStudy
     {
         private const string FileQuantityWord = "file";
+        private static readonly TimeSpan ProgressLogRateLimit = TimeSpan.FromSeconds(5);
+        private static readonly int ConnectionLimit = Environment.ProcessorCount * 16;
 
         private readonly IStudyClient studyClient;
         private readonly IDownloadBlobDirectory downloadBlobDirectory;
@@ -40,109 +43,88 @@ namespace Canopy.Cli.Executable.Services.GetStudies
         public async Task<GetStudyQueryResult> ExecuteAsync(string outputFolder, string tenantId, string studyId, int? jobIndex, CancellationToken cancellationToken)
         {
             var studyMetadata = await this.studyClient.GetStudyMetadataAsync(tenantId, studyId, cancellationToken);
-            
+
             var directoriesMetadata = this.getAllRequiredDirectoryMetadata.Execute(studyMetadata, outputFolder, jobIndex);
-            
+
             var directories = directoriesMetadata.Select(v => new BlobDirectoryAndOutputFolder(
                 this.getStudyBlobDirectory.Execute(v.AccessInformation),
                 v.OutputFolder)).ToList();
 
-            this.logger.LogInformation("Using {0} parallel operations.", TransferManager.Configurations.ParallelOperations);
-            this.logger.LogInformation("Using {0} max listing concurrency.", TransferManager.Configurations.MaxListingConcurrency);
-
-            DirectoryTransferContext? context = null;
+            bool isRetry = false;
             await this.retryPolicies.DownloadPolicy.ExecuteAsync(async () =>
             {
-                context = context == null ? new DirectoryTransferContext() : new DirectoryTransferContext(context.LastCheckpoint);
-                ConfigureContext(context);
+                var counters = new TransferCounters();
+                var bytesPerTransfer = new long[directories.Count];
 
-                var tasks = new List<Task<TransferStatus?>>();
-                foreach (var item in directories)
-                {
-                    this.logger.LogInformation("Adding {0}", item.Directory.Uri.Host);
+                var totalBytesProgress = new RateLimitedProgress<long>(
+                    ProgressLogRateLimit,
+                    totalBytes => LogTransferProgress(totalBytes, counters.Completed));
 
-                    tasks.Add(this.downloadBlobDirectory.ExecuteAsync(
-                        item.Directory,
-                        item.OutputFolder,
-                        new DownloadDirectoryOptions { Recursive = true },
-                        context,
-                        cancellationToken));
-                }
+                var totalStopwatch = Stopwatch.StartNew();
 
+                using var globalSemaphore = new SemaphoreSlim(ConnectionLimit);
+
+                var tasks = directories
+                    .Select((item, idx) =>
+                    {
+                        this.logger.LogInformation("Adding {0}", item.Directory.Container.Uri.Host);
+                        return this.downloadBlobDirectory.ExecuteAsync(
+                            item.Directory,
+                            item.OutputFolder,
+                            CreateDownloadOptions(idx, bytesPerTransfer, totalBytesProgress, counters, isRetry, globalSemaphore),
+                            cancellationToken);
+                    })
+                    .ToList();
+
+                isRetry = true;
                 this.logger.LogInformation("Processing added storage servers...");
 
-                var results = await Task.WhenAll(tasks);
-
-                var filesTransferred = results.Sum(v => v?.NumberOfFilesTransferred ?? 0);
-                var filesFailed = results.Sum(v => v?.NumberOfFilesFailed ?? 0);
-                var filesSkipped = results.Sum(v => v?.NumberOfFilesSkipped ?? 0);
-                var bytesTransferred = results.Sum(v => v?.BytesTransferred ?? 0);
+                var startStopwatch = Stopwatch.StartNew();
+                await Task.WhenAll(tasks);
+                this.logger.LogInformation("Transfer phase: {0:0.0}s", startStopwatch.Elapsed.TotalSeconds);
+                this.logger.LogInformation("Total transfer time: {0:0.0}s", totalStopwatch.Elapsed.TotalSeconds);
 
                 if (!cancellationToken.IsCancellationRequested)
                 {
-                    LogTransferProgress(bytesTransferred, filesTransferred);
+                    LogTransferProgress(bytesPerTransfer.Sum(), counters.Completed);
 
-                    if (filesFailed > 0)
-                    {
-                        this.logger.LogWarning("Failed downloading {0}", FileQuantityWord.ToQuantity(filesFailed, "N0"));
-                    }
+                    if (counters.Failed > 0)
+                        this.logger.LogWarning("Failed downloading {0}", FileQuantityWord.ToQuantity(counters.Failed, "N0"));
 
-                    if (filesSkipped > 0)
-                    {
-                        this.logger.LogWarning("Skipped downloading {0}", FileQuantityWord.ToQuantity(filesSkipped, "N0"));
-                    }
+                    if (counters.Skipped > 0)
+                        this.logger.LogWarning("Skipped downloading {0}", FileQuantityWord.ToQuantity(counters.Skipped, "N0"));
                 }
             });
 
             return studyMetadata;
         }
 
-        private void ConfigureContext(DirectoryTransferContext context)
+        private BlobDirectoryDownloadOptions CreateDownloadOptions(
+            int idx,
+            long[] bytesPerTransfer,
+            RateLimitedProgress<long> totalBytesProgress,
+            TransferCounters counters,
+            bool isRetry,
+            SemaphoreSlim globalSemaphore)
         {
-            var progressRateLimit = TimeSpan.FromSeconds(5);
-            context.ProgressHandler = new RateLimitedProgress<TransferStatus>(
-                progressRateLimit,
-                new Progress<TransferStatus>(progress =>
+            return new BlobDirectoryDownloadOptions
+            {
+                SkipExistingFiles = isRetry,
+                ConcurrencySemaphore = globalSemaphore,
+                BytesProgress = totalForDir =>
                 {
-                    var bytesTransferred = progress.BytesTransferred;
-                    var filesTransferred = progress.NumberOfFilesTransferred;
-                    LogTransferProgress(bytesTransferred, filesTransferred);
-                }));
-
-            context.FileFailed += (s, e) => this.logger.LogWarning("Failed to download {0}", e.Destination);
-
-            context.ShouldOverwriteCallbackAsync = TransferContext.ForceOverwrite;
+                    Interlocked.Exchange(ref bytesPerTransfer[idx], totalForDir);
+                    totalBytesProgress.Report(bytesPerTransfer.Sum());
+                },
+                OnFileCompleted = counters.IncrementCompleted,
+                OnFileFailed = counters.IncrementFailed,
+                OnFileSkipped = counters.IncrementSkipped,
+            };
         }
 
         private void LogTransferProgress(long bytesTransferred, long filesTransferred)
         {
             this.logger.LogInformation("Copied: {0}, {1}", bytesTransferred.Bytes().Humanize("0.0"), FileQuantityWord.ToQuantity(filesTransferred, "N0"));
-        }
-
-        public class RateLimitedProgress<T> : IProgress<T>
-        {
-            private readonly IProgress<T> inner;
-            private readonly TimeSpan rate;
-
-            private DateTimeOffset lastReport = DateTimeOffset.MinValue;
-
-            public RateLimitedProgress(TimeSpan rate, IProgress<T> inner)
-            {
-                this.inner = inner;
-                this.rate = rate;
-            }
-
-            public void Report(T value)
-            {
-                var now = DateTimeOffset.UtcNow;
-                if ((now - this.lastReport) < this.rate)
-                {
-                    return;
-                }
-
-                this.lastReport = now;
-                this.inner.Report(value);
-            }
         }
     }
 }
