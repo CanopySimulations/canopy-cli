@@ -1,4 +1,4 @@
-﻿#nullable enable
+#nullable enable
 namespace Canopy.Cli.Shared.StudyProcessing.ChannelData
 {
     using System;
@@ -74,6 +74,11 @@ namespace Canopy.Cli.Shared.StudyProcessing.ChannelData
                                         resolvedData.Enqueue(
                                             new ResolvedCsvColumn(column.File, column.Metadata.ChannelName, values));
                                     }
+                                }
+                                catch (OperationCanceledException)
+                                {
+                                    // Propagate cancellation so it isn't reported as a parsing error.
+                                    throw;
                                 }
                                 catch (Exception t)
                                 {
@@ -152,6 +157,11 @@ namespace Canopy.Cli.Shared.StudyProcessing.ChannelData
                                     kvp.Name,
                                     kvp.Data));
                             }
+                        }
+                        catch (OperationCanceledException)
+                        {
+                            // Propagate cancellation so it isn't reported as a parsing error.
+                            throw;
                         }
                         catch (Exception t)
                         {

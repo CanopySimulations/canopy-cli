@@ -58,6 +58,11 @@ namespace Canopy.Cli.Shared.StudyProcessing.ChannelData
                                 await writer.DeleteProcessedFile(root, domain.File);
                             }
                         }
+                        catch (OperationCanceledException)
+                        {
+                            // Propagate cancellation so it isn't reported as a processing error.
+                            throw;
+                        }
                         catch (Exception t)
                         {
                             writer.ReportError(
