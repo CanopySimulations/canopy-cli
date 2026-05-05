@@ -1,3 +1,4 @@
+using System.Threading;
 using System.Threading.Tasks;
 using Canopy.Cli.Executable.Commands;
 
@@ -5,6 +6,6 @@ namespace Canopy.Cli.Executable.Services
 {
     public interface IGetConfigs
     {
-        Task ExecuteAsync(GetConfigsCommand.Parameters parameters);
+        Task ExecuteAsync(GetConfigsCommand.Parameters parameters, CancellationToken cancellationToken);
     }
 }

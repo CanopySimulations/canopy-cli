@@ -47,7 +47,7 @@ namespace Canopy.Cli.Executable.Services
         }
 
         public async Task ExecuteAsync(
-            GetConfigsCommand.Parameters parameters)
+            GetConfigsCommand.Parameters parameters, CancellationToken cancellationToken)
         {
             var configType = parameters.ConfigType;
             var username = parameters.Username;
@@ -88,7 +88,8 @@ namespace Canopy.Cli.Executable.Services
                     configType,
                     filter.ToString(Formatting.None),
                     null,
-                    null);
+                    null,
+                    cancellationToken);
 
                 if (outputFolder != null)
                 {
@@ -105,7 +106,8 @@ namespace Canopy.Cli.Executable.Services
                             configMetadata.DocumentId,
                             null,
                             simVersion,
-                            null);
+                            null,
+                            cancellationToken);
 
                         var content = JObject.FromObject(config.Config.Data);
 
@@ -117,7 +119,7 @@ namespace Canopy.Cli.Executable.Services
                                 content.ToString(Formatting.None),
                                 parameters.DecryptingTenantShortName,
                                 simVersion,
-                                CancellationToken.None);
+                                cancellationToken);
                             content = JObject.Parse(reEncryptedContent);
                         }
 
@@ -134,7 +136,8 @@ namespace Canopy.Cli.Executable.Services
 
                         await this.writeFile.ExecuteAsync(
                             Path.Combine(outputFolderPath, FileNameUtilities.Sanitize(config.Config.Name) + ".json"),
-                            contentString);
+                            contentString,
+                            cancellationToken);
 
                         sizes.Add(contentString.Length);
                     }

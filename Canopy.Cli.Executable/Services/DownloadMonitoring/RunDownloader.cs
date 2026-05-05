@@ -1,4 +1,5 @@
 using System;
+using System.Threading;
 using System.Threading.Channels;
 using System.Threading.Tasks;
 using Canopy.Cli.Executable.Commands;
@@ -28,14 +29,12 @@ namespace Canopy.Cli.Executable.Services.DownloadMonitoring
             this.logger = logger;
         }
 
-        public async Task ExecuteAsync(DownloadMonitorCommand.Parameters parameters)
+        public async Task ExecuteAsync(DownloadMonitorCommand.Parameters parameters, CancellationToken cancellationToken)
         {
             await this.ensureAuthenticated.ExecuteAsync();
 
             var inputFolder = this.getCreatedOutputFolder.Execute(parameters.InputFolder);
             var outputFolder = this.getCreatedOutputFolder.Execute(parameters.OutputFolder);
-
-            using var cts = CommandUtilities.CreateCommandCancellationTokenSource();
 
             var channel = Channel.CreateUnbounded<QueuedDownloadToken>();
 
@@ -44,7 +43,7 @@ namespace Canopy.Cli.Executable.Services.DownloadMonitoring
                 var monitorDownloadsTask = this.monitorDownloads.ExecuteAsync(
                     channel.Writer,
                     inputFolder,
-                    cts.Token);
+                    cancellationToken);
 
                 await this.processDownloads.ExecuteAsync(
                     channel.Reader,
@@ -56,7 +55,7 @@ namespace Canopy.Cli.Executable.Services.DownloadMonitoring
                         PostProcessorArguments: parameters.PostProcessorArguments,
                         DecryptingTenantShortName: parameters.DecryptingTenantShortName
                     ),
-                    cancellationToken: cts.Token);
+                    cancellationToken: cancellationToken);
 
                 await monitorDownloadsTask;
             }

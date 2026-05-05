@@ -20,10 +20,10 @@ namespace Canopy.Cli.Shared
 
         Task WriteExistingFile(IRootFolder root, IFile file);
 
-        Task WriteNewFile(IRootFolder root, string relativePathToFile, string fileName, byte[] data, CancellationToken cancellationToken = default) =>
-            cancellationToken.IsCancellationRequested ? throw new OperationCanceledException() : WriteNewFile(root, relativePathToFile, fileName, data);
+        Task WriteNewFile(IRootFolder root, string relativePathToFile, string fileName, byte[] data, CancellationToken cancellationToken = default);
 
-        Task WriteNewFile(IRootFolder root, string relativePathToFile, string fileName, byte[] data);
+        Task WriteNewFile(IRootFolder root, string relativePathToFile, string fileName, byte[] data) =>
+            WriteNewFile(root, relativePathToFile, fileName, data, default);
 
         Task WriteNewFile(IRootFolder root, string relativePathToFile, string fileName, IEnumerable<byte> data, CancellationToken cancellationToken = default) =>
             WriteNewFile(root, relativePathToFile, fileName, [.. data], cancellationToken);

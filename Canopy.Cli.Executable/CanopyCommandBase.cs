@@ -1,15 +1,10 @@
 ﻿using System.CommandLine;
-using System.Threading.Tasks;
-using Canopy.Api.Client;
+using Microsoft.Extensions.Hosting;
 
 namespace Canopy.Cli.Executable
 {
     public abstract class CanopyCommandBase
     {
-		public CanopyCommandBase()
-        {
-        }
-
-        public abstract Command Create();
+        public abstract Command Create(IHost host);
     }
 }

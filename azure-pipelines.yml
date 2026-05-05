@@ -31,7 +31,7 @@ steps:
 - task: UseDotNet@2
   inputs:
     packageType: 'sdk'
-    version: '8.x'
+    version: '10.x'
 
 - powershell: |
     $tags = git tag --sort=-creatordate
@@ -114,7 +114,7 @@ steps:
     command: 'publish'
     projects: 'Canopy.Cli.Executable'
     publishWebProjects: false
-    arguments: '-c $(buildConfiguration) -r win-x64'
+    arguments: '-c $(buildConfiguration) -r win-x64 -o $(Build.BinariesDirectory)/win-x64'
     zipAfterPublish: false
     modifyOutputPath: false
   displayName: 'Publish Win'
@@ -136,17 +136,17 @@ steps:
 
 - task: DotNetCoreCLI@2
   inputs:
-    command: 'publish'
-    projects: 'Canopy.Cli.Executable'
-    publishWebProjects: false
-    arguments: '-c $(buildConfiguration) -r osx-arm64'
-    zipAfterPublish: false
-    modifyOutputPath: false
+      command: 'publish'
+      projects: 'Canopy.Cli.Executable'
+      publishWebProjects: false
+      arguments: '-c $(buildConfiguration) -r osx-arm64 -o $(Build.BinariesDirectory)/osx-arm64'
+      zipAfterPublish: false
+      modifyOutputPath: false
   displayName: 'Publsh OSX'
 
 - task: ArchiveFiles@2
   inputs:
-    rootFolderOrFile: '$(Build.SourcesDirectory)/Canopy.Cli.Executable/bin/$(buildConfiguration)/net8.0/win-x64/publish'
+    rootFolderOrFile: '$(Build.BinariesDirectory)/win-x64'
     includeRootFolder: false
     archiveType: 'zip'
     archiveFile: '$(Build.ArtifactStagingDirectory)/canopy-cli-windows.zip'
@@ -155,7 +155,7 @@ steps:
 
 - task: ArchiveFiles@2
   inputs:
-    rootFolderOrFile: '$(Build.SourcesDirectory)/Canopy.Cli.Executable/bin/$(buildConfiguration)/net8.0/osx-arm64/publish'
+    rootFolderOrFile: '$(Build.BinariesDirectory)/osx-arm64'
     includeRootFolder: false
     archiveType: 'zip'
     archiveFile: '$(Build.ArtifactStagingDirectory)/canopy-cli-mac.zip'

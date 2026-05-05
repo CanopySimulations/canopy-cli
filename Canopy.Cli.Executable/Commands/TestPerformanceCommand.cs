@@ -5,10 +5,8 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using System;
 using System.CommandLine;
-using System.CommandLine.Invocation;
 using System.Diagnostics;
 using System.IO;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -16,24 +14,22 @@ namespace Canopy.Cli.Executable.Commands
 {
     public class TestPerformanceCommand : CanopyCommandBase
     {
-        public record Parameters(FileInfo ScalarResults, FileInfo ScalarResultsMetadata);
+        public record Parameters(FileInfo? ScalarResults, FileInfo? ScalarResultsMetadata);
 
-        public override Command Create()
+        public override Command Create(IHost host)
         {
             var command = new Command("test-performance", "Tests the performance of certain operations.");
 
-            command.AddOption(new Option<FileInfo?>(
-                new[] { "--scalar-results", "-sr" },
-                description: "The path to the scalar results file.",
-                getDefaultValue: () => null));
+            var scalarResults = command.AddOption<FileInfo?>("--scalar-results", "-sr", null, "The path to the scalar results file.");
+            var scalarResultsMetadata = command.AddOption<FileInfo?>("--scalar-results-metadata", "-srm", null, "The path to the scalar results metadata file.");
 
-            command.AddOption(new Option<FileInfo?>(
-                new[] { "--scalar-results-metadata", "-srm" },
-                description: "The path to the scalar results metadata file.",
-                getDefaultValue: () => null));
-
-            command.Handler = CommandHandler.Create((IHost host, Parameters parameters) =>
-                host.Services.GetRequiredService<CommandRunner>().ExecuteAsync(parameters));
+            command.SetAction((ParseResult parseResult, CancellationToken cancellationToken) =>
+            {
+                var parameters = new Parameters(
+                    parseResult.GetValue(scalarResults),
+                    parseResult.GetValue(scalarResultsMetadata));
+                return host.Services.GetRequiredService<CommandRunner>().ExecuteAsync(parameters, cancellationToken);
+            });
 
             return command;
         }
@@ -48,16 +44,16 @@ namespace Canopy.Cli.Executable.Commands
                 this.logger = logger;
             }
 
-            public async Task ExecuteAsync(Parameters parameters)
+            public async Task ExecuteAsync(Parameters parameters, CancellationToken cancellationToken)
             {
                 if (parameters.ScalarResults != null && parameters.ScalarResultsMetadata != null)
                 {
-                    await this.TestScalarResultsProcessing(parameters.ScalarResults, parameters.ScalarResultsMetadata);
+                    await this.TestScalarResultsProcessing(parameters.ScalarResults, parameters.ScalarResultsMetadata, cancellationToken);
                 }
 
             }
 
-            private async Task TestScalarResultsProcessing(FileInfo scalarResults, FileInfo scalarResultsMetadata)
+            private async Task TestScalarResultsProcessing(FileInfo scalarResults, FileInfo scalarResultsMetadata, CancellationToken cancellationToken)
             {
                 if (!scalarResults.Exists)
                 {
@@ -71,8 +67,8 @@ namespace Canopy.Cli.Executable.Commands
                     return;
                 }
 
-                var scalarResultsContent = File.ReadAllText(scalarResults.FullName);
-                var scalarResultsMetadataContent = File.ReadAllText(scalarResultsMetadata.FullName);
+                var scalarResultsContent = await File.ReadAllTextAsync(scalarResults.FullName, cancellationToken);
+                var scalarResultsMetadataContent = await File.ReadAllTextAsync(scalarResultsMetadata.FullName, cancellationToken);
 
                 this.logger.LogInformation("ScalarResultsProcessing Started");
                 

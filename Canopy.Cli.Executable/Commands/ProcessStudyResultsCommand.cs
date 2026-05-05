@@ -1,7 +1,7 @@
 ﻿namespace Canopy.Cli.Executable.Commands
 {
     using System.CommandLine;
-    using System.CommandLine.Invocation;
+    using System.Threading;
     using Canopy.Api.Client;
     using Canopy.Cli.Executable.Services;
     using Microsoft.Extensions.DependencyInjection;
@@ -15,22 +15,20 @@
             DirectoryInfo Target,
             bool KeepOriginal);
 
-        public override Command Create()
+        public override Command Create(IHost host)
         {
             var command = new Command("process-study-results", "Creates user friendly files from raw study results.");
 
-            command.AddOption(new Option<DirectoryInfo>(
-                new[] { "--target", "-t" },
-                description: $"The folder to process. The current directory is used if omitted.",
-                getDefaultValue: () => new DirectoryInfo("./")));
+            var target = command.AddOption("--target", "-t", new DirectoryInfo("./"), "The folder to process. The current directory is used if omitted.");
+            var keepOriginal = command.AddOption("--keep-original", "-ko", false, "Do not delete files which have been processed (faster).");
 
-            command.AddOption(new Option<bool>(
-                new[] { "--keep-original", "-ko" },
-                description: $"Do not delete files which have been processed (faster).",
-                getDefaultValue: () => false));
-
-            command.Handler = CommandHandler.Create((IHost host, Parameters parameters) =>
-                host.Services.GetRequiredService<CommandRunner>().ExecuteAsync(parameters));
+            command.SetAction((ParseResult parseResult, CancellationToken cancellationToken) =>
+            {
+                var parameters = new Parameters(
+                    parseResult.GetValue(target),
+                    parseResult.GetValue(keepOriginal));
+                return host.Services.GetRequiredService<CommandRunner>().ExecuteAsync(parameters, cancellationToken);
+            });
 
             return command;
         }
@@ -48,7 +46,7 @@
                 this.processLocalStudyResults = processLocalStudyResults;
             }
 
-            public async Task ExecuteAsync(Parameters parameters)
+            public async Task ExecuteAsync(Parameters parameters, CancellationToken cancellationToken)
             {
                 await this.ensureAuthenticated.ExecuteAsync();
 
@@ -57,9 +55,7 @@
                     throw new RecoverableException("Folder not found: " + parameters.Target.FullName);
                 }
 
-                var cts = CommandUtilities.CreateCommandCancellationTokenSource();
-
-                await this.processLocalStudyResults.ExecuteAsync(parameters.Target.FullName, !parameters.KeepOriginal, channelsAsCsv: true, channelsAsBinary: false, cts.Token);
+                await this.processLocalStudyResults.ExecuteAsync(parameters.Target.FullName, !parameters.KeepOriginal, channelsAsCsv: true, channelsAsBinary: false, cancellationToken);
             }
         }
     }

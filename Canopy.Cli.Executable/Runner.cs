@@ -1,14 +1,11 @@
 ﻿using System;
 using System.CommandLine;
-using System.CommandLine.Builder;
-using System.CommandLine.Hosting;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using System.CommandLine.Parsing;
 using Serilog;
 using Canopy.Cli.Shared.StudyProcessing;
 using Canopy.Cli.Executable.Services;
@@ -23,41 +20,30 @@ namespace Canopy.Cli.Executable
     {
         public static async Task<int> ExecuteAsync(string[] args)
         {
-            RootCommand? rootCommand = null;
+            var isIntegrationTests = args.Length > 0 && args[0] == IntegrationTestsCommand.Name;
+
+            using var host = Host.CreateDefaultBuilder()
+                .ConfigureHostConfiguration(ConfigureHostConfiguration)
+                .UseSerilog(
+                    (context, loggerConfiguration) =>
+                    {
+                        StandardLogging.CreateStandardSerilogConfiguration(loggerConfiguration);
+                    })
+                .ConfigureServices((c, s) => ConfigureServices(c, s, isIntegrationTests))
+                .Build();
+
+            var rootCommand = ConfigureCommands(host);
+
             try
             {
-                rootCommand = ConfigureCommands();
+                return await rootCommand.Parse(args).InvokeAsync(
+                    new InvocationConfiguration { EnableDefaultExceptionHandler = false });
             }
             catch (Exception t)
             {
-                throw new RecoverableException("Failed to configure commands.", t);
+                Utilities.HandleError(t);
+                return 1;
             }
-
-
-            var initialParse = rootCommand.Parse(args);
-            var isIntegrationTests = initialParse.CommandResult.Command.Name == IntegrationTestsCommand.Name;
-
-            var parser = new CommandLineBuilder(rootCommand)
-                .UseDefaults()
-                .UseExceptionHandler((t, c) =>
-                {
-                    Utilities.HandleError(t);
-                    c.ExitCode = 1;
-                })
-                .UseHost(Host.CreateDefaultBuilder, host =>
-                {
-                    host
-                        .ConfigureHostConfiguration(ConfigureHostConfiguration)
-                        .UseSerilog(
-                            (context, loggerConfiguration) =>
-                            {
-                                StandardLogging.CreateStandardSerilogConfiguration(loggerConfiguration);
-                            })
-                        .ConfigureServices((c, s) => ConfigureServices(c, s, isIntegrationTests));
-                })
-                .Build();
-
-            return await parser.InvokeAsync(args);
         }
 
         public static void ConfigureHostConfiguration(IConfigurationBuilder config)
@@ -65,7 +51,7 @@ namespace Canopy.Cli.Executable
             config.AddUserSecrets<Program>(optional: true, reloadOnChange: true);
         }
 
-        private static RootCommand ConfigureCommands()
+        private static RootCommand ConfigureCommands(IHost host)
         {
             var rootCommand = new RootCommand("Canopy CLI");
 
@@ -77,7 +63,7 @@ namespace Canopy.Cli.Executable
 
             foreach (var command in commands.Where(v => v != null))
             {
-                rootCommand.Add(command.Create());
+                rootCommand.Subcommands.Add(command.Create(host));
             }
 
             return rootCommand;

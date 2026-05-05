@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using Canopy.Api.Client;
 using Canopy.Cli.Executable.Commands;
@@ -33,7 +34,7 @@ namespace Canopy.Cli.Executable.Services
             this.logger = logger;
         }
 
-        public async Task ExecuteAsync(GetSchemasCommand.Parameters parameters)
+        public async Task ExecuteAsync(GetSchemasCommand.Parameters parameters, CancellationToken cancellationToken)
         {
             var authenticatedUser = await this.ensureAuthenticated.ExecuteAsync();
 
@@ -48,7 +49,7 @@ namespace Canopy.Cli.Executable.Services
             var simVersion = await this.simVersionCache.GetOrSet(parameters.SimVersion);
 
             this.logger.LogInformation("Requesting schemas...");
-            var result = await this.simVersionClient.GetDocumentsAsync(simVersion, tenantId);
+            var result = await this.simVersionClient.GetDocumentsAsync(simVersion, tenantId, cancellationToken);
 
             this.logger.LogInformation("Saving schemas...");
             var writtenFiles = new List<TextDocumentOptionalContent>();
@@ -64,7 +65,7 @@ namespace Canopy.Cli.Executable.Services
                     continue;
                 }
 
-                await this.writeFile.ExecuteAsync(Path.Combine(outputFolder, document.Name), document.Content);
+                await this.writeFile.ExecuteAsync(Path.Combine(outputFolder, document.Name), document.Content, cancellationToken);
                 writtenFiles.Add(document);
             }
 

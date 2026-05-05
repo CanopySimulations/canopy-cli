@@ -64,10 +64,10 @@ namespace Canopy.Cli.Executable.Services
                 return Task.CompletedTask;
             }
 
-            public async Task WriteNewFile(IRootFolder root, string relativePathToFile, string fileName, byte[] data)
+            public async Task WriteNewFile(IRootFolder root, string relativePathToFile, string fileName, byte[] data, CancellationToken cancellationToken = default)
             {
                 LocalFolder.AssertRelativePathNotSupplied(relativePathToFile);
-                await File.WriteAllBytesAsync(Path.Combine(((LocalFolder)root).FolderPath, fileName), data);
+                await File.WriteAllBytesAsync(Path.Combine(((LocalFolder)root).FolderPath, fileName), data, cancellationToken);
             }
 
             public void ReportError(string message, Exception exception)

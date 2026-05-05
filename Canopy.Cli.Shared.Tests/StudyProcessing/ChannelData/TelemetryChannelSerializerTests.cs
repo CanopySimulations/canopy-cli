@@ -229,7 +229,7 @@ namespace Canopy.Cli.Shared.StudyProcessing.ChannelData
             using var cts = new CancellationTokenSource();
             cts.Cancel();
 
-            await Assert.ThrowsExceptionAsync<OperationCanceledException>(async () =>
+            await Assert.ThrowsExactlyAsync<OperationCanceledException>(async () =>
             {
                 await foreach (var _ in TelemetryChannelSerializer.ConvertChannelsStreamAsync(parquetBytes, new FloatChannelValueConverter(), null, cts.Token))
                 {
@@ -241,7 +241,7 @@ namespace Canopy.Cli.Shared.StudyProcessing.ChannelData
         [TestMethod]
         public async Task ConvertChannelsStreamAsync_WithNullStream_ShouldThrowArgumentNullException()
         {
-            await Assert.ThrowsExceptionAsync<ArgumentNullException>(async () =>
+            await Assert.ThrowsExactlyAsync<ArgumentNullException>(async () =>
             {
                 await foreach (var _ in TelemetryChannelSerializer.ConvertChannelsStreamAsync((byte[]?)null!, new FloatChannelValueConverter(), null, CancellationToken.None))
                 {

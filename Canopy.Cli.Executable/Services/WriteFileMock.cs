@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Concurrent;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Canopy.Cli.Executable.Services
@@ -9,7 +10,7 @@ namespace Canopy.Cli.Executable.Services
         private bool isRecording = false;
         private readonly ConcurrentDictionary<string, long> writtenSizes = new();
 
-        public Task ExecuteAsync(string path, string content)
+        public Task ExecuteAsync(string path, string content, CancellationToken cancellationToken = default)
         {
             if (!this.isRecording)
             {

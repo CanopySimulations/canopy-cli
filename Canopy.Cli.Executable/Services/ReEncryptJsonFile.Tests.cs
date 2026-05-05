@@ -51,7 +51,7 @@ namespace Canopy.Cli.Executable.Services
 
             this.fileOperations.Exists("does-not-exist.json").Returns(false);
 
-            await Assert.ThrowsAsync<FileNotFoundException>(() => this.target.ExecuteAsync(parameters));
+            await Assert.ThrowsAsync<FileNotFoundException>(() => this.target.ExecuteAsync(parameters, CancellationToken.None));
 
             await this.simVersionCache.Received(1).GetOrSet("1.0");
             await this.ensureAuthenticated.Received(1).ExecuteAsync();
@@ -74,7 +74,7 @@ namespace Canopy.Cli.Executable.Services
             this.fileOperations.ReadAllTextAsync(fileInfo.FullName, Arg.Any<CancellationToken>()).Returns(content);
             this.containsEncryptedToken.Execute(content).Returns(false);
 
-            await this.target.ExecuteAsync(parameters);
+            await this.target.ExecuteAsync(parameters, CancellationToken.None);
 
             await this.reEncryptFile.DidNotReceive().ExecuteAsync(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string>(), Arg.Any<CancellationToken>());
             await this.fileOperations.DidNotReceive().WriteAllTextAsync(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<CancellationToken>());
@@ -103,7 +103,7 @@ namespace Canopy.Cli.Executable.Services
             var newContent = "new-content";
             this.reEncryptFile.ExecuteAsync(content, "tenant", "2.0", Arg.Any<CancellationToken>()).Returns(Task.FromResult(newContent));
 
-            await this.target.ExecuteAsync(parameters);
+            await this.target.ExecuteAsync(parameters, CancellationToken.None);
 
             await this.fileOperations.Received(1).WriteAllTextAsync(fileInfo.FullName, newContent, Arg.Any<CancellationToken>());
             await this.simVersionCache.Received(1).GetOrSet("1.0");

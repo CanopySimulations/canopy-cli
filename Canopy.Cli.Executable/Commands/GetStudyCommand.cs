@@ -1,6 +1,6 @@
 ﻿using System.CommandLine;
+using System.Threading;
 using Microsoft.Extensions.Hosting;
-using System.CommandLine.Invocation;
 using Microsoft.Extensions.DependencyInjection;
 using Canopy.Cli.Shared;
 using Canopy.Cli.Executable.Services.GetStudies;
@@ -30,49 +30,32 @@ namespace Canopy.Cli.Executable.Commands
             }
         };
 
-        public override Command Create()
+        public override Command Create(IHost host)
         {
             var command = new Command("get-study", "Downloads the specified study or study job.");
 
-            command.AddOption(new Option<string>(
-                new[] { "--output-folder", "-o" },
-                description: $"The output folder in which to save the files (defaults to the current directory).",
-                getDefaultValue: () => "./"));
+            var outputFolder = command.AddOption("--output-folder", "-o", "./", "The output folder in which to save the files (defaults to the current directory).");
+            var tenantId = command.AddOption("--tenant-id", "-t", string.Empty, "The tenancy from which download.");
+            var studyId = command.AddOption("--study-id", "-s", string.Empty, "The study to download.");
+            var jobIndex = command.AddOption<int?>("--job-index", "-j", null, "The job index download.");
+            var generateCsv = command.AddOption("--generate-csv", "-csv", false, "Generate CSV files from binary files.");
+            var keepBinary = command.AddOption("--keep-binary", "-bin", true, "Do not delete binary files which have been processed into CSV files (faster).");
 
-            command.AddOption(new Option<string>(
-                new[] { "--tenant-id", "-t" },
-                description: $"The tenancy from which download.",
-                getDefaultValue: () => string.Empty));
-
-            command.AddOption(new Option<string>(
-                new[] { "--study-id", "-s" },
-                description: $"The study to download.",
-                getDefaultValue: () => string.Empty));
-
-            command.AddOption(new Option<int?>(
-                new[] { "--job-index", "-j" },
-                description: $"The job index download.",
-                getDefaultValue: () => null));
-
-            command.AddOption(new Option<bool>(
-                new[] { "--generate-csv", "-csv" },
-                description: $"Generate CSV files from binary files.",
-                getDefaultValue: () => false));
-
-            command.AddOption(new Option<bool>(
-                new[] { "--keep-binary", "-bin" },
-                description: $"Do not delete binary files which have been processed into CSV files (faster).",
-                getDefaultValue: () => true));
-
-            command.Handler = CommandHandler.Create((IHost host, Parameters parameters) =>
+            command.SetAction((ParseResult parseResult, CancellationToken cancellationToken) =>
             {
-                var cts = CommandUtilities.CreateCommandCancellationTokenSource();
-                host.Services.GetRequiredService<IGetStudy>().ExecuteAndHandleCancellationAsync(
+                var parameters = new Parameters(
+                    parseResult.GetValue(outputFolder),
+                    parseResult.GetValue(tenantId),
+                    parseResult.GetValue(studyId),
+                    parseResult.GetValue(jobIndex),
+                    parseResult.GetValue(generateCsv),
+                    parseResult.GetValue(keepBinary));
+                return host.Services.GetRequiredService<IGetStudy>().ExecuteAndHandleCancellationAsync(
                     parameters with
                     {
                         StudyId = CommandUtilities.ValueOrPrompt(parameters.StudyId, "Study ID: ", "Study ID is required.", false),
                     },
-                    cts.Token);
+                    cancellationToken);
             });
 
             return command;

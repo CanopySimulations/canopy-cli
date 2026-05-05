@@ -1,8 +1,6 @@
 ﻿using System;
 using System.CommandLine;
-using System.CommandLine.Invocation;
 using System.Security.Cryptography;
-using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
@@ -13,21 +11,22 @@ namespace Canopy.Cli.Executable.Commands
     {
         public record Parameters(string Input);
 
-        public override Command Create()
+        public override Command Create(IHost host)
         {
             var command = new Command("hash", "Hashes a given string. Defaults to SHA256.");
 
-            command.AddArgument(new Argument<string>(
-                "input",
-                description: "The input string to hash.",
-                getDefaultValue: () => string.Empty));
+            var input = command.AddArgument("input", string.Empty, "The input string to hash.");
 
-            command.Handler = CommandHandler.Create((IHost host, Parameters parameters) =>
-                host.Services.GetRequiredService<CommandRunner>().ExecuteAsync(
+            command.SetAction((ParseResult parseResult) =>
+            {
+                var parameters = new Parameters(
+                    parseResult.GetValue(input));
+                host.Services.GetRequiredService<CommandRunner>().Execute(
                     parameters with
                     {
                         Input = CommandUtilities.ValueOrPrompt(parameters.Input, "Input string: ", "Input string is required.", false),
-                    }));
+                    });
+            });
 
             return command;
         }
@@ -42,10 +41,9 @@ namespace Canopy.Cli.Executable.Commands
                 this.logger = logger;
             }
 
-            public Task ExecuteAsync(Parameters parameters)
+            public void Execute(Parameters parameters)
             {
                 this.logger.LogInformation(GetHash(parameters.Input));
-                return Task.CompletedTask;
             }
 
             public static string GetHash(string input)
