@@ -11,7 +11,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Parquet.Net" Version="5.4.0" />
+    <PackageReference Include="Parquet.Net" Version="6.0.1" />
   </ItemGroup>
 
 </Project>

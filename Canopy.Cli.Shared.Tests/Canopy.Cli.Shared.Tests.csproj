@@ -16,7 +16,7 @@
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="18.4.0" />
     <PackageReference Include="MSTest.TestAdapter" Version="4.2.1" />
     <PackageReference Include="MSTest.TestFramework" Version="4.2.1" />
-    <PackageReference Include="Parquet.Net" Version="5.4.0" />
+    <PackageReference Include="Parquet.Net" Version="6.0.1" />
   </ItemGroup>
 
   <ItemGroup>
