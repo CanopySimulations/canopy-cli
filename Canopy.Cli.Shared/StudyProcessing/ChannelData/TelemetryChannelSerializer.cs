@@ -1,6 +1,5 @@
 #nullable enable
 using Parquet;
-using Parquet.Data;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -64,7 +63,7 @@ namespace Canopy.Cli.Shared.StudyProcessing.ChannelData
             ArgumentNullException.ThrowIfNull(parquetStream);
             ArgumentNullException.ThrowIfNull(converter);
 
-            using var parquetReader = await ParquetReader.CreateAsync(parquetStream, cancellationToken: cancellationToken).ConfigureAwait(false);
+            await using var parquetReader = await ParquetReader.CreateAsync(parquetStream, cancellationToken: cancellationToken).ConfigureAwait(false);
             var channelNamesSet = channelNames != null && channelNames.Count > 0
             ? new HashSet<string>(channelNames)
             : null;
@@ -80,28 +79,10 @@ namespace Canopy.Cli.Shared.StudyProcessing.ChannelData
                 var channelValues = new List<T>((int)(parquetReader.Metadata?.NumRows ?? 0));
                 foreach (var rg in parquetReader.RowGroups)
                 {
-                    var partialColumnData = await rg.ReadColumnAsync(field, cancellationToken);
-                    ConvertAndAddValues(partialColumnData, converter, channelValues);
+                    using var rawData = await rg.ReadRawColumnDataBaseAsync(field, cancellationToken).ConfigureAwait(false);
+                    converter.AddConvertedValues(rawData, channelValues);
                 }
                 yield return (field.Name, channelValues.ToArray());
-            }
-        }
-
-        /// <summary>
-        /// Converts values from a Parquet <see cref="Parquet.Data.DataColumn"/> using the provided converter
-        /// and appends the converted values to <paramref name="targetList"/>.
-        /// </summary>
-        /// <typeparam name="T">Type of the converted values.</typeparam>
-        /// <param name="columnData">The source column data from a Parquet row group.</param>
-        /// <param name="converter">Converter used to transform raw values to <typeparamref name="T"/>.</param>
-        /// <param name="targetList">List to append converted values to.</param>
-        private static void ConvertAndAddValues<T>(DataColumn columnData, IChannelValueConverter<T> converter, List<T> targetList)
-        {
-            var data = columnData.Data;
-
-            for (int j = 0; j < data.Length; j++)
-            {
-                targetList.Add(converter.Convert(data.GetValue(j)));
             }
         }
     }
