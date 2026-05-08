@@ -18,7 +18,6 @@ namespace Canopy.Cli.Executable.Services
         {
             try
             {
-                long[] totalBytesTransferred = [0];
                 var prefix = blobDirectory.Prefix.TrimEnd('/') + '/';
                 var semaphore = options.ConcurrencySemaphore;
                 var tasks = new List<Task>();
@@ -40,19 +39,17 @@ namespace Canopy.Cli.Executable.Services
                         continue;
                     }
 
-                    // Wait for the semaphore before starting the download, and release it when the download completes
-                    // (successfully or with failure, inside downloadBlob.ExecuteAsync()).
-                    // This is to control how many download tasks run concurrently
                     await semaphore.WaitAsync(cancellationToken);
-                    tasks.Add(downloadBlob.ExecuteAsync(
-                        blobDirectory.Container,
-                        blobName,
-                        localPath,
-                        CreateBytesProgress(options.BytesProgress, totalBytesTransferred),
-                        options.OnFileCompleted,
-                        options.OnFileFailed,
-                        semaphore,
-                        cancellationToken));
+                    tasks.Add(ReleaseAfter(
+                        downloadBlob.ExecuteAsync(
+                            blobDirectory.Container,
+                            blobName,
+                            localPath,
+                            CreateBytesProgress(options.BytesProgress),
+                            options.OnFileCompleted,
+                            options.OnFileFailed,
+                            cancellationToken),
+                        semaphore));
                 }
 
                 await Task.WhenAll(tasks);
@@ -62,7 +59,13 @@ namespace Canopy.Cli.Executable.Services
             }
         }
 
-        private static IProgress<long>? CreateBytesProgress(Action<long>? bytesProgress, long[] totalBytesTransferred)
+        private static async Task ReleaseAfter(Task task, SemaphoreSlim semaphore)
+        {
+            try { await task; }
+            finally { semaphore.Release(); }
+        }
+
+        private static IProgress<long>? CreateBytesProgress(Action<long>? bytesProgress)
         {
             if (bytesProgress == null)
             {
@@ -75,7 +78,7 @@ namespace Canopy.Cli.Executable.Services
                 var prev = Interlocked.Exchange(ref filePreviousBytes[0], bytes);
                 var delta = bytes - prev;
                 if (delta > 0)
-                    bytesProgress(Interlocked.Add(ref totalBytesTransferred[0], delta));
+                    bytesProgress(delta);
             });
         }
 

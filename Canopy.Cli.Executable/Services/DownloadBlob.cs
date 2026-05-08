@@ -10,7 +10,8 @@ namespace Canopy.Cli.Executable.Services
 {
     public class DownloadBlob : IDownloadBlob
     {
-        private const long MaximumTransferSize = 20_971_520;
+        private const long TransferSize = 20_971_520;
+        private static readonly int ChunkConcurrency = Environment.ProcessorCount;
 
         public async Task ExecuteAsync(
             BlobContainerClient container,
@@ -19,7 +20,6 @@ namespace Canopy.Cli.Executable.Services
             IProgress<long>? bytesProgress,
             Action? onCompleted,
             Action? onFailed,
-            SemaphoreSlim semaphoreToRelease,
             CancellationToken cancellationToken)
         {
             try
@@ -32,7 +32,9 @@ namespace Canopy.Cli.Executable.Services
                     {
                         TransferOptions = new StorageTransferOptions
                         {
-                            MaximumTransferSize = MaximumTransferSize,
+                            InitialTransferSize = TransferSize,
+                            MaximumTransferSize = TransferSize,
+                            MaximumConcurrency = ChunkConcurrency,
                         },
                         ProgressHandler = bytesProgress,
                     },
@@ -46,10 +48,6 @@ namespace Canopy.Cli.Executable.Services
             catch
             {
                 onFailed?.Invoke();
-            }
-            finally
-            {
-                semaphoreToRelease.Release();
             }
         }
     }

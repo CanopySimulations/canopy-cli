@@ -54,7 +54,7 @@ namespace Canopy.Cli.Executable.Services.GetStudies
             await this.retryPolicies.DownloadPolicy.ExecuteAsync(async () =>
             {
                 var counters = new TransferCounters();
-                var bytesPerTransfer = new long[directories.Count];
+                long[] totalBytesTransferred = [0];
 
                 var totalBytesProgress = new RateLimitedProgress<long>(
                     ProgressLogRateLimit,
@@ -65,13 +65,13 @@ namespace Canopy.Cli.Executable.Services.GetStudies
                 using var globalSemaphore = new SemaphoreSlim(ConnectionLimit);
 
                 var tasks = directories
-                    .Select((item, idx) =>
+                    .Select(item =>
                     {
                         this.logger.LogInformation("Adding {0}", item.Directory.Container.Uri.Host);
                         return this.downloadBlobDirectory.ExecuteAsync(
                             item.Directory,
                             item.OutputFolder,
-                            CreateDownloadOptions(idx, bytesPerTransfer, totalBytesProgress, counters, isRetry, globalSemaphore),
+                            CreateDownloadOptions(totalBytesTransferred, totalBytesProgress, counters, isRetry, globalSemaphore),
                             cancellationToken);
                     })
                     .ToList();
@@ -86,7 +86,7 @@ namespace Canopy.Cli.Executable.Services.GetStudies
 
                 if (!cancellationToken.IsCancellationRequested)
                 {
-                    LogTransferProgress(bytesPerTransfer.Sum(), counters.Completed);
+                    LogTransferProgress(Interlocked.Read(ref totalBytesTransferred[0]), counters.Completed);
 
                     if (counters.Failed > 0)
                         this.logger.LogWarning("Failed downloading {0}", FileQuantityWord.ToQuantity(counters.Failed, "N0"));
@@ -100,8 +100,7 @@ namespace Canopy.Cli.Executable.Services.GetStudies
         }
 
         private BlobDirectoryDownloadOptions CreateDownloadOptions(
-            int idx,
-            long[] bytesPerTransfer,
+            long[] totalBytesTransferred,
             RateLimitedProgress<long> totalBytesProgress,
             TransferCounters counters,
             bool isRetry,
@@ -111,10 +110,10 @@ namespace Canopy.Cli.Executable.Services.GetStudies
             {
                 SkipExistingFiles = isRetry,
                 ConcurrencySemaphore = globalSemaphore,
-                BytesProgress = totalForDir =>
+                BytesProgress = delta =>
                 {
-                    Interlocked.Exchange(ref bytesPerTransfer[idx], totalForDir);
-                    totalBytesProgress.Report(bytesPerTransfer.Sum());
+                    var total = Interlocked.Add(ref totalBytesTransferred[0], delta);
+                    totalBytesProgress.Report(total);
                 },
                 OnFileCompleted = counters.IncrementCompleted,
                 OnFileFailed = counters.IncrementFailed,

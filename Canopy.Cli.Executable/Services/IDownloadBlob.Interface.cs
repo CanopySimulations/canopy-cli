@@ -14,7 +14,6 @@ namespace Canopy.Cli.Executable.Services
             IProgress<long>? bytesProgress,
             Action? onCompleted,
             Action? onFailed,
-            SemaphoreSlim semaphoreToRelease,
             CancellationToken cancellationToken);
     }
 }
