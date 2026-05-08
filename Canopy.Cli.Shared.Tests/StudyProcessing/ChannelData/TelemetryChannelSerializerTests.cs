@@ -1,7 +1,6 @@
 #nullable enable
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Parquet;
-using Parquet.Data;
 using Parquet.Schema;
 using System;
 using System.Collections.Generic;
@@ -37,7 +36,7 @@ namespace Canopy.Cli.Shared.StudyProcessing.ChannelData
 
             var schema = new ParquetSchema(fields);
 
-            using (var parquetWriter = await ParquetWriter.CreateAsync(schema, memoryStream))
+            await using (var parquetWriter = await ParquetWriter.CreateAsync(schema, memoryStream))
             using (var groupWriter = parquetWriter.CreateRowGroup())
             {
                 foreach (var kv in columns)
@@ -48,15 +47,14 @@ namespace Canopy.Cli.Shared.StudyProcessing.ChannelData
                     switch (sample)
                     {
                         case float:
-                            await groupWriter.WriteColumnAsync(new DataColumn(field, kv.Value.Cast<float>().ToArray()));
+                            await groupWriter.WriteAsync<float>(field, kv.Value.Cast<float>().ToArray().AsMemory(), null, null, default);
                             break;
                         case double:
-                            await groupWriter.WriteColumnAsync(new DataColumn(field, kv.Value.Cast<double>().ToArray()));
-                            break;                     
+                            await groupWriter.WriteAsync<double>(field, kv.Value.Cast<double>().ToArray().AsMemory(), null, null, default);
+                            break;
                         default:
-                            // Fallback: try to convert numeric-like values to float
                             var fallback = kv.Value.Select(v => Convert.ToSingle(v)).ToArray();
-                            await groupWriter.WriteColumnAsync(new DataColumn(field, fallback));
+                            await groupWriter.WriteAsync<float>(field, fallback.AsMemory(), null, null, default);
                             break;
                     }
                 }
