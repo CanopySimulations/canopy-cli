@@ -11,7 +11,6 @@ namespace Canopy.Cli.Executable.Services
     public class DownloadBlob : IDownloadBlob
     {
         private const long TransferSize = 20_971_520;
-        private static readonly int ChunkConcurrency = Environment.ProcessorCount;
 
         public async Task ExecuteAsync(
             BlobContainerClient container,
@@ -34,7 +33,6 @@ namespace Canopy.Cli.Executable.Services
                         {
                             InitialTransferSize = TransferSize,
                             MaximumTransferSize = TransferSize,
-                            MaximumConcurrency = ChunkConcurrency,
                         },
                         ProgressHandler = bytesProgress,
                     },
@@ -42,8 +40,13 @@ namespace Canopy.Cli.Executable.Services
 
                 onCompleted?.Invoke();
             }
+            catch (Exception t) when (ExceptionUtilities.IsFromCancellation(t) && cancellationToken.IsCancellationRequested)
+            {
+                throw;
+            }
             catch (Exception t) when (ExceptionUtilities.IsFromCancellation(t))
             {
+                onFailed?.Invoke();
             }
             catch
             {

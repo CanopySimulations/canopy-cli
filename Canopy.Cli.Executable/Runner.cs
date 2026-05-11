@@ -90,7 +90,6 @@ namespace Canopy.Cli.Executable
             services.AddTransient<IGetUserIdFromUsername, GetUserIdFromUsername>();
             services.AddTransient<IGetSchemas, GetSchemas>();
             services.AddTransient<IGetConfigs, GetConfigs>();
-            services.AddTransient<IProcessStudyResults, ProcessStudyResults>();
             services.AddTransient<IGetDefaultConfigPath, GetDefaultConfigPath>();
             services.AddTransient<IGetDefaultConfig, GetDefaultConfig>();
             services.AddTransient<IWaitForStudy, WaitForStudy>();

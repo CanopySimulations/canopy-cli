@@ -84,7 +84,7 @@ namespace Canopy.Cli.Executable.Services.GetStudies
             }
             try
             {
-                return !Directory.EnumerateFiles(outputFolder, "*.bin", SearchOption.AllDirectories)?.Any() ?? true;
+                return !Directory.EnumerateFiles(outputFolder, "*.bin", SearchOption.AllDirectories).Any();
             }
             catch(Exception ex)
             {

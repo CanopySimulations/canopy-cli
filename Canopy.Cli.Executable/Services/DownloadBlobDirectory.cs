@@ -16,12 +16,12 @@ namespace Canopy.Cli.Executable.Services
             BlobDirectoryDownloadOptions options,
             CancellationToken cancellationToken)
         {
+            var prefix = blobDirectory.Prefix.TrimEnd('/') + '/';
+            var semaphore = options.ConcurrencySemaphore;
+            var tasks = new List<Task>();
+
             try
             {
-                var prefix = blobDirectory.Prefix.TrimEnd('/') + '/';
-                var semaphore = options.ConcurrencySemaphore;
-                var tasks = new List<Task>();
-
                 await foreach (var blobItem in blobDirectory.Container.GetBlobsAsync(
                     BlobTraits.None,
                     BlobStates.None,
@@ -29,6 +29,11 @@ namespace Canopy.Cli.Executable.Services
                     cancellationToken))
                 {
                     var blobName = blobItem.Name;
+                    if (blobName.EndsWith('/'))
+                    {
+                        continue;
+                    }
+
                     var localPath = Path.Combine(
                         outputDirectoryPath,
                         blobName[prefix.Length..].Replace('/', Path.DirectorySeparatorChar));
@@ -51,11 +56,10 @@ namespace Canopy.Cli.Executable.Services
                             cancellationToken),
                         semaphore));
                 }
-
-                await Task.WhenAll(tasks);
             }
-            catch (Exception t) when (ExceptionUtilities.IsFromCancellation(t))
+            finally
             {
+                await Task.WhenAll(tasks);
             }
         }
 

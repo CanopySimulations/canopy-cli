@@ -6,7 +6,6 @@ namespace Canopy.Cli.Executable.Services
     using Microsoft.Extensions.Logging;
     using System.Threading;
     using Canopy.Cli.Executable.Commands;
-    using Xunit;
 
     public class ReEncryptJsonFile : IReEncryptJsonFile
     {

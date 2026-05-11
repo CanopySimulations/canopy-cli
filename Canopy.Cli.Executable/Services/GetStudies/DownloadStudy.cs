@@ -4,7 +4,6 @@ using Canopy.Cli.Executable.Services;
 using Humanizer;
 using Microsoft.Extensions.Logging;
 using System;
-using System.Diagnostics;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -60,8 +59,6 @@ namespace Canopy.Cli.Executable.Services.GetStudies
                     ProgressLogRateLimit,
                     totalBytes => LogTransferProgress(totalBytes, counters.Completed));
 
-                var totalStopwatch = Stopwatch.StartNew();
-
                 using var globalSemaphore = new SemaphoreSlim(ConnectionLimit);
 
                 var tasks = directories
@@ -79,10 +76,7 @@ namespace Canopy.Cli.Executable.Services.GetStudies
                 isRetry = true;
                 this.logger.LogInformation("Processing added storage servers...");
 
-                var startStopwatch = Stopwatch.StartNew();
                 await Task.WhenAll(tasks);
-                this.logger.LogInformation("Transfer phase: {0:0.0}s", startStopwatch.Elapsed.TotalSeconds);
-                this.logger.LogInformation("Total transfer time: {0:0.0}s", totalStopwatch.Elapsed.TotalSeconds);
 
                 if (!cancellationToken.IsCancellationRequested)
                 {
