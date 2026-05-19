@@ -1,6 +1,6 @@
-using Microsoft.Azure.Storage.Blob;
+using Canopy.Cli.Executable.Azure;
 
 namespace Canopy.Cli.Executable.Services.GetStudies
 {
-    public record BlobDirectoryAndOutputFolder(CloudBlobDirectory Directory, string OutputFolder);
+    public record BlobDirectoryAndOutputFolder(BlobDirectory Directory, string OutputFolder);
 }

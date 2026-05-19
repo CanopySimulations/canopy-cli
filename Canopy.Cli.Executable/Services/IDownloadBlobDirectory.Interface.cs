@@ -1,17 +1,15 @@
 using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.Azure.Storage.Blob;
-using Microsoft.Azure.Storage.DataMovement;
+using Canopy.Cli.Executable.Azure;
 
 namespace Canopy.Cli.Executable.Services
 {
     public interface IDownloadBlobDirectory
     {
-        Task<TransferStatus?> ExecuteAsync(
-            CloudBlobDirectory blobDirectory, 
-            string outputDirectoryPath, 
-            DownloadDirectoryOptions options, 
-            DirectoryTransferContext context, 
+        Task ExecuteAsync(
+            BlobDirectory blobDirectory,
+            string outputDirectoryPath,
+            BlobDirectoryDownloadOptions options,
             CancellationToken cancellationToken);
     }
 }

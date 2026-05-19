@@ -1,4 +1,5 @@
 using Canopy.Cli.Executable.Commands;
+using Humanizer;
 using Microsoft.Extensions.Logging;
 using System;
 using System.IO;
@@ -83,7 +84,7 @@ namespace Canopy.Cli.Executable.Services.GetStudies
             }
             try
             {
-                return !Directory.EnumerateFiles(outputFolder, "*.bin", SearchOption.AllDirectories)?.Any() ?? true;
+                return !Directory.EnumerateFiles(outputFolder, "*.bin", SearchOption.AllDirectories).Any();
             }
             catch(Exception ex)
             {

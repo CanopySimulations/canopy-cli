@@ -1,10 +1,10 @@
-using Microsoft.Azure.Storage.Blob;
+using Canopy.Cli.Executable.Azure;
 
 namespace Canopy.Cli.Executable.Services.GetStudies
 {
     public interface IGetStudyBlobDirectory
     {
-        CloudBlobDirectory Execute(BlobAccessInformation accessInformation);
-        CloudBlobDirectory Execute(string url, string accessSignature);
+        BlobDirectory Execute(BlobAccessInformation accessInformation);
+        BlobDirectory Execute(string url, string accessSignature);
     }
 }
